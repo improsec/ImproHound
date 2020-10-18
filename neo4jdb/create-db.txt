@@ -1,12 +1,5 @@
-# Install apoc plugin for the db
-
-# Allow apoc load by adding this line in the buttom of JonasBK\.Neo4jDesktop\neo4jDatabases\database-a46faeaf-430e-4c9c-855b-36dee9b2e575\installation-4.1.0\conf\neo4j.conf
-apoc.import.file.enabled=true
-apoc.import.file.use_neo4j_config=true			#False: Allow it to import from anywhere on the PC
-
 # Move json to 
 .Neo4jDesktop\neo4jDatabases\database-a46faeaf-430e-4c9c-855b-36dee9b2e575\installation-4.1.0\import\
-
 
 # Delete everything
 MATCH (n)
