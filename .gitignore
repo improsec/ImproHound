@@ -3,3 +3,4 @@ graphApps/*
 neo4jDatabases/*
 projects/*
 updates/*
+jupyter/.ipynb_checkpoints/*

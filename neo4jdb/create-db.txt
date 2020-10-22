@@ -20,7 +20,7 @@ ON CREATE SET c.tier = computer.tier
 # Load computers and set all simple properties
 MATCH (n) DETACH DELETE n;
 
-CALL apoc.load.json("file:///0001-computers.json") YIELD value
+CALL apoc.load.json("file:///C:/Users/User/Documents/GitHub/ImproHound/jupyter/../jsondata/0001-computers.json") YIELD value
 UNWIND value.computers AS c
 MERGE (computer:Computer {sid:c.SID})
 SET computer += c.Properties
@@ -65,7 +65,7 @@ MATCH (n) RETURN n
 // Load computers and set all simple properties
 MATCH (n) DETACH DELETE n;
 
-CALL apoc.load.json("file:///0001-computers.json") YIELD value
+CALL apoc.load.json("file:///C:/Users/User/Documents/GitHub/ImproHound/jupyter/../jsondata/0001-computers.json") YIELD value
 UNWIND value.computers AS c
 MERGE (computer:Computer {sid:c.SID})
 SET computer += c.Properties
