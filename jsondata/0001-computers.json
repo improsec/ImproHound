@@ -51,6 +51,11 @@
 							"type":"LocalUser",
 							"name":"Administrator",
 							"SID":"HOT-JUMPHOST-500"
+						},
+						{
+							"type":"LocalGroup",
+							"name":"Remote Desktop Users",
+							"SID":"S-1-5-32-555"
 						}
 					]
 				},
