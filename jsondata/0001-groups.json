@@ -1585,7 +1585,7 @@
             "members":[
                 
             ],
-            "type":"DomainGroup",
+            "type":"LocalGroup",
             "SID":"S-1-5-32-582",
             "Aces":[
                 {
