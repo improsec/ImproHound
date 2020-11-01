@@ -1,7 +1,6 @@
 ﻿{
     "users":[
         {
-			"SID":"S-1-5-21-3712873460-3785406585-1658148875-502",
             "Properties":{
                 "name":"KRBTGT@HOT.LOCAL",
                 "domain":"HOT.LOCAL",
@@ -39,7 +38,7 @@
             "HasSIDHistory":[
                 
             ],
-            "ObjectIdentifier":"S-1-5-21-3712873460-3785406585-1658148875-502",
+            "SID":"S-1-5-21-3712873460-3785406585-1658148875-502",
             "Aces":[
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
@@ -142,7 +141,6 @@
             ]
         },
         {
-			"SID":"S-1-5-21-3712873460-3785406585-1658148875-2115",
             "Properties":{
                 "name":"TESTBJ@HOT.LOCAL",
                 "domain":"HOT.LOCAL",
@@ -180,7 +178,7 @@
             "HasSIDHistory":[
                 
             ],
-            "ObjectIdentifier":"S-1-5-21-3712873460-3785406585-1658148875-2115",
+            "SID":"S-1-5-21-3712873460-3785406585-1658148875-2115",
             "Aces":[
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
@@ -283,7 +281,6 @@
             ]
         },
         {
-			"SID":"S-1-5-21-3712873460-3785406585-1658148875-2116",
             "Properties":{
                 "name":"TESTBC@HOT.LOCAL",
                 "domain":"HOT.LOCAL",
@@ -321,7 +318,7 @@
             "HasSIDHistory":[
                 
             ],
-            "ObjectIdentifier":"S-1-5-21-3712873460-3785406585-1658148875-2116",
+            "SID":"S-1-5-21-3712873460-3785406585-1658148875-2116",
             "Aces":[
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
@@ -403,7 +400,6 @@
             ]
         },
         {
-			"SID":"S-1-5-21-3712873460-3785406585-1658148875-2142",
             "Properties":{
                 "name":"TENPW@HOT.LOCAL",
                 "domain":"HOT.LOCAL",
@@ -441,7 +437,7 @@
             "HasSIDHistory":[
                 
             ],
-            "ObjectIdentifier":"S-1-5-21-3712873460-3785406585-1658148875-2142",
+            "SID":"S-1-5-21-3712873460-3785406585-1658148875-2142",
             "Aces":[
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
@@ -523,7 +519,6 @@
             ]
         },
         {
-			"SID":"S-1-5-21-3712873460-3785406585-1658148875-500",
             "Properties":{
                 "name":"ADMINISTRATOR@HOT.LOCAL",
                 "domain":"HOT.LOCAL",
@@ -561,7 +556,7 @@
             "HasSIDHistory":[
                 
             ],
-            "ObjectIdentifier":"S-1-5-21-3712873460-3785406585-1658148875-500",
+            "SID":"S-1-5-21-3712873460-3785406585-1658148875-500",
             "Aces":[
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
@@ -664,7 +659,6 @@
             ]
         },
         {
-            "SID":"S-1-5-21-3712873460-3785406585-1658148875-1112",
             "Properties":{
                 "name":"MJ@HOT.LOCAL",
                 "domain":"HOT.LOCAL",
@@ -702,7 +696,7 @@
             "HasSIDHistory":[
                 
             ],
-            "ObjectIdentifier":"S-1-5-21-3712873460-3785406585-1658148875-1112",
+            "SID":"S-1-5-21-3712873460-3785406585-1658148875-1112",
             "Aces":[
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
@@ -805,7 +799,6 @@
             ]
         },
         {
-			"SID":"S-1-5-21-3712873460-3785406585-1658148875-2151",
             "Properties":{
                 "name":"DOMAIN-ADMIN@HOT.LOCAL",
                 "domain":"HOT.LOCAL",
@@ -843,7 +836,7 @@
             "HasSIDHistory":[
                 
             ],
-            "ObjectIdentifier":"S-1-5-21-3712873460-3785406585-1658148875-2151",
+            "SID":"S-1-5-21-3712873460-3785406585-1658148875-2151",
             "Aces":[
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
@@ -946,7 +939,6 @@
             ]
         },
         {
-		    "SID":"S-1-5-21-3712873460-3785406585-1658148875-2139",
             "Properties":{
                 "name":"T1_BJ@HOT.LOCAL",
                 "domain":"HOT.LOCAL",
@@ -984,7 +976,7 @@
             "HasSIDHistory":[
                 
             ],
-            "ObjectIdentifier":"S-1-5-21-3712873460-3785406585-1658148875-2139",
+            "SID":"S-1-5-21-3712873460-3785406585-1658148875-2139",
             "Aces":[
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
@@ -1087,7 +1079,6 @@
             ]
         },
         {
-		    "SID":"S-1-5-21-3712873460-3785406585-1658148875-2107",
             "Properties":{
                 "name":"MSOL_F347C6E96717@HOT.LOCAL",
                 "domain":"HOT.LOCAL",
@@ -1125,7 +1116,7 @@
             "HasSIDHistory":[
                 
             ],
-            "ObjectIdentifier":"S-1-5-21-3712873460-3785406585-1658148875-2107",
+            "SID":"S-1-5-21-3712873460-3785406585-1658148875-2107",
             "Aces":[
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
@@ -1158,7 +1149,6 @@
             ]
         },
         {
-			"SID":"S-1-5-21-3712873460-3785406585-1658148875-2117",
             "Properties":{
                 "name":"TESTMJ@HOT.LOCAL",
                 "domain":"HOT.LOCAL",
@@ -1196,7 +1186,1002 @@
             "HasSIDHistory":[
                 
             ],
-            "ObjectIdentifier":"S-1-5-21-3712873460-3785406585-1658148875-2117",
+            "SID":"S-1-5-21-3712873460-3785406585-1658148875-2117",
+            "Aces":[
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"Owner",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-548",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericAll",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericAll",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2150",
+                    "PrincipalType":"User",
+                    "RightName":"ExtendedRight",
+                    "AceType":"User-Force-Change-Password",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2107",
+                    "PrincipalType":"User",
+                    "RightName":"ExtendedRight",
+                    "AceType":"User-Force-Change-Password",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2107",
+                    "PrincipalType":"User",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-519",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericAll",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteDacl",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteOwner",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"ExtendedRight",
+                    "AceType":"All",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":true
+                }
+            ]
+        },
+        {
+            "Properties":{
+                "name":"KR@HOT.LOCAL",
+                "domain":"HOT.LOCAL",
+                "distinguishedname":"CN=Keith Richards,CN=Users,DC=hot,DC=local",
+                "description":null,
+                "dontreqpreauth":false,
+                "passwordnotreqd":false,
+                "unconstraineddelegation":false,
+                "sensitive":false,
+                "enabled":true,
+                "pwdneverexpires":false,
+                "lastlogon":1597585778,
+                "lastlogontimestamp":1597416446,
+                "pwdlastset":1584917021,
+                "serviceprincipalnames":[
+                    
+                ],
+                "hasspn":false,
+                "displayname":"Keith Richards",
+                "email":null,
+                "title":null,
+                "homedirectory":null,
+                "userpassword":null,
+                "admincount":true,
+                "sidhistory":[
+                    
+                ]
+            },
+            "AllowedToDelegate":[
+                
+            ],
+            "SPNTargets":[
+                
+            ],
+            "PrimaryGroupSid":"S-1-5-21-3712873460-3785406585-1658148875-513",
+            "HasSIDHistory":[
+                
+            ],
+            "SID":"S-1-5-21-3712873460-3785406585-1658148875-1113",
+            "Aces":[
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"Owner",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteDacl",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteOwner",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"ExtendedRight",
+                    "AceType":"All",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteDacl",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteOwner",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"ExtendedRight",
+                    "AceType":"All",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-519",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteDacl",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-519",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteOwner",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-519",
+                    "PrincipalType":"Group",
+                    "RightName":"ExtendedRight",
+                    "AceType":"All",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-519",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2107",
+                    "PrincipalType":"User",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":false
+                }
+            ]
+        },
+        {
+            "Properties":{
+                "name":"TEST@HOT.LOCAL",
+                "domain":"HOT.LOCAL",
+                "distinguishedname":"CN=test,OU=ws,DC=hot,DC=local",
+                "description":"hej",
+                "dontreqpreauth":false,
+                "passwordnotreqd":false,
+                "unconstraineddelegation":false,
+                "sensitive":false,
+                "enabled":true,
+                "pwdneverexpires":false,
+                "lastlogon":1596703593,
+                "lastlogontimestamp":1596703593,
+                "pwdlastset":1596703570,
+                "serviceprincipalnames":[
+                    
+                ],
+                "hasspn":false,
+                "displayname":"test",
+                "email":null,
+                "title":null,
+                "homedirectory":null,
+                "userpassword":null,
+                "admincount":false,
+                "sidhistory":[
+                    
+                ]
+            },
+            "AllowedToDelegate":[
+                
+            ],
+            "SPNTargets":[
+                
+            ],
+            "PrimaryGroupSid":"S-1-5-21-3712873460-3785406585-1658148875-513",
+            "HasSIDHistory":[
+                
+            ],
+            "SID":"S-1-5-21-3712873460-3785406585-1658148875-2140",
+            "Aces":[
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"Owner",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-548",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericAll",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericAll",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2107",
+                    "PrincipalType":"User",
+                    "RightName":"ExtendedRight",
+                    "AceType":"User-Force-Change-Password",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2107",
+                    "PrincipalType":"User",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-519",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericAll",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteDacl",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteOwner",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"ExtendedRight",
+                    "AceType":"All",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":true
+                }
+            ]
+        },
+        {
+            "Properties":{
+                "name":"BENNY@HOT.LOCAL",
+                "domain":"HOT.LOCAL",
+                "distinguishedname":"CN=Benny,CN=Users,DC=hot,DC=local",
+                "description":null,
+                "dontreqpreauth":false,
+                "passwordnotreqd":false,
+                "unconstraineddelegation":false,
+                "sensitive":false,
+                "enabled":false,
+                "pwdneverexpires":false,
+                "lastlogon":-1,
+                "lastlogontimestamp":-1,
+                "pwdlastset":-1,
+                "serviceprincipalnames":[
+                    
+                ],
+                "hasspn":false,
+                "displayname":null,
+                "email":null,
+                "title":null,
+                "homedirectory":null,
+                "userpassword":null,
+                "admincount":true,
+                "sidhistory":[
+                    
+                ]
+            },
+            "AllowedToDelegate":[
+                
+            ],
+            "SPNTargets":[
+                
+            ],
+            "PrimaryGroupSid":"S-1-5-21-3712873460-3785406585-1658148875-513",
+            "HasSIDHistory":[
+                
+            ],
+            "SID":"S-1-5-21-3712873460-3785406585-1658148875-2144",
+            "Aces":[
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"Owner",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteDacl",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteOwner",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"ExtendedRight",
+                    "AceType":"All",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteDacl",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteOwner",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"ExtendedRight",
+                    "AceType":"All",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-519",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteDacl",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-519",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteOwner",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-519",
+                    "PrincipalType":"Group",
+                    "RightName":"ExtendedRight",
+                    "AceType":"All",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-519",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2107",
+                    "PrincipalType":"User",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":false
+                }
+            ]
+        },
+        {
+            "Properties":{
+                "name":"CRAZYX_HOT.LOCAL@HOT.LOCAL",
+                "domain":"HOT.LOCAL",
+                "distinguishedname":"CN=normal user,CN=Users,DC=hot,DC=local",
+                "description":null,
+                "dontreqpreauth":false,
+                "passwordnotreqd":false,
+                "unconstraineddelegation":false,
+                "sensitive":false,
+                "enabled":true,
+                "pwdneverexpires":false,
+                "lastlogon":-1,
+                "lastlogontimestamp":-1,
+                "pwdlastset":1589208506,
+                "serviceprincipalnames":[
+                    
+                ],
+                "hasspn":false,
+                "displayname":"Crazyyyyy",
+                "email":null,
+                "title":null,
+                "homedirectory":null,
+                "userpassword":null,
+                "admincount":false,
+                "sidhistory":[
+                    
+                ]
+            },
+            "AllowedToDelegate":[
+                
+            ],
+            "SPNTargets":[
+                
+            ],
+            "PrimaryGroupSid":"S-1-5-21-3712873460-3785406585-1658148875-513",
+            "HasSIDHistory":[
+                
+            ],
+            "SID":"S-1-5-21-3712873460-3785406585-1658148875-2109",
+            "Aces":[
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"Owner",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-548",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericAll",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericAll",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2150",
+                    "PrincipalType":"User",
+                    "RightName":"ExtendedRight",
+                    "AceType":"User-Force-Change-Password",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2107",
+                    "PrincipalType":"User",
+                    "RightName":"ExtendedRight",
+                    "AceType":"User-Force-Change-Password",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2107",
+                    "PrincipalType":"User",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-519",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericAll",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteDacl",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteOwner",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"ExtendedRight",
+                    "AceType":"All",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":true
+                }
+            ]
+        },
+        {
+            "Properties":{
+                "name":"GUEST@HOT.LOCAL",
+                "domain":"HOT.LOCAL",
+                "distinguishedname":"CN=Guest,CN=Users,DC=hot,DC=local",
+                "description":"Built-in account for guest access to the computer/domain",
+                "dontreqpreauth":false,
+                "passwordnotreqd":true,
+                "unconstraineddelegation":false,
+                "sensitive":false,
+                "enabled":false,
+                "pwdneverexpires":true,
+                "lastlogon":-1,
+                "lastlogontimestamp":-1,
+                "pwdlastset":-1,
+                "serviceprincipalnames":[
+                    
+                ],
+                "hasspn":false,
+                "displayname":null,
+                "email":null,
+                "title":null,
+                "homedirectory":null,
+                "userpassword":null,
+                "admincount":false,
+                "sidhistory":[
+                    
+                ]
+            },
+            "AllowedToDelegate":[
+                
+            ],
+            "SPNTargets":[
+                
+            ],
+            "PrimaryGroupSid":"S-1-5-21-3712873460-3785406585-1658148875-514",
+            "HasSIDHistory":[
+                
+            ],
+            "SID":"S-1-5-21-3712873460-3785406585-1658148875-501",
+            "Aces":[
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"Owner",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-548",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericAll",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericAll",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2150",
+                    "PrincipalType":"User",
+                    "RightName":"ExtendedRight",
+                    "AceType":"User-Force-Change-Password",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2107",
+                    "PrincipalType":"User",
+                    "RightName":"ExtendedRight",
+                    "AceType":"User-Force-Change-Password",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2107",
+                    "PrincipalType":"User",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-519",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericAll",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteDacl",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteOwner",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"ExtendedRight",
+                    "AceType":"All",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":true
+                }
+            ]
+        },
+        {
+            "Properties":{
+                "name":"WS-ADMIN@HOT.LOCAL",
+                "domain":"HOT.LOCAL",
+                "distinguishedname":"CN=ws admin,CN=Users,DC=hot,DC=local",
+                "description":null,
+                "dontreqpreauth":false,
+                "passwordnotreqd":false,
+                "unconstraineddelegation":false,
+                "sensitive":false,
+                "enabled":true,
+                "pwdneverexpires":false,
+                "lastlogon":1600336313,
+                "lastlogontimestamp":1600002285,
+                "pwdlastset":1600000787,
+                "serviceprincipalnames":[
+                    
+                ],
+                "hasspn":false,
+                "displayname":"ws admin",
+                "email":null,
+                "title":null,
+                "homedirectory":null,
+                "userpassword":null,
+                "admincount":false,
+                "sidhistory":[
+                    
+                ]
+            },
+            "AllowedToDelegate":[
+                
+            ],
+            "SPNTargets":[
+                
+            ],
+            "PrimaryGroupSid":"S-1-5-21-3712873460-3785406585-1658148875-513",
+            "HasSIDHistory":[
+                
+            ],
+            "SID":"S-1-5-21-3712873460-3785406585-1658148875-2150",
+            "Aces":[
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"Owner",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-548",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericAll",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericAll",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2150",
+                    "PrincipalType":"User",
+                    "RightName":"ExtendedRight",
+                    "AceType":"User-Force-Change-Password",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2107",
+                    "PrincipalType":"User",
+                    "RightName":"ExtendedRight",
+                    "AceType":"User-Force-Change-Password",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2107",
+                    "PrincipalType":"User",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-519",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericAll",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteDacl",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteOwner",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"ExtendedRight",
+                    "AceType":"All",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":true
+                }
+            ]
+        },
+        {
+            "Properties":{
+                "name":"NINEPW@HOT.LOCAL",
+                "domain":"HOT.LOCAL",
+                "distinguishedname":"CN=ninepw,CN=Users,DC=hot,DC=local",
+                "description":null,
+                "dontreqpreauth":false,
+                "passwordnotreqd":false,
+                "unconstraineddelegation":false,
+                "sensitive":false,
+                "enabled":true,
+                "pwdneverexpires":false,
+                "lastlogon":-1,
+                "lastlogontimestamp":-1,
+                "pwdlastset":-1,
+                "serviceprincipalnames":[
+                    
+                ],
+                "hasspn":false,
+                "displayname":"ninepw",
+                "email":null,
+                "title":null,
+                "homedirectory":null,
+                "userpassword":null,
+                "admincount":false,
+                "sidhistory":[
+                    
+                ]
+            },
+            "AllowedToDelegate":[
+                
+            ],
+            "SPNTargets":[
+                
+            ],
+            "PrimaryGroupSid":"S-1-5-21-3712873460-3785406585-1658148875-513",
+            "HasSIDHistory":[
+                
+            ],
+            "SID":"S-1-5-21-3712873460-3785406585-1658148875-2141",
+            "Aces":[
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"Owner",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-548",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericAll",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericAll",
+                    "AceType":"",
+                    "IsInherited":false
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2150",
+                    "PrincipalType":"User",
+                    "RightName":"ExtendedRight",
+                    "AceType":"User-Force-Change-Password",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2107",
+                    "PrincipalType":"User",
+                    "RightName":"ExtendedRight",
+                    "AceType":"User-Force-Change-Password",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2107",
+                    "PrincipalType":"User",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-519",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericAll",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteDacl",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"WriteOwner",
+                    "AceType":"",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"ExtendedRight",
+                    "AceType":"All",
+                    "IsInherited":true
+                },
+                {
+                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
+                    "PrincipalType":"Group",
+                    "RightName":"GenericWrite",
+                    "AceType":"",
+                    "IsInherited":true
+                }
+            ]
+        },
+        {
+            "Properties":{
+                "name":"AAD_F347C6E96717@HOT.LOCAL",
+                "domain":"HOT.LOCAL",
+                "distinguishedname":"CN=AAD_f347c6e96717,CN=Users,DC=hot,DC=local",
+                "description":"Service account for the Synchronization Service with installation identifier 18b338a7-5338-4591-a919-1ac275c47d61 running on computer HOT-DC-01.",
+                "dontreqpreauth":false,
+                "passwordnotreqd":false,
+                "unconstraineddelegation":false,
+                "sensitive":false,
+                "enabled":true,
+                "pwdneverexpires":true,
+                "lastlogon":1599567127,
+                "lastlogontimestamp":1599567127,
+                "pwdlastset":1589206066,
+                "serviceprincipalnames":[
+                    
+                ],
+                "hasspn":false,
+                "displayname":"AAD_f347c6e96717",
+                "email":null,
+                "title":null,
+                "homedirectory":null,
+                "userpassword":null,
+                "admincount":false,
+                "sidhistory":[
+                    
+                ]
+            },
+            "AllowedToDelegate":[
+                
+            ],
+            "SPNTargets":[
+                
+            ],
+            "PrimaryGroupSid":"S-1-5-21-3712873460-3785406585-1658148875-513",
+            "HasSIDHistory":[
+                
+            ],
+            "SID":"S-1-5-21-3712873460-3785406585-1658148875-2102",
             "Aces":[
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
@@ -1279,7 +2264,7 @@
         }
     ],
     "meta":{
-        "count":10,
+        "count":18,
         "type":"users",
         "version":3
     }
