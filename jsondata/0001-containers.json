@@ -427,35 +427,35 @@
             "Aces":[
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
-                    "PrincipalType":"Group",
+                    "PrincipalType":"DomainGroup",
                     "RightName":"Owner",
                     "AceType":"",
                     "IsInherited":false
                 },
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
-                    "PrincipalType":"Group",
+                    "PrincipalType":"DomainGroup",
                     "RightName":"GenericAll",
                     "AceType":"",
                     "IsInherited":false
                 },
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-519",
-                    "PrincipalType":"Group",
+                    "PrincipalType":"DomainGroup",
                     "RightName":"GenericAll",
                     "AceType":"",
                     "IsInherited":true
                 },
                 {
-                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
-                    "PrincipalType":"Group",
+                    "PrincipalSID":"S-1-5-32-544",
+                    "PrincipalType":"LocalGroup",
                     "RightName":"WriteDacl",
                     "AceType":"",
                     "IsInherited":true
                 },
                 {
-                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
-                    "PrincipalType":"Group",
+                    "PrincipalSID":"S-1-5-32-544",
+                    "PrincipalType":"LocalGroup",
                     "RightName":"WriteOwner",
                     "AceType":"",
                     "IsInherited":true
@@ -491,42 +491,42 @@
             "Aces":[
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
-                    "PrincipalType":"Group",
+                    "PrincipalType":"DomainGroup",
                     "RightName":"Owner",
                     "AceType":"",
                     "IsInherited":false
                 },
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
-                    "PrincipalType":"Group",
+                    "PrincipalType":"DomainGroup",
                     "RightName":"WriteDacl",
                     "AceType":"",
                     "IsInherited":false
                 },
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
-                    "PrincipalType":"Group",
+                    "PrincipalType":"DomainGroup",
                     "RightName":"WriteOwner",
                     "AceType":"",
                     "IsInherited":false
                 },
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-519",
-                    "PrincipalType":"Group",
+                    "PrincipalType":"DomainGroup",
                     "RightName":"GenericAll",
                     "AceType":"",
                     "IsInherited":true
                 },
                 {
-                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
-                    "PrincipalType":"Group",
+                    "PrincipalSID":"S-1-5-32-544",
+                    "PrincipalType":"LocalGroup",
                     "RightName":"WriteDacl",
                     "AceType":"",
                     "IsInherited":true
                 },
                 {
-                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
-                    "PrincipalType":"Group",
+                    "PrincipalSID":"S-1-5-32-544",
+                    "PrincipalType":"LocalGroup",
                     "RightName":"WriteOwner",
                     "AceType":"",
                     "IsInherited":true
@@ -574,35 +574,35 @@
             "Aces":[
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
-                    "PrincipalType":"Group",
+                    "PrincipalType":"DomainGroup",
                     "RightName":"Owner",
                     "AceType":"",
                     "IsInherited":false
                 },
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-512",
-                    "PrincipalType":"Group",
+                    "PrincipalType":"DomainGroup",
                     "RightName":"GenericAll",
                     "AceType":"",
                     "IsInherited":false
                 },
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-519",
-                    "PrincipalType":"Group",
+                    "PrincipalType":"DomainGroup",
                     "RightName":"GenericAll",
                     "AceType":"",
                     "IsInherited":true
                 },
                 {
-                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
-                    "PrincipalType":"Group",
+                    "PrincipalSID":"S-1-5-32-544",
+                    "PrincipalType":"LocalGroup",
                     "RightName":"WriteDacl",
                     "AceType":"",
                     "IsInherited":true
                 },
                 {
-                    "PrincipalSID":"HOT.LOCAL-S-1-5-32-544",
-                    "PrincipalType":"Group",
+                    "PrincipalSID":"S-1-5-32-544",
+                    "PrincipalType":"LocalGroup",
                     "RightName":"WriteOwner",
                     "AceType":"",
                     "IsInherited":true
