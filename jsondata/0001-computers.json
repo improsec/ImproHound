@@ -95,11 +95,6 @@
 							"type":"LocalGroup",
 							"name":"Remote Desktop Users",
 							"SID":"S-1-5-32-555"
-						},
-						{
-							"type":"DomainGroup",
-							"name":"Domain Users",
-							"SID":"S-1-5-21-3712873460-3785406585-1658148875-513"
 						}
 					]
 				},
@@ -126,6 +121,11 @@
 				{
 					"right":"SeRemoteInteractiveLogonRight",
 					"principals":[
+						{
+							"type":"DomainGroup",
+							"name":"Another Group",
+							"SID":"S-1-5-21-3712873460-3785406585-1658148875-2143"
+						}
 					]
 				},
 				{
