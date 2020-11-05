@@ -4515,6 +4515,13 @@
                     "AceType":"",
                     "IsInherited":true
                 },
+				{
+                    "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-2150",
+                    "PrincipalType":"DomainUser",
+                    "RightName":"GenericAll",
+                    "AceType":"",
+                    "IsInherited":false
+                },
                 {
                     "PrincipalSID":"S-1-5-21-3712873460-3785406585-1658148875-519",
                     "PrincipalType":"DomainGroup",
