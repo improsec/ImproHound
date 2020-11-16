@@ -1,0 +1,13 @@
+{
+	"Comment":"The name attribute is for reading convenience of this file and will not be used by the program",
+	"tiers":[
+		0,1,2
+	],
+	"groups":[
+		{
+			"RID":"-512",
+			"name":"Domain Admins",
+			"tier":"0"
+		}
+	]
+ }
