@@ -1,12 +1,107 @@
 {
 	"Comment":"The name attribute is for reading convenience of this file and will not be used by the program",
-	"tiers":[
-		0,1,2
+	"ous":[
+		{
+			"path":"",
+			"tier":"2"
+		}
+	],
+	"users":[
+		{
+			"RID":"-500",
+			"name":"Administrator",
+			"tier":"0"
+		},
+		{
+			"RID":"-502",
+			"name":"KRBTGT",
+			"tier":"0"
+		}
 	],
 	"groups":[
 		{
+			"RID":"-498",
+			"name":"Enterprise Read-only Domain Controllers",
+			"tier":"0"
+		},
+		{
+			"RID":"-500",
+			"name":"Administrators",
+			"tier":"0"
+		},
+		{
 			"RID":"-512",
 			"name":"Domain Admins",
+			"tier":"0"
+		},
+		{
+			"RID":"-516",
+			"name":"Domain Controllers",
+			"tier":"0"
+		},
+		{
+			"RID":"-517",
+			"name":"Cert Publishers",
+			"tier":"0"
+		},
+		{
+			"RID":"-518",
+			"name":"Schema Admins",
+			"tier":"0"
+		},
+		{
+			"RID":"-519",
+			"name":"Enterprise Admins",
+			"tier":"0"
+		},
+		{
+			"RID":"-520",
+			"name":"Group Policy Creator Owners",
+			"tier":"0"
+		},
+		{
+			"RID":"-521",
+			"name":"Read-only Domain Controllers",
+			"tier":"0"
+		},
+		{
+			"RID":"-526",
+			"name":"Key Admins",
+			"tier":"0"
+		},
+		{
+			"RID":"-527",
+			"name":"Enterprise Key Admins",
+			"tier":"0"
+		},
+		{
+			"RID":"-548",
+			"name":"Account Operators",
+			"tier":"0"
+		},
+		{
+			"RID":"-549",
+			"name":"Server Operators",
+			"tier":"0"
+		},
+		{
+			"RID":"-550",
+			"name":"Print Operators",
+			"tier":"0"
+		},
+		{
+			"RID":"-551",
+			"name":"Backup Operators",
+			"tier":"0"
+		},
+		{
+			"RID":"-552",
+			"name":"Replicators",
+			"tier":"0"
+		},
+		{
+			"RID":"-582",
+			"name":"Storage Replica Administrators",
 			"tier":"0"
 		}
 	]
