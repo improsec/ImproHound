@@ -4,3 +4,4 @@ neo4jDatabases/*
 projects/*
 updates/*
 jupyter/.ipynb_checkpoints/*
+jsondata/bloodhound/customer*
