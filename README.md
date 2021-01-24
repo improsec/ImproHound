@@ -9,7 +9,7 @@ BloodHound for blue teamers
     1. Set the 'Data path' under Settings in Neo4j Desktop to the root of the ImproHound repo
     1. Create a new project in Neo4j Desktop
     1. Install APOC plugin in Neo4j Desktop under the new project
-    1. Allow APOC load data. In the config (neo4jDatabases\database-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\installation-x.x.x\conf\neo4j.conf) add these lines:
+    1. Allow APOC load data. Go to settings for your database in Neo4j Desktop and add these lines in the bottom:
         ```
         apoc.import.file.enabled=true
         apoc.import.file.use_neo4j_config=false
