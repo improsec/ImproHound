@@ -1,12 +1,8 @@
 {
 	"Comment":"The name attribute is for reading convenience of this file and will not be used by the program",
-	"ous":[
-		{
-			"path":"",
-			"tier":"2"
-		}
-	],
-	"users":[
+	"defaulttier":"2",
+	"ous":[],
+	"principals":[
 		{
 			"RID":"-500",
 			"name":"Administrator",
