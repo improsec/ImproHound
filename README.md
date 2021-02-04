@@ -1,6 +1,35 @@
 # ImproHound
 BloodHound for blue teamers
 
+## How it works
+
+1. Run SharpHound
+1. Upload collected data to BloodHound
+1. Install APOC
+1. Run the script!
+
+### How the tiering is done
+In the json file you specify which tier certain AD objects belong to. This is how the program process the different objects:
+1. OUs
+    1. Set the OU to the given tier.
+    1. Set everything with a distinguished name ending with the distinguished name of the OU to the given tier.
+1. Groups
+    1. Set the group to the given tier.
+    1. Set every (recursive) members to the given tier.
+1. Principals
+    1. Set the principal ending with the given RID to the given tier.
+
+Afterwards, the program performs the following steps:
+1. Set all nodes to be in a default tier (Tier 2)			
+1. Set all nodes that are in multiple tiers to be only in the lowest one they are set to
+1. Replace domain objects (parent to top OUs) tier level with Tier 0
+1. Make sure all groups are in the right tier
+    1. Replace the current tier level for all groups with the highest tier level of their recursive members
+1. Make sure all OUs are in right tier
+    1. Replace the current tier level for all OUs with the lowest tier level of the AD objects under the OUs.
+1. Make sure all GPOs are in right tier
+    1. Replace the current tier level for all GPOs to the lowest by the OUs linked to.
+
 ## Dev setup (Windows)
 
 1. Download/clone the project
