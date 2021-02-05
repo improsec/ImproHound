@@ -1,0 +1,21 @@
+﻿<Page x:Class="ImproHound.pages.ConnectPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      mc:Ignorable="d"
+      Title="ConnectPage">
+
+    <Grid Width="600" Height="340">
+        <Grid Width="273" Height="194" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Label Content="Connect to BloodHound DB" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="160"/>
+            <Label Content="DB URL" HorizontalAlignment="Left" Margin="0,45,0,0" VerticalAlignment="Top"/>
+            <Label Content="DB username" HorizontalAlignment="Left" Margin="0,80,0,0" VerticalAlignment="Top"/>
+            <Label Content="DB password" HorizontalAlignment="Left" Margin="0,115,0,0" VerticalAlignment="Top"/>
+            <TextBox HorizontalAlignment="Left" Margin="105,45,0,0" VerticalAlignment="Top" Width="167" Text="bolt://localhost:7687" CaretIndex="2147483647"/>
+            <TextBox HorizontalAlignment="Left" Margin="105,80,0,0" VerticalAlignment="Top" Width="167" Text="neo4j" CaretIndex="2147483647"/>
+            <TextBox HorizontalAlignment="Left" Margin="105,115,0,0" VerticalAlignment="Top" Width="167" Text="bloodhound" CaretIndex="2147483647"/>
+            <Button Content="Connect" HorizontalAlignment="Left" Margin="173,165,0,0" VerticalAlignment="Top" Click="Button_Click"/>
+        </Grid>
+    </Grid>
+</Page>
