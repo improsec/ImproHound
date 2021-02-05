@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30717.126
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImproHound", "ImproHound.csproj", "{C1D32A15-2518-4A08-A3E1-9D4CBA4509D5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImproHound", "ImproHound.csproj", "{D3F80D34-66E4-42CC-8FB9-739FEE75D630}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C1D32A15-2518-4A08-A3E1-9D4CBA4509D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C1D32A15-2518-4A08-A3E1-9D4CBA4509D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C1D32A15-2518-4A08-A3E1-9D4CBA4509D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C1D32A15-2518-4A08-A3E1-9D4CBA4509D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3F80D34-66E4-42CC-8FB9-739FEE75D630}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3F80D34-66E4-42CC-8FB9-739FEE75D630}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3F80D34-66E4-42CC-8FB9-739FEE75D630}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3F80D34-66E4-42CC-8FB9-739FEE75D630}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {419EC935-54E9-46F2-B9B4-FDA08A7BCA5F}
+		SolutionGuid = {1DA71E9E-48B3-4045-A8FF-0BF5148A2DFB}
 	EndGlobalSection
 EndGlobal
