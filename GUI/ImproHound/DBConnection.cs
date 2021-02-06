@@ -15,7 +15,7 @@ namespace ImproHound
             _driver = GraphDatabase.Driver(uri, AuthTokens.Basic(user, password));
         }
 
-        public async Task asyncAsync(string cypher)
+        public async Task<List<IRecord>> CypherQuery(string cypher)
         {
 
             IAsyncSession session = _driver.AsyncSession();
@@ -23,17 +23,11 @@ namespace ImproHound
             try
             {
                 List<IRecord> records = await session.WriteTransactionAsync(tx => RunCypherWithResults(tx, cypher));
-                if (records == null)
-                {
-                    Console.WriteLine("TOO BAD");
-                }
-                else
-                {
-                    Console.WriteLine(records.ToString());
-                }
+                return records;
             }
             finally
             {
+                Console.WriteLine("Closed connection");
                 await session.CloseAsync();
             }
         }

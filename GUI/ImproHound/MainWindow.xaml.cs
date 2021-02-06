@@ -1,5 +1,6 @@
 ﻿using ImproHound.pages;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace ImproHound
 {
@@ -11,7 +12,12 @@ namespace ImproHound
         public MainWindow()
         {
             InitializeComponent();
-            MainFrame.Navigate(new ConnectPage());
+            MainFrame.Navigate(new ConnectPage(this));
+        }
+
+        public void NavigateToPage(Page page)
+        {
+            MainFrame.Navigate(page);
         }
     }
 }

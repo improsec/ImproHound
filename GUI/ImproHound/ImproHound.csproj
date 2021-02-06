@@ -152,6 +152,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="pages\OUStructure.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="resources\CoolResourceDictionary.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -160,6 +164,9 @@
   <ItemGroup>
     <Compile Include="pages\Connect.xaml.cs">
       <DependentUpon>Connect.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="pages\OUStructure.xaml.cs">
+      <DependentUpon>OUStructure.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
