@@ -15,7 +15,7 @@
             <TextBox x:Name="url" HorizontalAlignment="Left" Margin="105,45,0,0" VerticalAlignment="Top" Width="167" Text="bolt://localhost:7687" CaretIndex="2147483647"/>
             <TextBox x:Name="username" HorizontalAlignment="Left" Margin="105,80,0,0" VerticalAlignment="Top" Width="167" Text="neo4j" CaretIndex="2147483647"/>
             <TextBox x:Name="password" HorizontalAlignment="Left" Margin="105,115,0,0" VerticalAlignment="Top" Width="167" Text="bloodhound" CaretIndex="2147483647"/>
-            <Button Content="Connect" HorizontalAlignment="Left" Margin="173,165,0,0" VerticalAlignment="Top" Click="Button_Click"/>
+            <Button x:Name="connectButton" Content="Connect" HorizontalAlignment="Left" Margin="173,165,0,0" VerticalAlignment="Top" Click="ConnectButton_Click"/>
         </Grid>
     </Grid>
 </Page>
