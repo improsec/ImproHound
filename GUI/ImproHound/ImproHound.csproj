@@ -200,5 +200,17 @@
   <ItemGroup>
     <Resource Include="resources\images\improsec_icon.ico" />
   </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="resources\images\ad-icons\domain2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\images\ad-icons\computer.png" />
+    <Resource Include="resources\images\ad-icons\domain1.png" />
+    <Resource Include="resources\images\ad-icons\gpo.png" />
+    <Resource Include="resources\images\ad-icons\group.png" />
+    <Resource Include="resources\images\ad-icons\ou.png" />
+    <Resource Include="resources\images\ad-icons\user.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

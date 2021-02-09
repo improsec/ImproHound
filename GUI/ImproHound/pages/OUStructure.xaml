@@ -2,13 +2,47 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:ImproHound.pages"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:self="clr-namespace:ImproHound.pages"
+      xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="Page1">
+      Title="OUStructurePage">
 
     <Grid>
-        
+        <TreeView x:Name="trvFamilies" Background="Transparent">
+            <TreeView.Resources>
+                <sys:String x:Key="LastTierItem">1</sys:String>
+                <self:Tiers x:Key="Tiers"/>
+                <HierarchicalDataTemplate DataType="{x:Type self:OU}" ItemsSource="{Binding Members}">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/resources/images/ad-icons/group.png" Margin="0,0,5,0" Width="20" />
+                        <Label Content="{Binding Name}" />
+                        <Label Content=" Tier: " Foreground="LightGray" />
+                        <ComboBox ItemsSource="{StaticResource Tiers}" SelectedItem="{StaticResource LastTierItem}" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                            <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" />
+                            </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+                <DataTemplate DataType="{x:Type self:User}">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/resources/images/ad-icons/user.png" Margin="0,0,5,0" Width="16" />
+                        <Label Content="{Binding Name}" />
+                        <Label Content=" Tier: " Foreground="LightGray" />
+                        <ComboBox ItemsSource="{StaticResource Tiers}" SelectedItem="{StaticResource LastTierItem}" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                        <TextBlock Text="{Binding}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                </DataTemplate>
+            </TreeView.Resources>
+        </TreeView>
     </Grid>
 </Page>
