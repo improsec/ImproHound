@@ -18,7 +18,7 @@ namespace ImproHound.pages
 {
     public partial class OUStructurePage : Page
     {
-        public OUStructurePage()
+        public OUStructurePage(DBConnection connection)
         {
             InitializeComponent();
 

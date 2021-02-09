@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Windows;
 using Neo4j.Driver;
 
 namespace ImproHound
@@ -9,21 +10,37 @@ namespace ImproHound
     public class DBConnection : IAsyncDisposable
     {
         private readonly IDriver _driver;
+        private int timeout = 5000;
 
-        public DBConnection(string uri, string user, string password)
+        public DBConnection(string uri, string username, string password)
         {
-            _driver = GraphDatabase.Driver(uri, AuthTokens.Basic(user, password));
+            _driver = GraphDatabase.Driver(uri, AuthTokens.Basic(username, password));
         }
 
-        public async Task<List<IRecord>> CypherQuery(string cypher)
+        public async Task<List<IRecord>> Query(string query)
         {
-
             IAsyncSession session = _driver.AsyncSession();
 
             try
             {
-                List<IRecord> records = await session.WriteTransactionAsync(tx => RunCypherWithResults(tx, cypher));
-                return records;
+                Task<List<IRecord>> task = session.WriteTransactionAsync(tx => RunCypherWithResults(tx, query));
+                if (await Task.WhenAny(task, Task.Delay(timeout)) == task)
+                {
+                    return await task;
+                }
+                else
+                {
+                    // Timeout error
+                    MessageBox.Show("No response in " + timeout + " ms.\nVerify DB URL and DB is running.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    throw new Exception();
+                }
+
+            }
+            catch (AuthenticationException err)
+            {
+                // Auth error
+                MessageBox.Show("Authentication error:\n" + err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                throw new Exception();
             }
             finally
             {
