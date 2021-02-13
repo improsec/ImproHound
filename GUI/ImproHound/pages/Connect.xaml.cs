@@ -60,7 +60,7 @@ namespace ImproHound.pages
             }
 
             // Jump to OU structure page
-            containerWindow.NavigateToPage(new OUStructurePage(connection));
+            containerWindow.NavigateToPage(new OUStructurePage(containerWindow, connection, this));
             SetDefaultControls();
         }
 

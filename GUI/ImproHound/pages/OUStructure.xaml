@@ -10,14 +10,14 @@
       Title="OUStructurePage">
 
     <Grid>
-        <TreeView x:Name="trvFamilies" Background="Transparent">
+        <TreeView x:Name="forestTreeView" Background="Transparent">
             <TreeView.Resources>
                 <sys:String x:Key="LastTierItem">1</sys:String>
                 <self:Tiers x:Key="Tiers"/>
-                <HierarchicalDataTemplate DataType="{x:Type self:OU}" ItemsSource="{Binding Members}">
+                <HierarchicalDataTemplate DataType="{x:Type self:ADObject}" ItemsSource="{Binding MemberList}">
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="/resources/images/ad-icons/group.png" Margin="0,0,5,0" Width="20" />
-                        <Label Content="{Binding Name}" />
+                        <Image Source="{Binding Iconpath}" Margin="0,0,5,0" Width="20" />
+                        <Label Content="{Binding Distinguishedname}" Width="200" />
                         <Label Content=" Tier: " Foreground="LightGray" />
                         <ComboBox ItemsSource="{StaticResource Tiers}" SelectedItem="{StaticResource LastTierItem}" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
                             <ComboBox.ItemTemplate>
@@ -28,20 +28,6 @@
                         </ComboBox>
                     </StackPanel>
                 </HierarchicalDataTemplate>
-                <DataTemplate DataType="{x:Type self:User}">
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="/resources/images/ad-icons/user.png" Margin="0,0,5,0" Width="16" />
-                        <Label Content="{Binding Name}" />
-                        <Label Content=" Tier: " Foreground="LightGray" />
-                        <ComboBox ItemsSource="{StaticResource Tiers}" SelectedItem="{StaticResource LastTierItem}" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                        <TextBlock Text="{Binding}" />
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-                    </StackPanel>
-                </DataTemplate>
             </TreeView.Resources>
         </TreeView>
     </Grid>

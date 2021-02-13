@@ -36,10 +36,10 @@ namespace ImproHound
                 }
 
             }
-            catch (AuthenticationException err)
+            catch (Exception err)
             {
-                // Auth error
-                MessageBox.Show("Authentication error:\n" + err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                // Error
+                MessageBox.Show("Error:\n" + err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 throw new Exception();
             }
             finally
