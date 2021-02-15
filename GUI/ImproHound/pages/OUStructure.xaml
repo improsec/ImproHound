@@ -8,27 +8,30 @@
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="OUStructurePage">
-
-    <Grid>
-        <TreeView x:Name="forestTreeView" Background="Transparent">
-            <TreeView.Resources>
-                <sys:String x:Key="LastTierItem">1</sys:String>
-                <self:Tiers x:Key="Tiers"/>
-                <HierarchicalDataTemplate DataType="{x:Type self:ADObject}" ItemsSource="{Binding MemberList}">
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="{Binding Iconpath}" Margin="0,0,5,0" Width="20" />
-                        <Label Content="{Binding Name}" Width="200" />
-                        <Label Content=" Tier: " Foreground="LightGray" />
-                        <ComboBox ItemsSource="{StaticResource Tiers}" SelectedItem="{StaticResource LastTierItem}" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
-                            <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding}" />
-                            </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-                    </StackPanel>
-                </HierarchicalDataTemplate>
-            </TreeView.Resources>
-        </TreeView>
+    <Grid Margin="10" >
+        <DockPanel>
+            <Label DockPanel.Dock="Top" Content="OU structure" Width="200" HorizontalAlignment="Left" Margin="10"/>
+            <Button DockPanel.Dock="Bottom" Content="Click" HorizontalAlignment="Right" Margin="10"/>
+            <TreeView DockPanel.Dock="Top" x:Name="forestTreeView" Background="Transparent" Margin="10">
+                <TreeView.Resources>
+                    <sys:String x:Key="LastTierItem">1</sys:String>
+                    <self:Tiers x:Key="Tiers"/>
+                    <HierarchicalDataTemplate DataType="{x:Type self:ADObject}" ItemsSource="{Binding MemberList}">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{Binding Iconpath}" Margin="0,0,5,0" Width="20" />
+                            <Label Content="{Binding Name}" Width="200" />
+                            <Label Content=" Tier: " Width="35" />
+                            <ComboBox ItemsSource="{StaticResource Tiers}" SelectedItem="{StaticResource LastTierItem}" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                    </HierarchicalDataTemplate>
+                </TreeView.Resources>
+            </TreeView>
+        </DockPanel>
     </Grid>
 </Page>

@@ -7,8 +7,6 @@
         mc:Ignorable="d"
         Title="ImproHound" Height="450" Width="800" Background="#FF1B2D36">
     <Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
-            <Frame x:Name = "MainFrame" NavigationUIVisibility = "Hidden"/>
-        </ScrollViewer>
+        <Frame x:Name = "MainFrame" NavigationUIVisibility = "Hidden"/>
     </Grid>
 </Window>
