@@ -38,9 +38,9 @@ namespace ImproHound.pages
                     MATCH (o)
                     WHERE NOT o.distinguishedname IS NULL
 					UNWIND LABELS(o) AS adtype
-                    WITH o.objectid AS objectid, o.distinguishedname AS distinguishedname, adtype 
+                    WITH o.objectid AS objectid, o.distinguishedname AS distinguishedname, o.name AS name, adtype
                     WHERE adtype IN ['Domain', 'OU', 'Group', 'User', 'Computer', 'GPO']
-                    RETURN objectid, distinguishedname, adtype ORDER BY size(distinguishedname) LIMIT 25
+                    RETURN objectid, distinguishedname, name, adtype ORDER BY size(distinguishedname) LIMIT 25
                 ");
                 if (!records[0].Values.TryGetValue("objectid", out output))
                 {
@@ -62,6 +62,7 @@ namespace ImproHound.pages
                 //TODO: Make sure same object is not comming twice, if multiple labels
                 record.Values.TryGetValue("objectid", out object objectid);
                 record.Values.TryGetValue("distinguishedname", out object distinguishedname);
+                record.Values.TryGetValue("name", out object name);
                 record.Values.TryGetValue("adtype", out object type);
 
                 bool gotTypeEnum = Enum.TryParse((string)type, out ADOjectType adType);
@@ -72,7 +73,7 @@ namespace ImproHound.pages
                     if (adType.Equals(ADOjectType.Domain))
                     {
                         // TODO: Put sub domains under parent domain
-                        ADObject adContainer = new ADObject((string)objectid, adType, (string)distinguishedname);
+                        ADObject adContainer = new ADObject((string)objectid, adType, (string)distinguishedname, (string)name);
                         forestStructure.Add(adContainer.Distinguishedname, adContainer);
                     }
                     else
@@ -97,6 +98,7 @@ namespace ImproHound.pages
         {
             // Find the domain the object belongs to
             // TODO: Handle if no domain / ou was not found
+            // TODO: Handle non-existing containers. E.g. builtin is missing, so everything under builtin ends up directly under the domain
             foreach (KeyValuePair<string, ADObject> domain in forestStructure)
             {
                 if (adObject.Distinguishedname.EndsWith(domain.Key))
