@@ -73,12 +73,12 @@ namespace ImproHound.pages
                     if (adType.Equals(ADOjectType.Domain))
                     {
                         // TODO: Put sub domains under parent domain
-                        ADObject adContainer = new ADObject((string)objectid, adType, (string)distinguishedname, (string)name);
+                        ADObject adContainer = new ADObject((string)objectid, adType, (string)distinguishedname, (string)name, "2");
                         forest.Add(adContainer.Distinguishedname, adContainer);
                     }
                     else
                     {
-                        ADObject adObject = new ADObject((string)objectid, adType, (string)distinguishedname);
+                        ADObject adObject = new ADObject((string)objectid, adType, (string)distinguishedname, (string)name, "2");
                         ADObject parent = GetParent(adObject);
                         string rdnName = adObject.Distinguishedname.Substring(0, adObject.Distinguishedname.IndexOf(","));
                         parent.Members.Add(rdnName, adObject);
@@ -125,7 +125,7 @@ namespace ImproHound.pages
                             if (!parentFound)
                             {
                                 string distinguishedname = oupath[i] + "," + parent.Distinguishedname;
-                                ADObject adContainer = new ADObject("manually-created-" + distinguishedname, ADOjectType.OU, distinguishedname, oupath[i].Replace("CN=", ""));
+                                ADObject adContainer = new ADObject("manually-created-" + distinguishedname, ADOjectType.OU, distinguishedname, oupath[i].Replace("CN=", ""), "2");
                                 parent.Members.Add(oupath[i], adContainer);
                                 parent = adContainer;
                             }
@@ -137,11 +137,24 @@ namespace ImproHound.pages
             }
             throw new Exception("Error: Could not find ADObjects OU/Domain parent");
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (KeyValuePair<string, ADObject> domain in forest)
+            {
+                Console.WriteLine(domain.Value.Distinguishedname + "\t\t\t\t\t\t" + domain.Value.Tier);
+
+                foreach (var member in domain.Value.MemberList)
+                {
+                    Console.WriteLine(member.Distinguishedname + "\t\t\t\t\t\t" + member.Tier);
+                }
+            }
+        }
     }
 
     public class ADObject
     {
-        public ADObject(string objectid, ADOjectType type, string distinguishedname = null, string name = null, string tier = null)
+        public ADObject(string objectid, ADOjectType type, string distinguishedname, string name, string tier)
         {
             Objectid = objectid;
             Name = name;

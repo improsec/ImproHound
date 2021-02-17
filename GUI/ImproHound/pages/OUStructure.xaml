@@ -11,17 +11,16 @@
     <Grid Margin="10" >
         <DockPanel>
             <Label DockPanel.Dock="Top" Content="OU structure" Width="200" HorizontalAlignment="Left" Margin="10"/>
-            <Button DockPanel.Dock="Bottom" Content="Click" HorizontalAlignment="Right" Margin="10"/>
+            <Button DockPanel.Dock="Bottom" Content="Click" HorizontalAlignment="Right" Margin="10" Click="Button_Click"/>
             <TreeView DockPanel.Dock="Top" x:Name="forestTreeView" Background="Transparent" Margin="10">
                 <TreeView.Resources>
-                    <sys:String x:Key="LastTierItem">1</sys:String>
                     <self:Tiers x:Key="Tiers"/>
                     <HierarchicalDataTemplate DataType="{x:Type self:ADObject}" ItemsSource="{Binding MemberList}">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="{Binding Iconpath}" Margin="0,0,5,0" Width="20" />
                             <Label Content="{Binding Name}" Width="200" />
                             <Label Content=" Tier:" Width="45" HorizontalContentAlignment="Right" Padding="5,5,2,5"/>
-                            <ComboBox ItemsSource="{StaticResource Tiers}" SelectedItem="{StaticResource LastTierItem}" >
+                            <ComboBox ItemsSource="{StaticResource Tiers}" SelectedItem="{Binding Tier}" >
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding}" />
