@@ -26,7 +26,7 @@ namespace ImproHound.pages
 
         private async void BuildOUStructure()
         {
-            Dictionary<string, ADObject> forestStructure = new Dictionary<string, ADObject>();
+            forest = new Dictionary<string, ADObject>();
 
             List<IRecord> records;
             try
@@ -74,14 +74,14 @@ namespace ImproHound.pages
                     {
                         // TODO: Put sub domains under parent domain
                         ADObject adContainer = new ADObject((string)objectid, adType, (string)distinguishedname, (string)name);
-                        forestStructure.Add(adContainer.Distinguishedname, adContainer);
+                        forest.Add(adContainer.Distinguishedname, adContainer);
                     }
                     else
                     {
                         ADObject adObject = new ADObject((string)objectid, adType, (string)distinguishedname);
-                        ADObject parent = GetParent(adObject, forestStructure);
-                        string s = adObject.Distinguishedname.Substring(0, adObject.Distinguishedname.IndexOf(","));
-                        parent.Members.Add(s, adObject);
+                        ADObject parent = GetParent(adObject);
+                        string rdnName = adObject.Distinguishedname.Substring(0, adObject.Distinguishedname.IndexOf(","));
+                        parent.Members.Add(rdnName, adObject);
                     }
                 }
                 catch
@@ -90,16 +90,15 @@ namespace ImproHound.pages
                 }
             }
             Console.WriteLine("OU Structure build");
-            forest = forestStructure;
             forestTreeView.ItemsSource = forest.Values.ToList();
         }
 
-        private ADObject GetParent(ADObject adObject, Dictionary<string, ADObject> forestStructure)
+        private ADObject GetParent(ADObject adObject)
         {
             // Find the domain the object belongs to
             // TODO: Handle if no domain / ou was not found
             // TODO: Handle non-existing containers. E.g. builtin is missing, so everything under builtin ends up directly under the domain
-            foreach (KeyValuePair<string, ADObject> domain in forestStructure)
+            foreach (KeyValuePair<string, ADObject> domain in forest)
             {
                 if (adObject.Distinguishedname.EndsWith(domain.Key))
                 {
@@ -111,13 +110,24 @@ namespace ImproHound.pages
                     {
                         for (int i = oupath.Length - 1; i > 0; i--)
                         {
+                            bool parentFound = false;
                             foreach (KeyValuePair<string, ADObject> container in parent.GetOUMembers())
                             {
                                 if (oupath[i].Equals(container.Key))
                                 {
                                     parent = container.Value;
+                                    parentFound = true;
                                     break;
                                 }
+                            }
+
+                            // Containers are missing in BloodHound so they have to be created manually
+                            if (!parentFound)
+                            {
+                                string distinguishedname = oupath[i] + "," + parent.Distinguishedname;
+                                ADObject adContainer = new ADObject("manually-created-" + distinguishedname, ADOjectType.OU, distinguishedname, oupath[i].Replace("CN=", ""));
+                                parent.Members.Add(oupath[i], adContainer);
+                                parent = adContainer;
                             }
                         }
                     }
