@@ -31,15 +31,14 @@ namespace ImproHound
                 else
                 {
                     // Timeout error
-                    MessageBox.Show("No response in " + timeout + " ms.\nVerify DB URL and DB is running.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    throw new Exception();
+                    throw new Exception("No response in " + timeout + " ms.\nVerify DB URL and DB is running.");
                 }
 
             }
             catch (Exception err)
             {
                 // Error
-                MessageBox.Show("Error:\n" + err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 throw new Exception();
             }
             finally
