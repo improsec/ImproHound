@@ -38,8 +38,7 @@ namespace ImproHound
             catch (Exception err)
             {
                 // Error
-                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                throw new Exception();
+                throw err;
             }
             finally
             {

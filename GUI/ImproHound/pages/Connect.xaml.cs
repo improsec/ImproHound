@@ -52,9 +52,10 @@ namespace ImproHound.pages
                 }
 
             }
-            catch
+            catch (Exception err)
             {
-                // Authentication or connection error
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 SetDefaultControls();
                 return;
             }

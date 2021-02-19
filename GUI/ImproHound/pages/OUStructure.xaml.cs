@@ -53,9 +53,10 @@ namespace ImproHound.pages
                     return;
                 }
             }
-            catch
+            catch (Exception err)
             {
-                // Authentication or connection error
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 containerWindow.NavigateToPage(connectPage);
                 return;
             }
@@ -169,10 +170,10 @@ namespace ImproHound.pages
                     return;
                 }
             }
-            catch
+            catch (Exception err)
             {
-                // Authentication or connection error
-                containerWindow.NavigateToPage(connectPage);
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
         }
@@ -209,10 +210,10 @@ namespace ImproHound.pages
                         return;
                     }
                 }
-                catch
+                catch (Exception err)
                 {
-                    // Authentication or connection error
-                    containerWindow.NavigateToPage(connectPage);
+                    // Error
+                    MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
             }
