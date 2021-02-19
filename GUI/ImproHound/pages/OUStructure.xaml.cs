@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace ImproHound.pages
 {
@@ -23,8 +24,9 @@ namespace ImproHound.pages
             this.connection = connection;
             this.connectPage = connectPage;
             tiers = new List<String>() { "0", "1", "2" };
-            BuildOUStructure();
             InitializeComponent();
+            EnableGUIWait();
+            BuildOUStructure();
         }
 
         private async void BuildOUStructure()
@@ -43,12 +45,13 @@ namespace ImproHound.pages
 					UNWIND LABELS(o) AS adtype
                     WITH o.objectid AS objectid, o.distinguishedname AS distinguishedname, o.name AS name, adtype
                     WHERE adtype IN ['Domain', 'OU', 'Group', 'User', 'Computer', 'GPO']
-                    RETURN objectid, distinguishedname, name, adtype ORDER BY size(distinguishedname) LIMIT 25
+                    RETURN objectid, distinguishedname, name, adtype ORDER BY size(distinguishedname)
                 ");
                 if (!records[0].Values.TryGetValue("objectid", out output))
                 {
                     // Unknown error
                     MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    DisableGUIWait();
                     containerWindow.NavigateToPage(connectPage);
                     return;
                 }
@@ -57,6 +60,7 @@ namespace ImproHound.pages
             {
                 // Error
                 MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisableGUIWait();
                 containerWindow.NavigateToPage(connectPage);
                 return;
             }
@@ -95,6 +99,7 @@ namespace ImproHound.pages
             }
             Console.WriteLine("OU Structure build");
             forestTreeView.ItemsSource = forest.Values.ToList();
+            DisableGUIWait();
         }
 
         private ADObject GetParent(ADObject adObject)
@@ -217,6 +222,18 @@ namespace ImproHound.pages
                     return;
                 }
             }
+        }
+
+        private void EnableGUIWait()
+        {
+            Mouse.OverrideCursor = Cursors.Wait;
+            setTieringButton.IsEnabled = false;
+        }
+
+        private void DisableGUIWait()
+        {
+            Mouse.OverrideCursor = null;
+            setTieringButton.IsEnabled = true;
         }
     }
 
