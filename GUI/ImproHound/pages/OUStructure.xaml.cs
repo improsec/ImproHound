@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -14,12 +15,14 @@ namespace ImproHound.pages
         private readonly DBConnection connection;
         private readonly ConnectPage connectPage;
         private Dictionary<string, ADObject> forest;
+        private List<string> tiers;
 
         public OUStructurePage(MainWindow containerWindow, DBConnection connection, ConnectPage connectPage)
         {
             this.containerWindow = containerWindow;
             this.connection = connection;
             this.connectPage = connectPage;
+            tiers = new List<String>() { "0", "1", "2" };
             BuildOUStructure();
             InitializeComponent();
         }
@@ -138,15 +141,79 @@ namespace ImproHound.pages
             throw new Exception("Error: Could not find ADObjects OU/Domain parent");
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Set_Tiering_Click(object sender, RoutedEventArgs e)
         {
-            foreach (KeyValuePair<string, ADObject> domain in forest)
-            {
-                Console.WriteLine(domain.Value.Distinguishedname + "\t\t\t\t\t\t" + domain.Value.Tier);
+            DeleteTieringInDB();
+            SetTieringInDB();
+        }
 
-                foreach (var member in domain.Value.MemberList)
+        private async void DeleteTieringInDB()
+        {
+            List<IRecord> records;
+            try
+            {
+                object output;
+                records = await connection.Query(@"
+                    CALL db.labels()
+                    YIELD label WHERE label STARTS WITH 'Tier'
+                    WITH COLLECT(label) AS labels
+                    MATCH (p)
+                    WITH COLLECT(p) AS people, labels
+                    CALL apoc.create.removeLabels(people, labels)
+                    YIELD node RETURN null
+                ");
+                if (!records[0].Values.TryGetValue("null", out output))
                 {
-                    Console.WriteLine(member.Distinguishedname + "\t\t\t\t\t\t" + member.Tier);
+                    // Unknown error
+                    MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+            }
+            catch
+            {
+                // Authentication or connection error
+                containerWindow.NavigateToPage(connectPage);
+                return;
+            }
+        }
+
+        private async void SetTieringInDB()
+        {
+            List<ADObject> allADObjects = new List<ADObject>();
+            foreach (ADObject topADObject in forest.Values)
+            {
+                allADObjects.Add(topADObject);
+                allADObjects.AddRange(topADObject.GetAllChildren());
+            }
+
+            foreach (string tier in tiers)
+            {
+                IEnumerable<ADObject> tierADObjects = allADObjects.Where(obj => obj.Tier == tier);
+                List<string> tierObjectIds = tierADObjects.Select(obj => obj.Objectid).ToList();
+                string tierObjectIdsString = "['" + String.Join("','", tierObjectIds) + "']";
+
+                List<IRecord> records;
+                try
+                {
+                    object output;
+                    records = await connection.Query(@"
+                    MATCH(obj)
+                    WHERE obj.objectid IN " + tierObjectIdsString + @"
+                    CALL apoc.create.addLabels(obj, ['Tier' + " + tier + @"]) YIELD node
+                    RETURN null
+                ");
+                    if (!records[0].Values.TryGetValue("null", out output))
+                    {
+                        // Unknown error
+                        MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                }
+                catch
+                {
+                    // Authentication or connection error
+                    containerWindow.NavigateToPage(connectPage);
+                    return;
                 }
             }
         }
@@ -210,6 +277,16 @@ namespace ImproHound.pages
                 }
             }
             return ous;
+        }
+
+        public List<ADObject> GetAllChildren()
+        {
+            List<ADObject> children = Members.Values.ToList();
+            foreach (ADObject child in Members.Values.ToList())
+            {
+                children.AddRange(child.GetAllChildren());
+            }
+            return children;
         }
     }
 

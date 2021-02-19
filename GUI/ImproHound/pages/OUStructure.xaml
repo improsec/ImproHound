@@ -11,7 +11,7 @@
     <Grid Margin="10" >
         <DockPanel>
             <Label DockPanel.Dock="Top" Content="OU structure" Width="200" HorizontalAlignment="Left" Margin="10"/>
-            <Button DockPanel.Dock="Bottom" Content="Click" HorizontalAlignment="Right" Margin="10" Click="Button_Click"/>
+            <Button DockPanel.Dock="Bottom" Content="Set tiering in DB" HorizontalAlignment="Right" Margin="10" Click="Set_Tiering_Click"/>
             <TreeView DockPanel.Dock="Top" x:Name="forestTreeView" Background="Transparent" Margin="10">
                 <TreeView.Resources>
                     <self:Tiers x:Key="Tiers"/>
