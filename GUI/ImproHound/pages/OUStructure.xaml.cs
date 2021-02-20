@@ -149,6 +149,7 @@ namespace ImproHound.pages
 
         private void Set_Tiering_Click(object sender, RoutedEventArgs e)
         {
+            EnableGUIWait();
             DeleteTieringInDB();
             SetTieringInDB();
         }
@@ -185,6 +186,7 @@ namespace ImproHound.pages
 
         private async void SetTieringInDB()
         {
+            // Get all AD objects
             List<ADObject> allADObjects = new List<ADObject>();
             foreach (ADObject topADObject in forest.Values)
             {
@@ -192,26 +194,72 @@ namespace ImproHound.pages
                 allADObjects.AddRange(topADObject.GetAllChildren());
             }
 
+            // Devide AD objects in tiers
+            Dictionary<string, List<ADObject>> tierDict = new Dictionary<string, List<ADObject>>();
             foreach (string tier in tiers)
             {
-                IEnumerable<ADObject> tierADObjects = allADObjects.Where(obj => obj.Tier == tier);
-                List<string> tierObjectIds = tierADObjects.Select(obj => obj.Objectid).ToList();
-                string tierObjectIdsString = "['" + String.Join("','", tierObjectIds) + "']";
+                List<ADObject> tierADObjects = allADObjects.Where(obj => obj.Tier == tier).ToList();
 
-                List<IRecord> records;
+                // Skip empty tiers
+                if (!tierADObjects.Count().Equals(0))
+                {
+                    tierDict.Add(tier, tierADObjects);
+                }
+            }
+
+            // Sort tiers by size
+            List<KeyValuePair<string, List<ADObject>>> sortedTierDict = (from entry in tierDict orderby entry.Value.Count descending select entry).ToList();
+
+            // Set all AD object in DB to largest tier
+            KeyValuePair<string, List<ADObject>> largestTier = sortedTierDict.First();
+            sortedTierDict.RemoveAt(0);
+            List<IRecord> records;
+            try
+            {
+                object output;
+                string query = @"
+                        MATCH(obj)
+                        CALL apoc.create.addLabels(obj, ['Tier' + " + largestTier.Key + @"]) YIELD node
+                        RETURN null
+                    ";
+                records = await connection.Query(query, false);
+                if (!records[0].Values.TryGetValue("null", out output))
+                {
+                    // Unknown error
+                    MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    DisableGUIWait();
+                    return;
+                }
+            }
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisableGUIWait();
+                return;
+            }
+
+            // Replace tier label for AD object not in largest tier to the right tier
+            foreach (var tier in sortedTierDict)
+            {
+                List<string> tierObjectIds = tier.Value.Select(obj => obj.Objectid).ToList();
+                string tierObjectIdsString = "['" + String.Join("','", tierObjectIds) + "']";
                 try
                 {
                     object output;
-                    records = await connection.Query(@"
-                    MATCH(obj)
-                    WHERE obj.objectid IN " + tierObjectIdsString + @"
-                    CALL apoc.create.addLabels(obj, ['Tier' + " + tier + @"]) YIELD node
-                    RETURN null
-                ");
+                    string query = @"
+                        MATCH (n:Tier" + largestTier.Key + @")
+                        WHERE n.objectid IN " + tierObjectIdsString + @"
+                        WITH COLLECT(n) AS nList
+                        CALL apoc.refactor.rename.label('Tier' + " + largestTier.Key + ", 'Tier' + " + tier.Key + @", nList) YIELD indexes
+                        RETURN null
+                    ";
+                    records = await connection.Query(query, false);
                     if (!records[0].Values.TryGetValue("null", out output))
                     {
                         // Unknown error
                         MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        DisableGUIWait();
                         return;
                     }
                 }
@@ -219,9 +267,12 @@ namespace ImproHound.pages
                 {
                     // Error
                     MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    DisableGUIWait();
                     return;
                 }
             }
+
+            DisableGUIWait();
         }
 
         private void EnableGUIWait()
