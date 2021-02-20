@@ -10,28 +10,36 @@ namespace ImproHound
     public class DBConnection : IAsyncDisposable
     {
         private readonly IDriver _driver;
-        private int timeout = 5000;
+        private int timeoutMs = 5000;
 
         public DBConnection(string uri, string username, string password)
         {
             _driver = GraphDatabase.Driver(uri, AuthTokens.Basic(username, password));
         }
 
-        public async Task<List<IRecord>> Query(string query)
+        public async Task<List<IRecord>> Query(string query, bool timeout = true)
         {
             IAsyncSession session = _driver.AsyncSession();
 
             try
             {
                 Task<List<IRecord>> task = session.WriteTransactionAsync(tx => RunCypherWithResults(tx, query));
-                if (await Task.WhenAny(task, Task.Delay(timeout)) == task)
+
+                if (timeout)
                 {
-                    return await task;
+                    if (await Task.WhenAny(task, Task.Delay(timeoutMs)) == task)
+                    {
+                        return await task;
+                    }
+                    else
+                    {
+                        // Timeout error
+                        throw new Exception("No response in " + timeoutMs + " ms.\nVerify DB URL and DB is running.");
+                    }
                 }
                 else
                 {
-                    // Timeout error
-                    throw new Exception("No response in " + timeout + " ms.\nVerify DB URL and DB is running.");
+                    return await task;
                 }
 
             }
