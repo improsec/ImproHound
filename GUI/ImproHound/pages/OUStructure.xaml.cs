@@ -166,9 +166,9 @@ namespace ImproHound.pages
                     CALL db.labels()
                     YIELD label WHERE label STARTS WITH 'Tier'
                     WITH COLLECT(label) AS labels
-                    MATCH (p)
-                    WITH COLLECT(p) AS people, labels
-                    CALL apoc.create.removeLabels(people, labels)
+                    MATCH (n)
+                    WITH COLLECT(n) AS nodes, labels
+                    CALL apoc.create.removeLabels(nodes, labels)
                     YIELD node RETURN null
                 ");
                 if (!records[0].Values.TryGetValue("null", out output))
