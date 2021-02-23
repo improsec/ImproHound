@@ -1,0 +1,19 @@
+﻿<Page x:Class="ImproHound.pages.AlreadyTieredPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:ImproHound.pages"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="AlreadyTiered">
+
+    <Grid Width="360" Height="140" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Label Content="The BloodHound database contains tiering labels already." HorizontalAlignment="Center" VerticalAlignment="Top" Width="350" HorizontalContentAlignment="Center" Margin="0,10,0,0"/>
+        <Label Content="Start over or continue with labels from database?" HorizontalAlignment="Center" VerticalAlignment="Top" Width="350" Margin="0,40,0,0" HorizontalContentAlignment="Center"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10">
+            <Button x:Name="startoverButton" Content="Start over" Click="StartoverButton_Click" Margin="5"/>
+            <Button x:Name="continueButton" Content="Continue" Click="ContinueButton_Click" Margin="5"/>
+        </StackPanel>
+    </Grid>
+</Page>

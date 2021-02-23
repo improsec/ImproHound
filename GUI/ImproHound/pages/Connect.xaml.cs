@@ -71,9 +71,18 @@ namespace ImproHound.pages
                 return;
             }
 
-            // Jump to OU structure page
+            if (numOfTierLabels > 0)
+            {
+                // Jump to alreay tiered page
+                containerWindow.NavigateToPage(new AlreadyTieredPage(containerWindow, connection, this, numOfTierLabels: numOfTierLabels));
+            }
+            else
+            {
+                // Jump to OU structure page
+                containerWindow.NavigateToPage(new OUStructurePage(containerWindow, connection, this));
+            }
+
             DisableGUIWait();
-            containerWindow.NavigateToPage(new OUStructurePage(containerWindow, connection, this, numOfTierLabels: numOfTierLabels));
         }
 
         private void EnableGUIWait()
