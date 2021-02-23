@@ -1,6 +1,7 @@
 ﻿using Neo4j.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,6 +22,7 @@ namespace ImproHound.pages
         private async void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
             EnableGUIWait();
+            int numOfTierLabels = 0;
             object output;
 
             // Make sure we can connect to the DB and the graph is not empty
@@ -28,8 +30,8 @@ namespace ImproHound.pages
 
             try
             {
-                List<IRecord> response = await connection.Query("MATCH (n) RETURN COUNT(n)");
-                if (!response[0].Values.TryGetValue("COUNT(n)", out output))
+                List<IRecord> response = await connection.Query("CALL apoc.meta.stats() YIELD labels RETURN labels");
+                if (!response[0].Values.TryGetValue("labels", out output))
                 {
                     // Unknown error
                     MessageBox.Show("Something went wrong.\nNo authentication error but could not fetch number of nodes in graph.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -37,16 +39,21 @@ namespace ImproHound.pages
                     return;
                 }
 
-                long numOfNodes = (long)output;
-                Console.WriteLine("Number of nodes in graph: " + numOfNodes);
-                if (numOfNodes.Equals(0))
+                // Ensure graph is not empty
+                Dictionary<string, object> dirout = (Dictionary<string, object>)output;
+                object numOfBase;
+                dirout.TryGetValue("Base", out numOfBase);
+                Console.WriteLine("Number of nodes in graph: " + numOfBase);
+                if (numOfBase.ToString().Equals("0"))
                 {
                     // 0 nodes in graph error
-                    MessageBox.Show("You have 0 nodes in your graph.\nMake sure you have upload BloodHound data to graph before connecting.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("You have 0 nodes with label 'Base' in your graph.\nMake sure you have upload BloodHound data to graph before connecting.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     DisableGUIWait();
                     return;
                 }
 
+                // Get number of tier labels already existing in db
+                numOfTierLabels = new List<string>(dirout.Keys).Where(key => key.StartsWith("Tier")).Count();
             }
             catch (Exception err)
             {
@@ -58,7 +65,7 @@ namespace ImproHound.pages
 
             // Jump to OU structure page
             DisableGUIWait();
-            containerWindow.NavigateToPage(new OUStructurePage(containerWindow, connection, this));
+            containerWindow.NavigateToPage(new OUStructurePage(containerWindow, connection, this, numOfTierLabels: numOfTierLabels));
         }
 
         private void EnableGUIWait()

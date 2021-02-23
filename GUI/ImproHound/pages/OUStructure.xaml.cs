@@ -18,11 +18,13 @@ namespace ImproHound.pages
         private Dictionary<string, ADObject> forest;
         private List<string> tiers;
 
-        public OUStructurePage(MainWindow containerWindow, DBConnection connection, ConnectPage connectPage)
+        public OUStructurePage(MainWindow containerWindow, DBConnection connection, ConnectPage connectPage, int numOfTierLabels)
         {
             this.containerWindow = containerWindow;
             this.connection = connection;
             this.connectPage = connectPage;
+
+            // TODO: use numOfTierLabels
             tiers = new List<String>() { "0", "1", "2" };
             InitializeComponent();
             EnableGUIWait();
