@@ -58,7 +58,15 @@ namespace ImproHound.pages
             catch (Exception err)
             {
                 // Error
-                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (err.Message.ToString().StartsWith("There is no procedure with the name"))
+                {
+                    MessageBox.Show("Procedure 'apoc.meta.stats()' does not exist. Make sure APOC plugin is installed in database.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else
+                {
+                    MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
                 DisableGUIWait();
                 return;
             }
