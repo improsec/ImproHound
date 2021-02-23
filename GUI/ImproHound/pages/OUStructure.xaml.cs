@@ -17,38 +17,63 @@ namespace ImproHound.pages
         private readonly ConnectPage connectPage;
         private Dictionary<string, ADObject> forest;
         private List<string> tiers;
+        private int defaultTierNumber;
 
         public OUStructurePage(MainWindow containerWindow, DBConnection connection, ConnectPage connectPage, bool startover = true, int numOfTierLabels = 0)
         {
             this.containerWindow = containerWindow;
             this.connection = connection;
             this.connectPage = connectPage;
+            this.defaultTierNumber = 2;
 
             // TODO: use numOfTierLabels and startover
             tiers = new List<String>() { "0", "1", "2" };
             InitializeComponent();
             EnableGUIWait();
-            BuildOUStructure();
+            BuildOUStructure(startover, numOfTierLabels);
         }
 
-        private async void BuildOUStructure()
+        private async void BuildOUStructure(bool startover = true, int numOfTierLabels = 0)
         {
+            // TODO: Remember nodes without distinguishedname
+
             forest = new Dictionary<string, ADObject>();
 
+            if (!startover)
+            {
+                // Create temp tier property on objects
+                try
+                {
+                    await connection.Query(@"
+                        MATCH (o)
+                        UNWIND LABELS(o) AS lbls
+                        WITH o, lbls WHERE lbls STARTS WITH 'Tier'
+                        SET o.tier = lbls
+                    ");
+                }
+                catch (Exception err)
+                {
+                    // Error
+                    MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    DisableGUIWait();
+                    containerWindow.NavigateToPage(connectPage);
+                    return;
+                }
+            }
+
+            // Get all obejcts with distinguishedname (incl. objects with o.tier = null)
             List<IRecord> records;
             try
             {
-                // TODO: Remember nodes without distinguishedname
-
                 object output;
                 records = await connection.Query(@"
-                    MATCH (o)
-                    WHERE NOT o.distinguishedname IS NULL
-					UNWIND LABELS(o) AS adtype
-                    WITH o.objectid AS objectid, o.distinguishedname AS distinguishedname, o.name AS name, adtype
-                    WHERE adtype IN ['Domain', 'OU', 'Group', 'User', 'Computer', 'GPO']
-                    RETURN objectid, distinguishedname, name, adtype ORDER BY size(distinguishedname)
-                ");
+                        MATCH (o)
+                        WHERE NOT o.distinguishedname IS NULL
+					    UNWIND LABELS(o) AS adtype
+                        WITH o.objectid AS objectid, o.distinguishedname AS distinguishedname, o.name AS name, o.tier AS tier, adtype
+                        WHERE adtype IN ['Domain', 'OU', 'Group', 'User', 'Computer', 'GPO']
+                        RETURN objectid, distinguishedname, name, tier, adtype ORDER BY size(distinguishedname)
+                    ");
                 if (!records[0].Values.TryGetValue("objectid", out output))
                 {
                     // Unknown error
@@ -74,7 +99,13 @@ namespace ImproHound.pages
                 record.Values.TryGetValue("distinguishedname", out object distinguishedname);
                 record.Values.TryGetValue("name", out object name);
                 record.Values.TryGetValue("adtype", out object type);
+                record.Values.TryGetValue("tier", out object tier);
 
+                // Get tier
+                string tierNumber = defaultTierNumber.ToString();
+                if (tier != null) tierNumber = tier.ToString().Replace("Tier", "");
+
+                // Get AD type
                 bool gotTypeEnum = Enum.TryParse((string)type, out ADOjectType adType);
                 if (!gotTypeEnum) adType = ADOjectType.Unknown;
 
@@ -83,12 +114,12 @@ namespace ImproHound.pages
                     if (adType.Equals(ADOjectType.Domain))
                     {
                         // TODO: Put sub domains under parent domain
-                        ADObject adContainer = new ADObject((string)objectid, adType, (string)distinguishedname, (string)name, "2");
+                        ADObject adContainer = new ADObject((string)objectid, adType, (string)distinguishedname, (string)name, tierNumber);
                         forest.Add(adContainer.Distinguishedname, adContainer);
                     }
                     else
                     {
-                        ADObject adObject = new ADObject((string)objectid, adType, (string)distinguishedname, (string)name, "2");
+                        ADObject adObject = new ADObject((string)objectid, adType, (string)distinguishedname, (string)name, tierNumber);
                         ADObject parent = GetParent(adObject);
                         string rdnName = adObject.Distinguishedname.Substring(0, adObject.Distinguishedname.IndexOf(","));
                         parent.Members.Add(rdnName, adObject);
@@ -99,6 +130,28 @@ namespace ImproHound.pages
                     Console.Error.WriteLine("Something went wrong when adding this AD object (objectid): " + objectid);
                 }
             }
+
+            if (!startover)
+            {
+                // Delete temp tier property on objects
+                try
+                {
+                    await connection.Query(@"
+                        MATCH(o)
+                        SET o.tier = NULL
+                    ");
+                }
+                catch (Exception err)
+                {
+                    // Error
+                    MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                    DisableGUIWait();
+                    containerWindow.NavigateToPage(connectPage);
+                    return;
+                }
+            }
+
             Console.WriteLine("OU Structure build");
             forestTreeView.ItemsSource = forest.Values.ToList();
             DisableGUIWait();
