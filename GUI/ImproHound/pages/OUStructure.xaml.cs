@@ -1,7 +1,9 @@
-﻿using Neo4j.Driver;
+﻿using GalaSoft.MvvmLight.Command;
+using Neo4j.Driver;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -27,6 +29,7 @@ namespace ImproHound.pages
             this.defaultTierNumber = 2;
 
             // TODO: use numOfTierLabels and startover
+            // TODO: Replace tiers variable
             tiers = new List<String>() { "0", "1", "2" };
             InitializeComponent();
             EnableGUIWait();
@@ -343,7 +346,7 @@ namespace ImproHound.pages
         }
     }
 
-    public class ADObject
+    public class ADObject : INotifyPropertyChanged
     {
         public ADObject(string objectid, ADOjectType type, string distinguishedname, string name, string tier)
         {
@@ -353,6 +356,9 @@ namespace ImproHound.pages
             Tier = tier;
             Type = type;
             Members = new Dictionary<string, ADObject>();
+
+            TierUpCommand = new RelayCommand(TierUp);
+            TierDownCommand = new RelayCommand(TierDown);
 
             switch (type)
             {
@@ -385,10 +391,22 @@ namespace ImproHound.pages
         public ADOjectType Type { get; set; }
         public string Tier { get; set; }
         public string Iconpath { get; set; }
-
+        public ICommand TierUpCommand { get; set; }
+        public ICommand TierDownCommand { get; set; }
         public Dictionary<string, ADObject> Members { get; set; }
-
         public List<ADObject> MemberList => Members.Values.ToList();
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void TierUp()
+        {
+            Tier = (Int32.Parse(Tier) + 1).ToString();
+            PropertyChanged(this, new PropertyChangedEventArgs("Tier"));
+        }
+        private void TierDown()
+        {
+            Tier = (Math.Max((Int32.Parse(Tier) - 1), 0)).ToString();
+            PropertyChanged(this, new PropertyChangedEventArgs("Tier"));
+        }
 
         public Dictionary<string, ADObject> GetOUMembers()
         {
@@ -411,14 +429,6 @@ namespace ImproHound.pages
                 children.AddRange(child.GetAllChildren());
             }
             return children;
-        }
-    }
-
-    public class Tiers : List<String>
-    {
-        public Tiers()
-        {
-            AddRange(new List<String>() { "0", "1", "2" });
         }
     }
 
