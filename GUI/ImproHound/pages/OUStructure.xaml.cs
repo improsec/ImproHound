@@ -1,11 +1,9 @@
 ﻿using GalaSoft.MvvmLight.Command;
 using Neo4j.Driver;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -18,7 +16,6 @@ namespace ImproHound.pages
         private readonly DBConnection connection;
         private readonly ConnectPage connectPage;
         private Dictionary<string, ADObject> forest;
-        private List<string> tiers;
         private int defaultTierNumber;
 
         public OUStructurePage(MainWindow containerWindow, DBConnection connection, ConnectPage connectPage, bool startover = true, int numOfTierLabels = 0)
@@ -29,8 +26,6 @@ namespace ImproHound.pages
             this.defaultTierNumber = 2;
 
             // TODO: use numOfTierLabels and startover
-            // TODO: Replace tiers variable
-            tiers = new List<String>() { "0", "1", "2" };
             InitializeComponent();
             EnableGUIWait();
             BuildOUStructure(startover, numOfTierLabels);
@@ -252,20 +247,8 @@ namespace ImproHound.pages
                 allADObjects.AddRange(topADObject.GetAllChildren());
             }
 
-            // Devide AD objects in tiers
-            Dictionary<string, List<ADObject>> tierDict = new Dictionary<string, List<ADObject>>();
-            foreach (string tier in tiers)
-            {
-                List<ADObject> tierADObjects = allADObjects.Where(obj => obj.Tier == tier).ToList();
-
-                // Skip empty tiers
-                if (!tierADObjects.Count().Equals(0))
-                {
-                    tierDict.Add(tier, tierADObjects);
-                }
-            }
-
-            // Sort tiers by size
+            // Devide AD objects into tiers and sort by number of objects in tiers
+            Dictionary<string, List<ADObject>> tierDict = allADObjects.GroupBy(g => g.Tier).ToDictionary(group => group.Key, group => group.ToList());
             List<KeyValuePair<string, List<ADObject>>> sortedTierDict = (from entry in tierDict orderby entry.Value.Count descending select entry).ToList();
 
             // Set all AD object in DB to largest tier
