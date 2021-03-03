@@ -158,8 +158,6 @@ namespace ImproHound.pages
         private ADObject GetParent(ADObject adObject)
         {
             // Find the domain the object belongs to
-            // TODO: Handle if no domain / ou was not found
-            // TODO: Handle non-existing containers. E.g. builtin is missing, so everything under builtin ends up directly under the domain
             foreach (KeyValuePair<string, ADObject> domain in forest)
             {
                 if (adObject.Distinguishedname.EndsWith(domain.Key))
