@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace ImproHound.pages
 {
@@ -306,6 +307,7 @@ namespace ImproHound.pages
         {
             Mouse.OverrideCursor = Cursors.Wait;
             setTieringButton.IsEnabled = false;
+            getTieringViolationsButton.IsEnabled = false;
             inheritButton.IsEnabled = false;
         }
 
@@ -313,7 +315,78 @@ namespace ImproHound.pages
         {
             Mouse.OverrideCursor = null;
             setTieringButton.IsEnabled = true;
+            getTieringViolationsButton.IsEnabled = true;
             inheritButton.IsEnabled = forestTreeView.SelectedItem != null;
+        }
+
+        private async void getTieringViolationsButton_Click(object sender, RoutedEventArgs e)
+        {
+            EnableGUIWait();
+            await DeleteTieringInDB();
+            await SetTieringInDB();
+
+            // Get tiering violations
+            List<IRecord> records;
+            try
+            {
+                object output;
+                records = await connection.Query(@"
+                    MATCH (t2:Tier2)-[r]->(t0:Tier0)
+                    UNWIND LABELS(t2) AS t2lbls
+                    UNWIND LABELS(t0) AS t0lbls
+                    WITH t2, t2lbls, t0lbls, r, t0
+                    WHERE t2lbls <> 'Tier2' AND t2lbls <> 'Base'
+                    AND t0lbls <> 'Tier0' AND t0lbls <> 'Base'
+                    RETURN t2lbls, t2.distinguishedname, TYPE(r), t0lbls, t0.distinguishedname
+                ");
+                if (!records[0].Values.TryGetValue("t2.distinguishedname", out output))
+                {
+                    // Unknown error
+                    MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+            }
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // Save tiering violations in file
+            string header = @"BaseADObjectTier;
+                            BaseADObjectType;
+                            BaseADObjectName;
+                            Relation;
+                            TargetADObjectTier;
+                            TargetADObjectType;
+                            TargetADObjectName";
+            List<string> csvOutput = new List<string>() { String.Concat(header.Where(c => !Char.IsWhiteSpace(c))) };
+            string baseADObjectTier = "Tier2";
+            string targetADObjectTier = "Tier0";
+            foreach (IRecord record in records)
+            {
+                record.Values.TryGetValue("t2.distinguishedname", out object baseADObjectName);
+                record.Values.TryGetValue("t2lbls", out object baseADObjectType);
+                record.Values.TryGetValue("TYPE(r)", out object relation);
+                record.Values.TryGetValue("t0.distinguishedname", out object targetADObjectName);
+                record.Values.TryGetValue("t0lbls", out object targetADObjectType);
+
+                csvOutput.Add(baseADObjectTier + ";" +
+                    baseADObjectType + ";" +
+                    baseADObjectName + ";" +
+                    relation + ";" +
+                    targetADObjectTier + ";" +
+                    targetADObjectType + ";" +
+                    targetADObjectName);
+            }
+
+            string timeStamp = DateTime.Now.ToString("yyyyMMddHHmmssffff");
+            string filename = "tiering-violations-" + timeStamp + ".csv";
+            File.AppendAllLines(filename, csvOutput);
+            MessageBox.Show("Tiering violations: " + Path.GetFullPath(filename), "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            DisableGUIWait();
         }
 
         private async void setTieringButton_Click(object sender, RoutedEventArgs e)
