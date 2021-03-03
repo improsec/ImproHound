@@ -11,24 +11,27 @@
     <Grid Margin="10" >
         <DockPanel>
             <Label DockPanel.Dock="Top" Content="OU structure" Width="200" HorizontalAlignment="Left" Margin="10"/>
-            <Button x:Name="setTieringButton" DockPanel.Dock="Bottom" Content="Set tiering in DB" HorizontalAlignment="Right" Margin="10" Click="Set_Tiering_Click" Width="140"/>
-            <TreeView DockPanel.Dock="Top" x:Name="forestTreeView" Background="Transparent" Margin="10">
-                <TreeView.Resources>
-                    <HierarchicalDataTemplate DataType="{x:Type self:ADObject}" ItemsSource="{Binding MemberList}">
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
+                <Button x:Name="inheritButton" Content="Tier inheritance" HorizontalAlignment="Right" Margin="10" Width="140" IsEnabled="False" Click="inheritButton_Click"/>
+                <Button x:Name="setTieringButton" Content="Set tiering in DB" HorizontalAlignment="Right" Margin="10" Click="Set_Tiering_Click" Width="140"/>
+            </StackPanel>
+            <TreeView DockPanel.Dock="Top" x:Name="forestTreeView" Background="Transparent" Margin="10" SelectedItemChanged="forestTreeView_SelectedItemChanged">
+            <TreeView.Resources>
+                <HierarchicalDataTemplate DataType="{x:Type self:ADObject}" ItemsSource="{Binding MemberList}">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="{Binding Iconpath}" Margin="0,0,5,0" Width="20" />
+                        <Label Content="{Binding Name}" Width="200" />
+                        <Label Content=" Tier:" Width="45" HorizontalContentAlignment="Right" Padding="5,5,2,5"/>
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="{Binding Iconpath}" Margin="0,0,5,0" Width="20" />
-                            <Label Content="{Binding Name}" Width="200" />
-                            <Label Content=" Tier:" Width="45" HorizontalContentAlignment="Right" Padding="5,5,2,5"/>
-                            <StackPanel Orientation="Horizontal">
-                                <Label Width="18" Content="{Binding Tier}" HorizontalContentAlignment="Center" VerticalContentAlignment="Stretch" Height="24" />
-                                <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                                    <Button Height="12" Content="˄" Width="16" Command="{Binding TierUpCommand}" FontWeight="Bold" BorderBrush="Transparent" Padding="0,-1,0,0" VerticalContentAlignment="Center"/>
-                                    <Button Height="12" Content="˅" Width="16" Command="{Binding TierDownCommand}" FontWeight="Bold" BorderBrush="Transparent" Padding="0,-3,0,0" />
-                                </StackPanel>
+                            <Label Width="18" Content="{Binding Tier}" HorizontalContentAlignment="Center" VerticalContentAlignment="Stretch" Height="24" />
+                            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                                <Button Height="12" Content="˄" Width="16" Command="{Binding TierUpCommand}" FontWeight="Bold" BorderBrush="Transparent" Padding="0,-1,0,0" VerticalContentAlignment="Center"/>
+                                <Button Height="12" Content="˅" Width="16" Command="{Binding TierDownCommand}" FontWeight="Bold" BorderBrush="Transparent" Padding="0,-3,0,0" />
                             </StackPanel>
                         </StackPanel>
-                    </HierarchicalDataTemplate>
-                </TreeView.Resources>
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+            </TreeView.Resources>
             </TreeView>
         </DockPanel>
     </Grid>

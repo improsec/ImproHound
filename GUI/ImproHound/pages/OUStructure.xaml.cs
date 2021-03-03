@@ -318,12 +318,28 @@ namespace ImproHound.pages
         {
             Mouse.OverrideCursor = Cursors.Wait;
             setTieringButton.IsEnabled = false;
+            inheritButton.IsEnabled = false;
         }
 
         private void DisableGUIWait()
         {
             Mouse.OverrideCursor = null;
             setTieringButton.IsEnabled = true;
+            inheritButton.IsEnabled = forestTreeView.SelectedItem != null;
+        }
+
+        private void inheritButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (forestTreeView.SelectedItem == null) return;
+
+            ADObject parent = (ADObject)forestTreeView.SelectedItem;
+            parent.GetAllChildren().ForEach(child => child.SetTier(parent.Tier));
+            forestTreeView.Focus();
+        }
+
+        private void forestTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            inheritButton.IsEnabled = forestTreeView.SelectedItem != null;
         }
     }
 
@@ -389,6 +405,14 @@ namespace ImproHound.pages
             PropertyChanged(this, new PropertyChangedEventArgs("Tier"));
         }
 
+        public void SetTier(string tier)
+        {
+            Tier = tier;
+            if (PropertyChanged != null) {
+                PropertyChanged(this, new PropertyChangedEventArgs("Tier"));
+            }
+        }
+
         public Dictionary<string, ADObject> GetOUMembers()
         {
             Dictionary<string, ADObject> ous = new Dictionary<string, ADObject>();
@@ -404,8 +428,8 @@ namespace ImproHound.pages
 
         public List<ADObject> GetAllChildren()
         {
-            List<ADObject> children = Members.Values.ToList();
-            foreach (ADObject child in Members.Values.ToList())
+            List<ADObject> children = MemberList;
+            foreach (ADObject child in MemberList)
             {
                 children.AddRange(child.GetAllChildren());
             }
