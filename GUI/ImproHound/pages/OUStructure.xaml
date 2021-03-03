@@ -13,7 +13,7 @@
             <Label DockPanel.Dock="Top" Content="OU structure" Width="200" HorizontalAlignment="Left" Margin="10"/>
             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
                 <Button x:Name="inheritButton" Content="Tier inheritance" HorizontalAlignment="Right" Margin="10" Width="140" IsEnabled="False" Click="inheritButton_Click"/>
-                <Button x:Name="setTieringButton" Content="Set tiering in DB" HorizontalAlignment="Right" Margin="10" Click="Set_Tiering_Click" Width="140"/>
+                <Button x:Name="setTieringButton" Content="Set tiering in DB" HorizontalAlignment="Right" Margin="10" Click="setTieringButton_Click" Width="140"/>
             </StackPanel>
             <TreeView DockPanel.Dock="Top" x:Name="forestTreeView" Background="Transparent" Margin="10" SelectedItemChanged="forestTreeView_SelectedItemChanged">
             <TreeView.Resources>

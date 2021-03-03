@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Threading.Tasks;
 
 namespace ImproHound.pages
 {
@@ -27,11 +28,17 @@ namespace ImproHound.pages
 
             // TODO: use numOfTierLabels and startover
             InitializeComponent();
-            EnableGUIWait();
-            BuildOUStructure(startover, numOfTierLabels);
+            Initialization(startover, numOfTierLabels);
         }
 
-        private async void BuildOUStructure(bool startover = true, int numOfTierLabels = 0)
+        private async void Initialization(bool startover = true, int numOfTierLabels = 0)
+        {
+            EnableGUIWait();
+            await BuildOUStructure(startover, numOfTierLabels);
+            DisableGUIWait();
+        }
+
+        private async Task BuildOUStructure(bool startover = true, int numOfTierLabels = 0)
         {
             // TODO: Remember nodes without distinguishedname
 
@@ -53,7 +60,6 @@ namespace ImproHound.pages
                 {
                     // Error
                     MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    DisableGUIWait();
                     containerWindow.NavigateToPage(connectPage);
                     return;
                 }
@@ -76,7 +82,6 @@ namespace ImproHound.pages
                 {
                     // Unknown error
                     MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    DisableGUIWait();
                     containerWindow.NavigateToPage(connectPage);
                     return;
                 }
@@ -85,7 +90,6 @@ namespace ImproHound.pages
             {
                 // Error
                 MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                DisableGUIWait();
                 containerWindow.NavigateToPage(connectPage);
                 return;
             }
@@ -143,8 +147,6 @@ namespace ImproHound.pages
                 {
                     // Error
                     MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                    DisableGUIWait();
                     containerWindow.NavigateToPage(connectPage);
                     return;
                 }
@@ -152,7 +154,6 @@ namespace ImproHound.pages
 
             Console.WriteLine("OU Structure build");
             forestTreeView.ItemsSource = forest.Values.ToList();
-            DisableGUIWait();
         }
 
         private ADObject GetParent(ADObject adObject)
@@ -198,14 +199,7 @@ namespace ImproHound.pages
             throw new Exception("Error: Could not find ADObjects OU/Domain parent");
         }
 
-        private void Set_Tiering_Click(object sender, RoutedEventArgs e)
-        {
-            EnableGUIWait();
-            DeleteTieringInDB();
-            SetTieringInDB();
-        }
-
-        private async void DeleteTieringInDB()
+        private async Task DeleteTieringInDB()
         {
             List<IRecord> records;
             try
@@ -235,7 +229,7 @@ namespace ImproHound.pages
             }
         }
 
-        private async void SetTieringInDB()
+        private async Task SetTieringInDB()
         {
             // Get all AD objects
             List<ADObject> allADObjects = new List<ADObject>();
@@ -266,7 +260,6 @@ namespace ImproHound.pages
                 {
                     // Unknown error
                     MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    DisableGUIWait();
                     return;
                 }
             }
@@ -274,7 +267,6 @@ namespace ImproHound.pages
             {
                 // Error
                 MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                DisableGUIWait();
                 return;
             }
 
@@ -298,7 +290,6 @@ namespace ImproHound.pages
                     {
                         // Unknown error
                         MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                        DisableGUIWait();
                         return;
                     }
                 }
@@ -306,12 +297,9 @@ namespace ImproHound.pages
                 {
                     // Error
                     MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    DisableGUIWait();
                     return;
                 }
             }
-
-            DisableGUIWait();
         }
 
         private void EnableGUIWait()
@@ -326,6 +314,14 @@ namespace ImproHound.pages
             Mouse.OverrideCursor = null;
             setTieringButton.IsEnabled = true;
             inheritButton.IsEnabled = forestTreeView.SelectedItem != null;
+        }
+
+        private async void setTieringButton_Click(object sender, RoutedEventArgs e)
+        {
+            EnableGUIWait();
+            await DeleteTieringInDB();
+            await SetTieringInDB();
+            DisableGUIWait();
         }
 
         private void inheritButton_Click(object sender, RoutedEventArgs e)
