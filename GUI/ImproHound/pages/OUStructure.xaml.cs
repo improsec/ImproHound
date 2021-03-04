@@ -26,7 +26,6 @@ namespace ImproHound.pages
             this.connectPage = connectPage;
             this.defaultTierNumber = 2;
 
-            // TODO: use startover
             InitializeComponent();
             Initialization(startover);
         }
@@ -40,8 +39,6 @@ namespace ImproHound.pages
 
         private async Task BuildOUStructure(bool startover = true)
         {
-            // TODO: Remember nodes without distinguishedname
-
             forest = new Dictionary<string, ADObject>();
 
             if (!startover)
@@ -96,7 +93,6 @@ namespace ImproHound.pages
 
             foreach (IRecord record in records)
             {
-                //TODO: Make sure same object is not comming twice, if multiple labels
                 record.Values.TryGetValue("objectid", out object objectid);
                 record.Values.TryGetValue("distinguishedname", out object distinguishedname);
                 record.Values.TryGetValue("name", out object name);
