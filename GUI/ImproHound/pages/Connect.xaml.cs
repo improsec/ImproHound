@@ -1,8 +1,6 @@
 ﻿using Neo4j.Driver;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -22,7 +20,7 @@ namespace ImproHound.pages
         private async void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
             EnableGUIWait();
-            int numOfTierLabels = 0;
+            bool alreadyTieredCorrectly = false;
             object output;
 
             // Make sure we can connect to the DB and the graph is not empty
@@ -52,8 +50,32 @@ namespace ImproHound.pages
                     return;
                 }
 
-                // Get number of tier labels already existing in db
-                numOfTierLabels = new List<string>(dirout.Keys).Where(key => key.StartsWith("Tier")).Count();
+                // Get number of nodes with tier label in db
+                response = await connection.Query(@"CALL db.labels()
+                    YIELD label WHERE label STARTS WITH 'Tier'
+                    MATCH(n) WHERE label IN labels(n)
+                    RETURN COUNT(n)");
+                if (!response[0].Values.TryGetValue("COUNT(n)", out output))
+                {
+                    // Unknown error
+                    MessageBox.Show("Something went wrong.\nNo authentication error but could not fetch number of nodes in graph.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    DisableGUIWait();
+                    return;
+                }
+                response[0].Values.TryGetValue("COUNT(n)", out object numOfTierLabeled);
+
+                // Get number of nodes with distinguished name in db
+                response = await connection.Query("MATCH(n) WHERE EXISTS(n.distinguishedname) RETURN COUNT(n)");
+                if (!response[0].Values.TryGetValue("COUNT(n)", out output))
+                {
+                    // Unknown error
+                    MessageBox.Show("Something went wrong.\nNo authentication error but could not fetch number of nodes in graph.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    DisableGUIWait();
+                    return;
+                }
+                response[0].Values.TryGetValue("COUNT(n)", out object numOfDistinguishedname);
+
+                alreadyTieredCorrectly = numOfDistinguishedname.ToString().Equals(numOfTierLabeled.ToString());
             }
             catch (Exception err)
             {
@@ -71,10 +93,10 @@ namespace ImproHound.pages
                 return;
             }
 
-            if (numOfTierLabels > 0)
+            if (alreadyTieredCorrectly)
             {
                 // Jump to alreay tiered page
-                containerWindow.NavigateToPage(new AlreadyTieredPage(containerWindow, connection, this, numOfTierLabels: numOfTierLabels));
+                containerWindow.NavigateToPage(new AlreadyTieredPage(containerWindow, connection, this));
             }
             else
             {

@@ -19,26 +19,27 @@ namespace ImproHound.pages
         private Dictionary<string, ADObject> forest;
         private int defaultTierNumber;
 
-        public OUStructurePage(MainWindow containerWindow, DBConnection connection, ConnectPage connectPage, bool startover = true, int numOfTierLabels = 0)
+        public OUStructurePage(MainWindow containerWindow, DBConnection connection, ConnectPage connectPage, bool startover = true)
         {
             this.containerWindow = containerWindow;
             this.connection = connection;
             this.connectPage = connectPage;
             this.defaultTierNumber = 2;
 
-            // TODO: use numOfTierLabels and startover
+            // TODO: No cursor wait when comming from connect page
+            // TODO: use startover
             InitializeComponent();
-            Initialization(startover, numOfTierLabels);
+            Initialization(startover);
         }
 
-        private async void Initialization(bool startover = true, int numOfTierLabels = 0)
+        private async void Initialization(bool startover = true)
         {
             EnableGUIWait();
-            await BuildOUStructure(startover, numOfTierLabels);
+            await BuildOUStructure(startover);
             DisableGUIWait();
         }
 
-        private async Task BuildOUStructure(bool startover = true, int numOfTierLabels = 0)
+        private async Task BuildOUStructure(bool startover = true)
         {
             // TODO: Remember nodes without distinguishedname
 
@@ -251,7 +252,7 @@ namespace ImproHound.pages
             {
                 object output;
                 string query = @"
-                        MATCH(obj)
+                        MATCH(obj) WHERE EXISTS(obj.distinguishedname)
                         CALL apoc.create.addLabels(obj, ['Tier' + " + largestTier.Key + @"]) YIELD node
                         RETURN null
                     ";
