@@ -12,6 +12,7 @@
             <Label DockPanel.Dock="Top" Content="OU structure" Width="200" HorizontalAlignment="Left" Margin="10"/>
             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
                 <Button x:Name="inheritButton" Content="Tier inheritance" HorizontalAlignment="Right" Margin="10" Width="140" IsEnabled="False" Click="inheritButton_Click"/>
+                <Button x:Name="removeTieringButton" Content="Remove tiering in DB" HorizontalAlignment="Right" Margin="10" Click="removeTieringButton_Click" Width="140"/>
                 <Button x:Name="setTieringButton" Content="Set tiering in DB" HorizontalAlignment="Right" Margin="10" Click="setTieringButton_Click" Width="140"/>
                 <Button x:Name="getTieringViolationsButton" Content="Get tiering violations" HorizontalAlignment="Right" Margin="10" Width="140" Click="getTieringViolationsButton_Click"/>
             </StackPanel>

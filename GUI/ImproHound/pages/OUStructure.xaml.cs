@@ -305,6 +305,7 @@ namespace ImproHound.pages
         private void EnableGUIWait()
         {
             Mouse.OverrideCursor = Cursors.Wait;
+            removeTieringButton.IsEnabled = false;
             setTieringButton.IsEnabled = false;
             getTieringViolationsButton.IsEnabled = false;
             inheritButton.IsEnabled = false;
@@ -313,6 +314,7 @@ namespace ImproHound.pages
         private void DisableGUIWait()
         {
             Mouse.OverrideCursor = null;
+            removeTieringButton.IsEnabled = true;
             setTieringButton.IsEnabled = true;
             getTieringViolationsButton.IsEnabled = true;
             inheritButton.IsEnabled = forestTreeView.SelectedItem != null;
@@ -424,6 +426,13 @@ namespace ImproHound.pages
             EnableGUIWait();
             await DeleteTieringInDB();
             await SetTieringInDB();
+            DisableGUIWait();
+        }
+
+        private async void removeTieringButton_Click(object sender, RoutedEventArgs e)
+        {
+            EnableGUIWait();
+            await DeleteTieringInDB();
             DisableGUIWait();
         }
 
