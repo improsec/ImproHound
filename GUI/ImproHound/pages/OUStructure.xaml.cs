@@ -26,7 +26,6 @@ namespace ImproHound.pages
             this.connectPage = connectPage;
             this.defaultTierNumber = 2;
 
-            // TODO: No cursor wait when comming from connect page
             // TODO: use startover
             InitializeComponent();
             Initialization(startover);

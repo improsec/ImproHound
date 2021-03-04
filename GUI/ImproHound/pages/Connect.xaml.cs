@@ -93,6 +93,8 @@ namespace ImproHound.pages
                 return;
             }
 
+            DisableGUIWait();
+
             if (alreadyTieredCorrectly)
             {
                 // Jump to alreay tiered page
@@ -101,10 +103,8 @@ namespace ImproHound.pages
             else
             {
                 // Jump to OU structure page
-                containerWindow.NavigateToPage(new OUStructurePage(containerWindow, connection, this));
+                containerWindow.NavigateToPage(new OUStructurePage(containerWindow, connection, this, startover: false));
             }
-
-            DisableGUIWait();
         }
 
         private void EnableGUIWait()
