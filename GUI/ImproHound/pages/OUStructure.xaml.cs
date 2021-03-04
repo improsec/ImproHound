@@ -17,14 +17,13 @@ namespace ImproHound.pages
         private readonly DBConnection connection;
         private readonly ConnectPage connectPage;
         private Dictionary<string, ADObject> forest;
-        private int defaultTierNumber;
+        private readonly int defaultTierNumber = 1;
 
         public OUStructurePage(MainWindow containerWindow, DBConnection connection, ConnectPage connectPage, bool startover = true)
         {
             this.containerWindow = containerWindow;
             this.connection = connection;
             this.connectPage = connectPage;
-            this.defaultTierNumber = 2;
 
             InitializeComponent();
             Initialization(startover);
