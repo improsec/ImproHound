@@ -324,66 +324,97 @@ namespace ImproHound.pages
             await DeleteTieringInDB();
             await SetTieringInDB();
 
-            // Get tiering violations
-            List<IRecord> records;
-            try
+            // Get list of tiers in OU structure
+            List<ADObject> allADObjects = new List<ADObject>();
+            foreach (ADObject topADObject in forest.Values)
             {
-                object output;
-                records = await connection.Query(@"
-                    MATCH (t2:Tier2)-[r]->(t0:Tier0)
-                    UNWIND LABELS(t2) AS t2lbls
-                    UNWIND LABELS(t0) AS t0lbls
-                    WITH t2, t2lbls, t0lbls, r, t0
-                    WHERE t2lbls <> 'Tier2' AND t2lbls <> 'Base'
-                    AND t0lbls <> 'Tier0' AND t0lbls <> 'Base'
-                    RETURN t2lbls, t2.distinguishedname, TYPE(r), t0lbls, t0.distinguishedname
-                ");
-                if (!records[0].Values.TryGetValue("t2.distinguishedname", out output))
+                allADObjects.Add(topADObject);
+                allADObjects.AddRange(topADObject.GetAllChildren());
+            }
+            List<string> tiers = allADObjects.Select(o => o.Tier).Distinct().OrderByDescending(tier => tier).ToList();
+
+            // Generate list of tier pairs (source, target)
+            List<string[]> tierPairs = new List<string[]>();
+            for (int i = 0; i < tiers.Count - 1; i++)
+            {
+                for (int j = i + 1; j < tiers.Count; j++)
                 {
-                    // Unknown error
-                    MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
+                    tierPairs.Add(new string[] { tiers.ElementAt(i), tiers.ElementAt(j) });
                 }
             }
-            catch (Exception err)
-            {
-                // Error
-                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
 
-            // Save tiering violations in file
-            string header = @"BaseADObjectTier;
-                            BaseADObjectType;
-                            BaseADObjectName;
-                            Relation;
-                            TargetADObjectTier;
-                            TargetADObjectType;
-                            TargetADObjectName";
+            // Prepare csvOutput
+            string header = @"SourceTier;
+                                SourceType;
+                                SourceName;
+                                SourceDistinguishedname;
+                                Relation;
+                                TargetTier;
+                                TargetType;
+                                TargetName;
+                                TargetDistinguishedname";
             List<string> csvOutput = new List<string>() { String.Concat(header.Where(c => !Char.IsWhiteSpace(c))) };
-            string baseADObjectTier = "Tier2";
-            string targetADObjectTier = "Tier0";
-            foreach (IRecord record in records)
-            {
-                record.Values.TryGetValue("t2.distinguishedname", out object baseADObjectName);
-                record.Values.TryGetValue("t2lbls", out object baseADObjectType);
-                record.Values.TryGetValue("TYPE(r)", out object relation);
-                record.Values.TryGetValue("t0.distinguishedname", out object targetADObjectName);
-                record.Values.TryGetValue("t0lbls", out object targetADObjectType);
 
-                csvOutput.Add(baseADObjectTier + ";" +
-                    baseADObjectType + ";" +
-                    baseADObjectName + ";" +
-                    relation + ";" +
-                    targetADObjectTier + ";" +
-                    targetADObjectType + ";" +
-                    targetADObjectName);
+            // Get tiering violations for each tier pair
+            foreach (string[] tierPair in tierPairs)
+            {
+                string sourceTier = "Tier" + tierPair[0];
+                string targetTier = "Tier" + tierPair[1];
+
+                List<IRecord> records;
+                try
+                {
+                    object output;
+                    records = await connection.Query(@"
+                        MATCH (sourceObj:" + sourceTier + ") -[r]->(targetObj:" + targetTier + @")
+                        UNWIND LABELS(sourceObj) AS sourceObjlbls
+                        UNWIND LABELS(targetObj) AS targetObjlbls
+                        WITH sourceObj, sourceObjlbls, targetObjlbls, r, targetObj
+                        WHERE sourceObjlbls <> '" + sourceTier + @"' AND sourceObjlbls <> 'Base'
+                        AND targetObjlbls <> '" + targetTier + @"' AND targetObjlbls <> 'Base'
+                        RETURN sourceObjlbls, sourceObj.name, sourceObj.distinguishedname, TYPE(r), targetObjlbls, targetObj.name, targetObj.distinguishedname
+                    ");
+                    if (!records[0].Values.TryGetValue("TYPE(r)", out output))
+                    {
+                        // Unknown error
+                        MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                }
+                catch (Exception err)
+                {
+                    // Error
+                    MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                foreach (IRecord record in records)
+                {
+                    record.Values.TryGetValue("sourceObj.name", out object sourceName);
+                    record.Values.TryGetValue("sourceObj.distinguishedname", out object sourceDistinguishedname);
+                    record.Values.TryGetValue("sourceObjlbls", out object sourceType);
+                    record.Values.TryGetValue("TYPE(r)", out object relation);
+                    record.Values.TryGetValue("targetObj.name", out object targetName);
+                    record.Values.TryGetValue("targetObj.distinguishedname", out object targetDistinguishedname);
+                    record.Values.TryGetValue("targetObjlbls", out object targetType);
+
+                    csvOutput.Add(sourceTier + ";" +
+                        sourceType + ";" +
+                        sourceName + ";" +
+                        sourceDistinguishedname + ";" +
+                        relation + ";" +
+                        targetTier + ";" +
+                        targetType + ";" +
+                        targetName + ";" +
+                        targetDistinguishedname);
+                }
             }
 
+            // Save tier violations
             string timeStamp = DateTime.Now.ToString("yyyyMMddHHmmssffff");
             string filename = "tiering-violations-" + timeStamp + ".csv";
             File.AppendAllLines(filename, csvOutput);
-            MessageBox.Show("Tiering violations: " + Path.GetFullPath(filename), "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("Tiering violations csv: " + Path.GetFullPath(filename), "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 
             DisableGUIWait();
         }
