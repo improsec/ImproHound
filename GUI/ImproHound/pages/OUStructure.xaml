@@ -3,8 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:self="clr-namespace:ImproHound.pages"
-      xmlns:sys="clr-namespace:System;assembly=mscorlib"
+      xmlns:classes="clr-namespace:ImproHound.classes"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="OUStructurePage">
@@ -18,7 +17,7 @@
             </StackPanel>
             <TreeView DockPanel.Dock="Top" x:Name="forestTreeView" Background="Transparent" Margin="10" SelectedItemChanged="forestTreeView_SelectedItemChanged">
                 <TreeView.Resources>
-                    <HierarchicalDataTemplate DataType="{x:Type self:ADObject}" ItemsSource="{Binding MemberList}">
+                    <HierarchicalDataTemplate DataType="{x:Type classes:ADObject}" ItemsSource="{Binding MemberList}">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="{Binding Iconpath}" Margin="0,0,5,0" Width="20" />
                             <Label Content="{Binding Name}" Width="200" />
