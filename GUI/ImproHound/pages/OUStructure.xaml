@@ -21,7 +21,7 @@
                     <HierarchicalDataTemplate DataType="{x:Type classes:ADObject}" ItemsSource="{Binding MemberList}">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="{Binding Iconpath}" Margin="0,0,5,0" Width="20" />
-                            <Label Content="{Binding Name}" Width="200" />
+                            <Label Content="{Binding CN}" Width="200" />
                             <Label Content=" Tier:" Width="45" HorizontalContentAlignment="Right" Padding="5,5,2,5"/>
                             <StackPanel Orientation="Horizontal">
                                 <Label Width="18" Content="{Binding Tier}" HorizontalContentAlignment="Center" VerticalContentAlignment="Stretch" Height="24" />

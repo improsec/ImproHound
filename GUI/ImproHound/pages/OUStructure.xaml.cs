@@ -70,9 +70,9 @@ namespace ImproHound.pages
                         MATCH (o)
                         WHERE NOT o.distinguishedname IS NULL
 					    UNWIND LABELS(o) AS adtype
-                        WITH o.objectid AS objectid, o.distinguishedname AS distinguishedname, o.name AS name, o.tier AS tier, adtype
+                        WITH o.objectid AS objectid, o.distinguishedname AS distinguishedname, o.tier AS tier, adtype
                         WHERE adtype IN ['Domain', 'OU', 'Group', 'User', 'Computer', 'GPO']
-                        RETURN objectid, distinguishedname, name, tier, adtype ORDER BY size(distinguishedname)
+                        RETURN objectid, distinguishedname, tier, adtype ORDER BY size(distinguishedname)
                     ");
                 if (!records[0].Values.TryGetValue("objectid", out output))
                 {
@@ -94,7 +94,6 @@ namespace ImproHound.pages
             {
                 record.Values.TryGetValue("objectid", out object objectid);
                 record.Values.TryGetValue("distinguishedname", out object distinguishedname);
-                record.Values.TryGetValue("name", out object name);
                 record.Values.TryGetValue("adtype", out object type);
                 record.Values.TryGetValue("tier", out object tier);
 
@@ -106,17 +105,23 @@ namespace ImproHound.pages
                 bool gotTypeEnum = Enum.TryParse((string)type, out ADOjectType adType);
                 if (!gotTypeEnum) adType = ADOjectType.Unknown;
 
+                // Get CN
+                string distinguishednameStr = (string)distinguishedname;
+                string cn = adType.Equals(ADOjectType.Domain)
+                    ? distinguishednameStr
+                    : distinguishednameStr.Substring(distinguishednameStr.IndexOf("=") + 1, distinguishednameStr.IndexOf(",") - distinguishednameStr.IndexOf("=") - 1);
+
                 try
                 {
                     if (adType.Equals(ADOjectType.Domain))
                     {
                         // TODO: Put sub domains under parent domain
-                        ADObject adContainer = new ADObject((string)objectid, adType, (string)distinguishedname, (string)name, tierNumber);
+                        ADObject adContainer = new ADObject((string)objectid, adType, cn, distinguishednameStr, tierNumber);
                         forest.Add(adContainer.Distinguishedname, adContainer);
                     }
                     else
                     {
-                        ADObject adObject = new ADObject((string)objectid, adType, (string)distinguishedname, (string)name, tierNumber);
+                        ADObject adObject = new ADObject((string)objectid, adType, cn, distinguishednameStr, tierNumber);
                         ADObject parent = GetParent(adObject);
                         string rdnName = adObject.Distinguishedname.Substring(0, adObject.Distinguishedname.IndexOf(","));
                         parent.Members.Add(rdnName, adObject);
@@ -159,7 +164,6 @@ namespace ImproHound.pages
                 if (adObject.Distinguishedname.EndsWith(domain.Key))
                 {
                     string[] oupath = adObject.Distinguishedname.Replace("," + domain.Key, "").Split(',');
-                    adObject.Name = oupath[0].Substring(oupath[0].IndexOf("=") + 1);
                     ADObject parent = domain.Value;
 
                     if (oupath.Length > 1)
@@ -181,7 +185,7 @@ namespace ImproHound.pages
                             if (!parentFound)
                             {
                                 string distinguishedname = oupath[i] + "," + parent.Distinguishedname;
-                                ADObject adContainer = new ADObject("manually-created-" + distinguishedname, ADOjectType.OU, distinguishedname, oupath[i].Replace("CN=", ""), "2");
+                                ADObject adContainer = new ADObject("manually-created-" + distinguishedname, ADOjectType.OU, oupath[i].Replace("CN=", ""), distinguishedname, "2");
                                 parent.Members.Add(oupath[i], adContainer);
                                 parent = adContainer;
                             }
