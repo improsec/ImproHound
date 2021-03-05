@@ -301,6 +301,12 @@ namespace ImproHound.pages
             }
         }
 
+        private bool enabledInheritance()
+        {
+            return forestTreeView.SelectedItem != null &&
+                (((ADObject)forestTreeView.SelectedItem).Type.Equals(ADOjectType.Domain) || ((ADObject)forestTreeView.SelectedItem).Type.Equals(ADOjectType.OU));
+        }
+
         private void EnableGUIWait()
         {
             Mouse.OverrideCursor = Cursors.Wait;
@@ -316,7 +322,7 @@ namespace ImproHound.pages
             removeTieringButton.IsEnabled = true;
             setTieringButton.IsEnabled = true;
             getTieringViolationsButton.IsEnabled = true;
-            inheritButton.IsEnabled = forestTreeView.SelectedItem != null;
+            inheritButton.IsEnabled = enabledInheritance();
         }
 
         private async void getTieringViolationsButton_Click(object sender, RoutedEventArgs e)
@@ -446,7 +452,7 @@ namespace ImproHound.pages
 
         private void forestTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            inheritButton.IsEnabled = forestTreeView.SelectedItem != null;
+            inheritButton.IsEnabled = enabledInheritance();
         }
     }
 }
