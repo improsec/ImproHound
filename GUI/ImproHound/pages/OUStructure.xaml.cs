@@ -102,18 +102,18 @@ namespace ImproHound.pages
                 if (tier != null) tierNumber = tier.ToString().Replace("Tier", "");
 
                 // Get AD type
-                bool gotTypeEnum = Enum.TryParse((string)type, out ADOjectType adType);
-                if (!gotTypeEnum) adType = ADOjectType.Unknown;
+                bool gotTypeEnum = Enum.TryParse((string)type, out ADObjectType adType);
+                if (!gotTypeEnum) adType = ADObjectType.Unknown;
 
                 // Get CN
                 string distinguishednameStr = (string)distinguishedname;
-                string cn = adType.Equals(ADOjectType.Domain)
+                string cn = adType.Equals(ADObjectType.Domain)
                     ? distinguishednameStr
                     : distinguishednameStr.Substring(distinguishednameStr.IndexOf("=") + 1, distinguishednameStr.IndexOf(",") - distinguishednameStr.IndexOf("=") - 1);
 
                 try
                 {
-                    if (adType.Equals(ADOjectType.Domain))
+                    if (adType.Equals(ADObjectType.Domain))
                     {
                         // TODO: Put sub domains under parent domain
                         ADObject adContainer = new ADObject((string)objectid, adType, cn, distinguishednameStr, tierNumber);
@@ -185,7 +185,7 @@ namespace ImproHound.pages
                             if (!parentFound)
                             {
                                 string distinguishedname = oupath[i] + "," + parent.Distinguishedname;
-                                ADObject adContainer = new ADObject("manually-created-" + distinguishedname, ADOjectType.OU, oupath[i].Replace("CN=", ""), distinguishedname, defaultTierNumber.ToString());
+                                ADObject adContainer = new ADObject("manually-created-" + distinguishedname, ADObjectType.OU, oupath[i].Replace("CN=", ""), distinguishedname, defaultTierNumber.ToString());
                                 parent.Members.Add(oupath[i], adContainer);
                                 parent = adContainer;
                             }
@@ -304,7 +304,7 @@ namespace ImproHound.pages
         private bool enabledInheritance()
         {
             return forestTreeView.SelectedItem != null &&
-                (((ADObject)forestTreeView.SelectedItem).Type.Equals(ADOjectType.Domain) || ((ADObject)forestTreeView.SelectedItem).Type.Equals(ADOjectType.OU));
+                (((ADObject)forestTreeView.SelectedItem).Type.Equals(ADObjectType.Domain) || ((ADObject)forestTreeView.SelectedItem).Type.Equals(ADObjectType.OU));
         }
 
         private void EnableGUIWait()

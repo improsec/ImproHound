@@ -9,7 +9,7 @@ namespace ImproHound.classes
 {
     public class ADObject : INotifyPropertyChanged
     {
-        public ADObject(string objectid, ADOjectType type, string cn, string distinguishedname, string tier)
+        public ADObject(string objectid, ADObjectType type, string cn, string distinguishedname, string tier)
         {
             Objectid = objectid;
             CN = cn;
@@ -23,22 +23,22 @@ namespace ImproHound.classes
 
             switch (type)
             {
-                case ADOjectType.Domain:
+                case ADObjectType.Domain:
                     Iconpath = "/resources/images/ad-icons/domain1.png";
                     break;
-                case ADOjectType.OU:
+                case ADObjectType.OU:
                     Iconpath = "/resources/images/ad-icons/ou.png";
                     break;
-                case ADOjectType.Group:
+                case ADObjectType.Group:
                     Iconpath = "/resources/images/ad-icons/group.png";
                     break;
-                case ADOjectType.User:
+                case ADObjectType.User:
                     Iconpath = "/resources/images/ad-icons/user.png";
                     break;
-                case ADOjectType.Computer:
+                case ADObjectType.Computer:
                     Iconpath = "/resources/images/ad-icons/computer.png";
                     break;
-                case ADOjectType.GPO:
+                case ADObjectType.GPO:
                     Iconpath = "/resources/images/ad-icons/gpo.png";
                     break;
                 default:
@@ -49,7 +49,7 @@ namespace ImproHound.classes
         public string Objectid { get; set; }
         public string CN { get; set; }
         public string Distinguishedname { get; set; }
-        public ADOjectType Type { get; set; }
+        public ADObjectType Type { get; set; }
         public string Tier { get; set; }
         public string Iconpath { get; set; }
         public ICommand TierUpCommand { get; set; }
@@ -83,7 +83,7 @@ namespace ImproHound.classes
             Dictionary<string, ADObject> ous = new Dictionary<string, ADObject>();
             foreach (KeyValuePair<string, ADObject> member in Members)
             {
-                if (member.Value.Type is ADOjectType.OU)
+                if (member.Value.Type is ADObjectType.OU)
                 {
                     ous.Add(member.Key, member.Value);
                 }
@@ -102,7 +102,7 @@ namespace ImproHound.classes
         }
     }
 
-    public enum ADOjectType
+    public enum ADObjectType
     {
         Unknown, Domain, OU, Group, User, Computer, GPO
     }
