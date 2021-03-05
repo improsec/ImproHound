@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:classes="clr-namespace:ImproHound.classes"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="450" d:DesignWidth="900"
       Title="OUStructurePage">
     <Grid Margin="10" >
         <DockPanel>
@@ -14,6 +14,7 @@
                 <Button x:Name="inheritButton" Content="Tier inheritance" HorizontalAlignment="Right" Margin="10" Width="140" IsEnabled="False" Click="inheritButton_Click"/>
                 <Button x:Name="removeTieringButton" Content="Remove tiering in DB" HorizontalAlignment="Right" Margin="10" Click="removeTieringButton_Click" Width="140"/>
                 <Button x:Name="setTieringButton" Content="Set tiering in DB" HorizontalAlignment="Right" Margin="10" Click="setTieringButton_Click" Width="140"/>
+                <Button x:Name="setTieringGPOsButton" Content="Set tier for GPOs" HorizontalAlignment="Right" Margin="10" Click="setTieringGPOsButton_Click" Width="140"/>
                 <Button x:Name="getTieringViolationsButton" Content="Get tiering violations" HorizontalAlignment="Right" Margin="10" Width="140" Click="getTieringViolationsButton_Click"/>
             </StackPanel>
             <TreeView DockPanel.Dock="Top" x:Name="forestTreeView" Background="Transparent" Margin="10" SelectedItemChanged="forestTreeView_SelectedItemChanged">

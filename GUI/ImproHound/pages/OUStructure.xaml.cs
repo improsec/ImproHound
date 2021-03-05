@@ -113,16 +113,16 @@ namespace ImproHound.pages
 
                 try
                 {
+                    ADObject adObject = new ADObject((string)objectid, adType, cn, distinguishednameStr, tierNumber);
+
                     if (adType.Equals(ADObjectType.Domain))
                     {
                         // TODO: Put sub domains under parent domain
-                        ADObject adContainer = new ADObject((string)objectid, adType, cn, distinguishednameStr, tierNumber);
-                        forest.Add(adContainer.Distinguishedname, adContainer);
+                        forest.Add(adObject.Distinguishedname, adObject);
                     }
                     else
                     {
-                        ADObject adObject = new ADObject((string)objectid, adType, cn, distinguishednameStr, tierNumber);
-                        ADObject parent = GetParent(adObject);
+                        ADObject parent = GetParent(adObject.Distinguishedname);
                         string rdnName = adObject.Distinguishedname.Substring(0, adObject.Distinguishedname.IndexOf(","));
                         parent.Members.Add(rdnName, adObject);
                     }
@@ -156,14 +156,14 @@ namespace ImproHound.pages
             forestTreeView.ItemsSource = forest.Values.ToList();
         }
 
-        private ADObject GetParent(ADObject adObject)
+        private ADObject GetParent(string distinguishedname)
         {
             // Find the domain the object belongs to
             foreach (KeyValuePair<string, ADObject> domain in forest)
             {
-                if (adObject.Distinguishedname.EndsWith(domain.Key))
+                if (distinguishedname.EndsWith(domain.Key))
                 {
-                    string[] oupath = adObject.Distinguishedname.Replace("," + domain.Key, "").Split(',');
+                    string[] oupath = distinguishedname.Replace("," + domain.Key, "").Split(',');
                     ADObject parent = domain.Value;
 
                     if (oupath.Length > 1)
@@ -184,8 +184,8 @@ namespace ImproHound.pages
                             // Containers are missing in BloodHound so they have to be created manually
                             if (!parentFound)
                             {
-                                string distinguishedname = oupath[i] + "," + parent.Distinguishedname;
-                                ADObject adContainer = new ADObject("manually-created-" + distinguishedname, ADObjectType.OU, oupath[i].Replace("CN=", ""), distinguishedname, defaultTierNumber.ToString());
+                                string containerDistinguishedname = oupath[i] + "," + parent.Distinguishedname;
+                                ADObject adContainer = new ADObject("manually-created-" + containerDistinguishedname, ADObjectType.OU, oupath[i].Replace("CN=", ""), containerDistinguishedname, defaultTierNumber.ToString());
                                 parent.Members.Add(oupath[i], adContainer);
                                 parent = adContainer;
                             }
@@ -312,6 +312,7 @@ namespace ImproHound.pages
             Mouse.OverrideCursor = Cursors.Wait;
             removeTieringButton.IsEnabled = false;
             setTieringButton.IsEnabled = false;
+            setTieringGPOsButton.IsEnabled = false;
             getTieringViolationsButton.IsEnabled = false;
             inheritButton.IsEnabled = false;
         }
@@ -321,6 +322,7 @@ namespace ImproHound.pages
             Mouse.OverrideCursor = null;
             removeTieringButton.IsEnabled = true;
             setTieringButton.IsEnabled = true;
+            setTieringGPOsButton.IsEnabled = true;
             getTieringViolationsButton.IsEnabled = true;
             inheritButton.IsEnabled = enabledInheritance();
         }
@@ -422,6 +424,53 @@ namespace ImproHound.pages
             string filename = "tiering-violations-" + timeStamp + ".csv";
             File.AppendAllLines(filename, csvOutput);
             MessageBox.Show("Tiering violations csv: " + Path.GetFullPath(filename), "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            DisableGUIWait();
+        }
+
+        private async void setTieringGPOsButton_Click(object sender, RoutedEventArgs e)
+        {
+            EnableGUIWait();
+
+            // Set GPOs to the lowest tier of the GPOs they are linked to
+            List<IRecord> records;
+            try
+            {
+                object output;
+                records = await connection.Query(@"
+                    MATCH(gpo: GPO)
+                    MATCH(gpo) -[:GpLink]->(ou)
+                    UNWIND labels(ou) AS allLabels
+                    WITH DISTINCT allLabels, gpo WHERE allLabels STARTS WITH 'Tier'
+                    WITH gpo, allLabels ORDER BY allLabels ASC
+                    WITH gpo, head(collect(allLabels)) AS lowestTier
+                    CALL apoc.create.setLabels(gpo, ['Base', 'GPO', lowestTier]) YIELD node
+                    RETURN gpo.distinguishedname, lowestTier
+                ");
+                if (!records[0].Values.TryGetValue("lowestTier", out output))
+                {
+                    // Unknown error
+                    MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+            }
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // Update application data
+            foreach (IRecord record in records)
+            {
+                record.Values.TryGetValue("gpo.distinguishedname", out object distinguishedname);
+                record.Values.TryGetValue("lowestTier", out object lowestTier);
+
+                ADObject parent = GetParent((string)distinguishedname);
+                ADObject gpo = parent.MemberList.Where(member => member.Distinguishedname.Equals((string)distinguishedname)).FirstOrDefault();
+                gpo.SetTier(lowestTier.ToString().Replace("Tier", ""));
+            }
 
             DisableGUIWait();
         }
