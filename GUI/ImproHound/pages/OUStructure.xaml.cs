@@ -185,7 +185,7 @@ namespace ImproHound.pages
                             if (!parentFound)
                             {
                                 string distinguishedname = oupath[i] + "," + parent.Distinguishedname;
-                                ADObject adContainer = new ADObject("manually-created-" + distinguishedname, ADOjectType.OU, oupath[i].Replace("CN=", ""), distinguishedname, "2");
+                                ADObject adContainer = new ADObject("manually-created-" + distinguishedname, ADOjectType.OU, oupath[i].Replace("CN=", ""), distinguishedname, defaultTierNumber.ToString());
                                 parent.Members.Add(oupath[i], adContainer);
                                 parent = adContainer;
                             }
