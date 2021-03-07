@@ -344,18 +344,28 @@ namespace ImproHound.pages
             DisableGUIWait();
         }
 
-        private void setChildrenButton_Click(object sender, RoutedEventArgs e)
+        private async void setChildrenButton_Click(object sender, RoutedEventArgs e)
         {
+            EnableGUIWait();
+            await DeleteTieringInDB();
+
             if (forestTreeView.SelectedItem == null) return;
 
             ADObject parent = (ADObject)forestTreeView.SelectedItem;
             parent.GetAllChildren().ForEach(child => child.SetTier(parent.Tier));
             forestTreeView.Focus();
+
+            await SetTieringInDB();
+            DisableGUIWait();
         }
 
         private async void setTierGPOsButton_Click(object sender, RoutedEventArgs e)
         {
             EnableGUIWait();
+
+            // Make sure data is consistent
+            await DeleteTieringInDB();
+            await SetTieringInDB();
 
             // Set GPOs to the lowest tier of the GPOs they are linked to
             List<IRecord> records;
@@ -403,6 +413,8 @@ namespace ImproHound.pages
         private async void getTieringViolationsButton_Click(object sender, RoutedEventArgs e)
         {
             EnableGUIWait();
+
+            // Make sure data is consistent
             await DeleteTieringInDB();
             await SetTieringInDB();
 
