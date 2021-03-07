@@ -301,7 +301,7 @@ namespace ImproHound.pages
             }
         }
 
-        private bool enabledInheritance()
+        private bool SetChildrenButtonEnabled()
         {
             return forestTreeView.SelectedItem != null &&
                 (((ADObject)forestTreeView.SelectedItem).Type.Equals(ADObjectType.Domain) || ((ADObject)forestTreeView.SelectedItem).Type.Equals(ADObjectType.OU));
@@ -310,21 +310,94 @@ namespace ImproHound.pages
         private void EnableGUIWait()
         {
             Mouse.OverrideCursor = Cursors.Wait;
-            removeTieringButton.IsEnabled = false;
-            setTieringButton.IsEnabled = false;
-            setTieringGPOsButton.IsEnabled = false;
+            resetButton.IsEnabled = false;
+            saveButton.IsEnabled = false;
+            setTierGPOsButton.IsEnabled = false;
             getTieringViolationsButton.IsEnabled = false;
-            inheritButton.IsEnabled = false;
+            setChildrenButton.IsEnabled = false;
         }
 
         private void DisableGUIWait()
         {
             Mouse.OverrideCursor = null;
-            removeTieringButton.IsEnabled = true;
-            setTieringButton.IsEnabled = true;
-            setTieringGPOsButton.IsEnabled = true;
+            resetButton.IsEnabled = true;
+            saveButton.IsEnabled = true;
+            setTierGPOsButton.IsEnabled = true;
             getTieringViolationsButton.IsEnabled = true;
-            inheritButton.IsEnabled = enabledInheritance();
+            setChildrenButton.IsEnabled = SetChildrenButtonEnabled();
+        }
+
+        /// BUTTON CLICKS
+
+        private async void resetButton_Click(object sender, RoutedEventArgs e)
+        {
+            EnableGUIWait();
+            await DeleteTieringInDB();
+            DisableGUIWait();
+        }
+
+        private async void saveButton_Click(object sender, RoutedEventArgs e)
+        {
+            EnableGUIWait();
+            await DeleteTieringInDB();
+            await SetTieringInDB();
+            DisableGUIWait();
+        }
+
+        private void setChildrenButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (forestTreeView.SelectedItem == null) return;
+
+            ADObject parent = (ADObject)forestTreeView.SelectedItem;
+            parent.GetAllChildren().ForEach(child => child.SetTier(parent.Tier));
+            forestTreeView.Focus();
+        }
+
+        private async void setTierGPOsButton_Click(object sender, RoutedEventArgs e)
+        {
+            EnableGUIWait();
+
+            // Set GPOs to the lowest tier of the GPOs they are linked to
+            List<IRecord> records;
+            try
+            {
+                object output;
+                records = await connection.Query(@"
+                    MATCH(gpo: GPO)
+                    MATCH(gpo) -[:GpLink]->(ou)
+                    UNWIND labels(ou) AS allLabels
+                    WITH DISTINCT allLabels, gpo WHERE allLabels STARTS WITH 'Tier'
+                    WITH gpo, allLabels ORDER BY allLabels ASC
+                    WITH gpo, head(collect(allLabels)) AS lowestTier
+                    CALL apoc.create.setLabels(gpo, ['Base', 'GPO', lowestTier]) YIELD node
+                    RETURN gpo.distinguishedname, lowestTier
+                ");
+                if (!records[0].Values.TryGetValue("lowestTier", out output))
+                {
+                    // Unknown error
+                    MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+            }
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // Update application data
+            foreach (IRecord record in records)
+            {
+                record.Values.TryGetValue("gpo.distinguishedname", out object distinguishedname);
+                record.Values.TryGetValue("lowestTier", out object lowestTier);
+
+                ADObject parent = GetParent((string)distinguishedname);
+                ADObject gpo = parent.MemberList.Where(member => member.Distinguishedname.Equals((string)distinguishedname)).FirstOrDefault();
+                gpo.SetTier(lowestTier.ToString().Replace("Tier", ""));
+            }
+
+            DisableGUIWait();
         }
 
         private async void getTieringViolationsButton_Click(object sender, RoutedEventArgs e)
@@ -428,80 +501,11 @@ namespace ImproHound.pages
             DisableGUIWait();
         }
 
-        private async void setTieringGPOsButton_Click(object sender, RoutedEventArgs e)
-        {
-            EnableGUIWait();
-
-            // Set GPOs to the lowest tier of the GPOs they are linked to
-            List<IRecord> records;
-            try
-            {
-                object output;
-                records = await connection.Query(@"
-                    MATCH(gpo: GPO)
-                    MATCH(gpo) -[:GpLink]->(ou)
-                    UNWIND labels(ou) AS allLabels
-                    WITH DISTINCT allLabels, gpo WHERE allLabels STARTS WITH 'Tier'
-                    WITH gpo, allLabels ORDER BY allLabels ASC
-                    WITH gpo, head(collect(allLabels)) AS lowestTier
-                    CALL apoc.create.setLabels(gpo, ['Base', 'GPO', lowestTier]) YIELD node
-                    RETURN gpo.distinguishedname, lowestTier
-                ");
-                if (!records[0].Values.TryGetValue("lowestTier", out output))
-                {
-                    // Unknown error
-                    MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-            }
-            catch (Exception err)
-            {
-                // Error
-                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            // Update application data
-            foreach (IRecord record in records)
-            {
-                record.Values.TryGetValue("gpo.distinguishedname", out object distinguishedname);
-                record.Values.TryGetValue("lowestTier", out object lowestTier);
-
-                ADObject parent = GetParent((string)distinguishedname);
-                ADObject gpo = parent.MemberList.Where(member => member.Distinguishedname.Equals((string)distinguishedname)).FirstOrDefault();
-                gpo.SetTier(lowestTier.ToString().Replace("Tier", ""));
-            }
-
-            DisableGUIWait();
-        }
-
-        private async void setTieringButton_Click(object sender, RoutedEventArgs e)
-        {
-            EnableGUIWait();
-            await DeleteTieringInDB();
-            await SetTieringInDB();
-            DisableGUIWait();
-        }
-
-        private async void removeTieringButton_Click(object sender, RoutedEventArgs e)
-        {
-            EnableGUIWait();
-            await DeleteTieringInDB();
-            DisableGUIWait();
-        }
-
-        private void inheritButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (forestTreeView.SelectedItem == null) return;
-
-            ADObject parent = (ADObject)forestTreeView.SelectedItem;
-            parent.GetAllChildren().ForEach(child => child.SetTier(parent.Tier));
-            forestTreeView.Focus();
-        }
+        /// OTHER GUI CHANGES
 
         private void forestTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            inheritButton.IsEnabled = enabledInheritance();
+            setChildrenButton.IsEnabled = SetChildrenButtonEnabled();
         }
     }
 }

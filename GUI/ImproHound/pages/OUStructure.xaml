@@ -4,19 +4,20 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:classes="clr-namespace:ImproHound.classes"
-      mc:Ignorable="d" 
+      mc:Ignorable="d"
       d:DesignHeight="450" d:DesignWidth="900"
       Title="OUStructurePage">
-    <Grid Margin="10" >
-        <DockPanel>
-            <Label DockPanel.Dock="Top" Content="OU structure" Width="200" HorizontalAlignment="Left" Margin="10"/>
-            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
-                <Button x:Name="inheritButton" Content="Tier inheritance" HorizontalAlignment="Right" Margin="10" Width="140" IsEnabled="False" Click="inheritButton_Click"/>
-                <Button x:Name="removeTieringButton" Content="Remove tiering in DB" HorizontalAlignment="Right" Margin="10" Click="removeTieringButton_Click" Width="140"/>
-                <Button x:Name="setTieringButton" Content="Set tiering in DB" HorizontalAlignment="Right" Margin="10" Click="setTieringButton_Click" Width="140"/>
-                <Button x:Name="setTieringGPOsButton" Content="Set tier for GPOs" HorizontalAlignment="Right" Margin="10" Click="setTieringGPOsButton_Click" Width="140"/>
-                <Button x:Name="getTieringViolationsButton" Content="Get tiering violations" HorizontalAlignment="Right" Margin="10" Width="140" Click="getTieringViolationsButton_Click"/>
-            </StackPanel>
+    <DockPanel Margin="5">
+            <DockPanel DockPanel.Dock="Top">
+                <Label DockPanel.Dock="Left" Content="OU structure" Width="200" Margin="10"/>
+                <Button x:Name="saveButton" DockPanel.Dock="Right" Content="Save" HorizontalAlignment="Right" Margin="10" Click="saveButton_Click" Width="100"/>
+                <Button x:Name="resetButton" DockPanel.Dock="Right" Content="Reset" HorizontalAlignment="Right" Margin="10" Click="resetButton_Click" Width="100"/>
+            </DockPanel>
+            <DockPanel DockPanel.Dock="Bottom">
+                <Button x:Name="setChildrenButton" Content="Set children to tier" HorizontalAlignment="Right" Margin="10" Width="140" Click="setChildrenButton_Click"/>
+                <Button x:Name="setTierGPOsButton" Content="Set tier for GPOs" HorizontalAlignment="Right" Margin="10" Click="setTierGPOsButton_Click" Width="140"/>
+                <Button x:Name="getTieringViolationsButton" Content="Get tiering violations" HorizontalAlignment="Right" Margin="10" Width="160" Click="getTieringViolationsButton_Click"/>
+            </DockPanel>
             <TreeView DockPanel.Dock="Top" x:Name="forestTreeView" Background="Transparent" Margin="10" SelectedItemChanged="forestTreeView_SelectedItemChanged">
                 <TreeView.Resources>
                     <HierarchicalDataTemplate DataType="{x:Type classes:ADObject}" ItemsSource="{Binding MemberList}">
@@ -36,5 +37,4 @@
                 </TreeView.Resources>
             </TreeView>
         </DockPanel>
-    </Grid>
 </Page>
