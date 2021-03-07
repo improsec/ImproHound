@@ -349,8 +349,14 @@ namespace ImproHound.pages
         private async void resetButton_Click(object sender, RoutedEventArgs e)
         {
             EnableGUIWait();
-            resetOUStructure();
-            await DeleteTieringInDB();
+            MessageBoxResult messageBoxResult = MessageBox.Show("Reset will delete tier labels in DB and set all objects in the OU structure to Tier " + defaultTierNumber.ToString(),
+                "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+
+            if (messageBoxResult.Equals(MessageBoxResult.OK))
+            {
+                resetOUStructure();
+                await DeleteTieringInDB();
+            }
             DisableGUIWait();
         }
 
