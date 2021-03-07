@@ -301,6 +301,22 @@ namespace ImproHound.pages
             }
         }
 
+        private void resetOUStructure()
+        {
+            GetAllADObjects().ForEach(obj => obj.SetTier(defaultTierNumber.ToString()));
+        }
+
+        private List<ADObject> GetAllADObjects()
+        {
+            List<ADObject> allADObjects = new List<ADObject>();
+            foreach (ADObject topADObject in forest.Values)
+            {
+                allADObjects.Add(topADObject);
+                allADObjects.AddRange(topADObject.GetAllChildren());
+            }
+            return allADObjects;
+        }
+
         private bool SetChildrenButtonEnabled()
         {
             return forestTreeView.SelectedItem != null &&
@@ -332,6 +348,7 @@ namespace ImproHound.pages
         private async void resetButton_Click(object sender, RoutedEventArgs e)
         {
             EnableGUIWait();
+            resetOUStructure();
             await DeleteTieringInDB();
             DisableGUIWait();
         }
@@ -418,16 +435,8 @@ namespace ImproHound.pages
             await DeleteTieringInDB();
             await SetTieringInDB();
 
-            // Get list of tiers in OU structure
-            List<ADObject> allADObjects = new List<ADObject>();
-            foreach (ADObject topADObject in forest.Values)
-            {
-                allADObjects.Add(topADObject);
-                allADObjects.AddRange(topADObject.GetAllChildren());
-            }
-            List<string> tiers = allADObjects.Select(o => o.Tier).Distinct().OrderByDescending(tier => tier).ToList();
-
             // Generate list of tier pairs (source, target)
+            List<string> tiers = GetAllADObjects().Select(o => o.Tier).Distinct().OrderByDescending(tier => tier).ToList();
             List<string[]> tierPairs = new List<string[]>();
             for (int i = 0; i < tiers.Count - 1; i++)
             {
