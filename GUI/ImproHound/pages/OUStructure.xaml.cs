@@ -32,6 +32,7 @@ namespace ImproHound.pages
         private async void Initialization(bool startover = true)
         {
             EnableGUIWait();
+            if (startover) await DeleteTieringInDB();
             await BuildOUStructure(startover);
             DisableGUIWait();
         }
