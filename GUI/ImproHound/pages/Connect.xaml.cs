@@ -13,8 +13,9 @@ namespace ImproHound.pages
 
         public ConnectPage(MainWindow containerWindow)
         {
-            InitializeComponent();
             this.containerWindow = containerWindow;
+
+            InitializeComponent();
         }
 
         private async void ConnectButton_Click(object sender, RoutedEventArgs e)

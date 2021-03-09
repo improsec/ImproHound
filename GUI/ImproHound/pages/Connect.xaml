@@ -4,18 +4,20 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       mc:Ignorable="d"
-      Title="ConnectPage">
-
-    <Grid Width="600" Height="340">
-        <Grid Width="273" Height="194" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Label Content="Connect to BloodHound DB" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="160"/>
-            <Label Content="DB URL" HorizontalAlignment="Left" Margin="0,45,0,0" VerticalAlignment="Top"/>
-            <Label Content="DB username" HorizontalAlignment="Left" Margin="0,80,0,0" VerticalAlignment="Top"/>
-            <Label Content="DB password" HorizontalAlignment="Left" Margin="0,115,0,0" VerticalAlignment="Top"/>
-            <TextBox x:Name="url" HorizontalAlignment="Left" Margin="105,45,0,0" VerticalAlignment="Top" Width="167" Text="bolt://localhost:7687" CaretIndex="2147483647"/>
-            <TextBox x:Name="username" HorizontalAlignment="Left" Margin="105,80,0,0" VerticalAlignment="Top" Width="167" Text="neo4j" CaretIndex="2147483647"/>
-            <TextBox x:Name="password" HorizontalAlignment="Left" Margin="105,115,0,0" VerticalAlignment="Top" Width="167" Text="bloodhound" CaretIndex="2147483647"/>
-            <Button x:Name="connectButton" Content="Connect" HorizontalAlignment="Left" Margin="173,165,0,0" VerticalAlignment="Top" Click="ConnectButton_Click"/>
-        </Grid>
+      Title="ConnectPage"
+      Height="450"
+      Width="800"
+      HorizontalAlignment="Center"
+      VerticalAlignment="Center">
+    
+    <Grid Width="330" Height="220">
+        <Label Content="Connect to BloodHound DB" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="160" Padding="0,0,5,5"/>
+        <Label Content="DB URL" HorizontalAlignment="Left" Margin="0,55,0,0" VerticalAlignment="Top" Padding="0,0,5,5"/>
+        <Label Content="DB username" HorizontalAlignment="Left" Margin="0,90,0,0" VerticalAlignment="Top" Padding="0,0,5,5"/>
+        <Label Content="DB password" HorizontalAlignment="Left" Margin="0,125,0,0" VerticalAlignment="Top" Padding="0,0,5,5"/>
+        <TextBox x:Name="url" HorizontalAlignment="Right" Margin="0,55,0,0" VerticalAlignment="Top" Width="167" Text="bolt://localhost:7687" CaretIndex="2147483647"/>
+        <TextBox x:Name="username" HorizontalAlignment="Right" Margin="0,90,0,0" VerticalAlignment="Top" Width="167" Text="neo4j" CaretIndex="2147483647"/>
+        <TextBox x:Name="password" HorizontalAlignment="Right" Margin="0,125,0,0" VerticalAlignment="Top" Width="167" Text="bloodhound" CaretIndex="2147483647"/>
+        <Button x:Name="connectButton" Content="Connect" HorizontalAlignment="Right" Margin="0,185,0,0" VerticalAlignment="Top" Click="ConnectButton_Click"/>
     </Grid>
 </Page>

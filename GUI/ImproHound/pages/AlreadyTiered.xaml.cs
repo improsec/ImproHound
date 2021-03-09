@@ -14,6 +14,7 @@ namespace ImproHound.pages
             this.containerWindow = containerWindow;
             this.connection = connection;
             this.connectPage = connectPage;
+
             InitializeComponent();
         }
 

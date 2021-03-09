@@ -5,8 +5,9 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:classes="clr-namespace:ImproHound.classes"
       mc:Ignorable="d"
-      d:DesignHeight="450" d:DesignWidth="900"
+      d:DesignHeight="450" d:DesignWidth="800"
       Title="OUStructurePage">
+
     <DockPanel Margin="5">
             <DockPanel DockPanel.Dock="Top">
                 <Label DockPanel.Dock="Left" Content="OU structure" Width="200" Margin="10"/>

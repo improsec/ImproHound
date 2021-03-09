@@ -4,9 +4,6 @@ using System.Windows.Controls;
 
 namespace ImproHound
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
@@ -18,6 +15,21 @@ namespace ImproHound
         public void NavigateToPage(Page page)
         {
             MainFrame.Navigate(page);
+
+            switch (page.Title)
+            {
+                case "OUStructurePage":
+                    ResizeMode = ResizeMode.CanResize;
+                    MinHeight = 400;
+                    MinWidth = 600;
+                    break;
+
+                default:
+                    ResizeMode = ResizeMode.CanMinimize;
+                    Width = page.Width;
+                    Height = page.Height;
+                    break;
+            }
         }
     }
 }
