@@ -71,9 +71,9 @@ namespace ImproHound.pages
                         MATCH (o)
                         WHERE NOT o.distinguishedname IS NULL
 					    UNWIND LABELS(o) AS adtype
-                        WITH o.objectid AS objectid, o.distinguishedname AS distinguishedname, o.tier AS tier, adtype
+                        WITH o.objectid AS objectid, o.name AS name, o.distinguishedname AS distinguishedname, o.tier AS tier, adtype
                         WHERE adtype IN ['Domain', 'OU', 'Group', 'User', 'Computer', 'GPO']
-                        RETURN objectid, distinguishedname, tier, adtype ORDER BY size(distinguishedname)
+                        RETURN objectid, name, distinguishedname, tier, adtype ORDER BY size(distinguishedname)
                     ");
                 if (!records[0].Values.TryGetValue("objectid", out output))
                 {
@@ -94,6 +94,7 @@ namespace ImproHound.pages
             foreach (IRecord record in records)
             {
                 record.Values.TryGetValue("objectid", out object objectid);
+                record.Values.TryGetValue("name", out object name);
                 record.Values.TryGetValue("distinguishedname", out object distinguishedname);
                 record.Values.TryGetValue("adtype", out object type);
                 record.Values.TryGetValue("tier", out object tier);
@@ -114,7 +115,7 @@ namespace ImproHound.pages
 
                 try
                 {
-                    ADObject adObject = new ADObject((string)objectid, adType, cn, distinguishednameStr, tierNumber);
+                    ADObject adObject = new ADObject((string)objectid, adType, cn, (string)name, distinguishednameStr, tierNumber);
 
                     if (adType.Equals(ADObjectType.Domain))
                     {
@@ -186,7 +187,7 @@ namespace ImproHound.pages
                             if (!parentFound)
                             {
                                 string containerDistinguishedname = oupath[i] + "," + parent.Distinguishedname;
-                                ADObject adContainer = new ADObject("manually-created-" + containerDistinguishedname, ADObjectType.OU, oupath[i].Replace("CN=", ""), containerDistinguishedname, defaultTierNumber.ToString());
+                                ADObject adContainer = new ADObject("manually-created-" + containerDistinguishedname, ADObjectType.OU, oupath[i].Replace("CN=", ""), oupath[i].Replace("CN=", ""), containerDistinguishedname, defaultTierNumber.ToString());
                                 parent.Members.Add(oupath[i], adContainer);
                                 parent = adContainer;
                             }
@@ -443,7 +444,8 @@ namespace ImproHound.pages
             await SetTieringInDB();
 
             // Generate list of tier pairs (source, target)
-            List<string> tiers = GetAllADObjects().Select(o => o.Tier).Distinct().OrderByDescending(tier => tier).ToList();
+            List<ADObject> allADObjects = GetAllADObjects();
+            List<string> tiers = allADObjects.Select(o => o.Tier).Distinct().OrderByDescending(tier => tier).ToList();
             List<string[]> tierPairs = new List<string[]>();
             for (int i = 0; i < tiers.Count - 1; i++)
             {
@@ -453,8 +455,12 @@ namespace ImproHound.pages
                 }
             }
 
-            // Prepare csvOutput
-            string header = @"SourceTier;
+            // Prepare csv contents
+            string csvHeaderADObjects = @"Tier;
+                                Type;
+                                Name;
+                                Distinguishedname";
+            string csvHeaderViolations = @"SourceTier;
                                 SourceType;
                                 SourceName;
                                 SourceDistinguishedname;
@@ -463,9 +469,19 @@ namespace ImproHound.pages
                                 TargetType;
                                 TargetName;
                                 TargetDistinguishedname";
-            List<string> csvOutput = new List<string>() { String.Concat(header.Where(c => !Char.IsWhiteSpace(c))) };
+            List<string> csvADObjects = new List<string>() { String.Concat(csvHeaderADObjects.Where(c => !Char.IsWhiteSpace(c))) };
+            List<string> csvViolations = new List<string>() { String.Concat(csvHeaderViolations.Where(c => !Char.IsWhiteSpace(c))) };
 
-            // Get tiering violations for each tier pair
+            // Create csv content: ADobjects
+            foreach (ADObject aDObject in allADObjects)
+            {
+                csvADObjects.Add("Tier" + aDObject.Tier + ";" +
+                    aDObject.Type + ";" +
+                    aDObject.Name + ";" +
+                    aDObject.Distinguishedname);
+            }
+
+            // Create csv content: Tiering violations
             foreach (string[] tierPair in tierPairs)
             {
                 string sourceTier = "Tier" + tierPair[0];
@@ -474,7 +490,6 @@ namespace ImproHound.pages
                 List<IRecord> records;
                 try
                 {
-                    object output;
                     records = await connection.Query(@"
                         MATCH (sourceObj:" + sourceTier + ") -[r]->(targetObj:" + targetTier + @")
                         UNWIND LABELS(sourceObj) AS sourceObjlbls
@@ -484,12 +499,6 @@ namespace ImproHound.pages
                         AND targetObjlbls <> '" + targetTier + @"' AND targetObjlbls <> 'Base'
                         RETURN sourceObjlbls, sourceObj.name, sourceObj.distinguishedname, TYPE(r), targetObjlbls, targetObj.name, targetObj.distinguishedname
                     ");
-                    if (!records[0].Values.TryGetValue("TYPE(r)", out output))
-                    {
-                        // Unknown error
-                        MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
                 }
                 catch (Exception err)
                 {
@@ -508,7 +517,7 @@ namespace ImproHound.pages
                     record.Values.TryGetValue("targetObj.distinguishedname", out object targetDistinguishedname);
                     record.Values.TryGetValue("targetObjlbls", out object targetType);
 
-                    csvOutput.Add(sourceTier + ";" +
+                    csvViolations.Add(sourceTier + ";" +
                         sourceType + ";" +
                         sourceName + ";" +
                         sourceDistinguishedname + ";" +
@@ -520,11 +529,14 @@ namespace ImproHound.pages
                 }
             }
 
-            // Save tier violations
+            // Save csvs
             string timeStamp = DateTime.Now.ToString("yyyyMMddHHmmssffff");
-            string filename = "tiering-violations-" + timeStamp + ".csv";
-            File.AppendAllLines(filename, csvOutput);
-            MessageBox.Show("Tiering violations csv: " + Path.GetFullPath(filename), "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            string csvFilenameADObjects = "adobjects-" + timeStamp + ".csv";
+            string csvFilenameViolations = "tiering-violations-" + timeStamp + ".csv";
+            File.AppendAllLines(csvFilenameADObjects, csvADObjects);
+            File.AppendAllLines(csvFilenameViolations, csvViolations);
+            MessageBox.Show("ADObject list and tiering violations csvs saved in:\n\n" + Path.GetFullPath(csvFilenameADObjects) + "\n\n" + Path.GetFullPath(csvFilenameViolations),
+                "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 
             DisableGUIWait();
         }

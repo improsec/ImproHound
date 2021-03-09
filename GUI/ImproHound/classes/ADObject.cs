@@ -9,10 +9,11 @@ namespace ImproHound.classes
 {
     public class ADObject : INotifyPropertyChanged
     {
-        public ADObject(string objectid, ADObjectType type, string cn, string distinguishedname, string tier)
+        public ADObject(string objectid, ADObjectType type, string cn, string name, string distinguishedname, string tier)
         {
             Objectid = objectid;
             CN = cn;
+            Name = name;
             Distinguishedname = distinguishedname;
             Tier = tier;
             Type = type;
@@ -48,6 +49,7 @@ namespace ImproHound.classes
         }
         public string Objectid { get; set; }
         public string CN { get; set; }
+        public string Name { get; set; }
         public string Distinguishedname { get; set; }
         public ADObjectType Type { get; set; }
         public string Tier { get; set; }
