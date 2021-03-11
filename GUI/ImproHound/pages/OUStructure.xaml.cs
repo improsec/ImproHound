@@ -256,7 +256,7 @@ namespace ImproHound.pages
                         CALL apoc.create.addLabels(obj, ['Tier' + " + largestTier.Key + @"]) YIELD node
                         RETURN null
                     ";
-                records = await connection.Query(query, false);
+                records = await connection.Query(query);
                 if (!records[0].Values.TryGetValue("null", out output))
                 {
                     // Unknown error
@@ -286,7 +286,7 @@ namespace ImproHound.pages
                         CALL apoc.refactor.rename.label('Tier' + " + largestTier.Key + ", 'Tier' + " + tier.Key + @", nList) YIELD indexes
                         RETURN null
                     ";
-                    records = await connection.Query(query, false);
+                    records = await connection.Query(query);
                     if (!records[0].Values.TryGetValue("null", out output))
                     {
                         // Unknown error

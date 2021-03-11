@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Windows;
 using Neo4j.Driver;
 
 namespace ImproHound
@@ -10,38 +9,19 @@ namespace ImproHound
     public class DBConnection : IAsyncDisposable
     {
         private readonly IDriver _driver;
-        private int timeoutMs = 5000;
 
         public DBConnection(string uri, string username, string password)
         {
             _driver = GraphDatabase.Driver(uri, AuthTokens.Basic(username, password));
         }
 
-        public async Task<List<IRecord>> Query(string query, bool timeout = true)
+        public async Task<List<IRecord>> Query(string query)
         {
             IAsyncSession session = _driver.AsyncSession();
 
             try
             {
-                Task<List<IRecord>> task = session.WriteTransactionAsync(tx => RunCypherWithResults(tx, query));
-
-                if (timeout)
-                {
-                    if (await Task.WhenAny(task, Task.Delay(timeoutMs)) == task)
-                    {
-                        return await task;
-                    }
-                    else
-                    {
-                        // Timeout error
-                        throw new Exception("No response in " + timeoutMs + " ms.\nVerify DB URL and DB is running.");
-                    }
-                }
-                else
-                {
-                    return await task;
-                }
-
+                return await session.WriteTransactionAsync(tx => RunCypherWithResults(tx, query));
             }
             catch (Exception err)
             {
