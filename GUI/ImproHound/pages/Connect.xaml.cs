@@ -25,7 +25,7 @@ namespace ImproHound.pages
             object output;
 
             // Make sure we can connect to the DB and the graph is not empty
-            DBConnection connection = new DBConnection(url.Text, username.Text, password.Text);
+            DBConnection connection = new DBConnection(url.Text, username.Text, password.Password);
 
             try
             {
@@ -104,7 +104,7 @@ namespace ImproHound.pages
             else
             {
                 // Jump to OU structure page
-                containerWindow.NavigateToPage(new OUStructurePage(containerWindow, connection, this, startover: false));
+                containerWindow.NavigateToPage(new OUStructurePage(containerWindow, connection, this, startover: false)) ;
             }
         }
 

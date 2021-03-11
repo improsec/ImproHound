@@ -117,6 +117,19 @@
         <Setter Property="Foreground" Value="White"/>
     </Style>
 
+    <!--PasswordBox-->
+    <Style TargetType="PasswordBox">
+        <Setter Property="Width" Value="200"/>
+        <Setter Property="Height" Value="22"/>
+        <Setter Property="BorderBrush" Value="White"/>
+        <Setter Property="FontFamily" Value="Verdana"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="CaretBrush" Value="White"/>
+    </Style>
+
     <!--RadioButton-->
     <Style x:Key="{x:Type RadioButton}"
        TargetType="{x:Type RadioButton}">

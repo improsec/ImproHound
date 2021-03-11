@@ -17,7 +17,7 @@
         <Label Content="DB password" HorizontalAlignment="Left" Margin="0,125,0,0" VerticalAlignment="Top" Padding="0,0,5,5"/>
         <TextBox x:Name="url" HorizontalAlignment="Right" Margin="0,55,0,0" VerticalAlignment="Top" Width="167" Text="bolt://localhost:7687" CaretIndex="2147483647"/>
         <TextBox x:Name="username" HorizontalAlignment="Right" Margin="0,90,0,0" VerticalAlignment="Top" Width="167" Text="neo4j" CaretIndex="2147483647"/>
-        <TextBox x:Name="password" HorizontalAlignment="Right" Margin="0,125,0,0" VerticalAlignment="Top" Width="167" Text="bloodhound" CaretIndex="2147483647"/>
+        <PasswordBox x:Name="password" HorizontalAlignment="Right" Margin="0,125,0,0" VerticalAlignment="Top" Width="167"/>
         <Button x:Name="connectButton" Content="Connect" HorizontalAlignment="Right" Margin="0,185,0,0" VerticalAlignment="Top" Click="ConnectButton_Click"/>
     </Grid>
 </Page>
