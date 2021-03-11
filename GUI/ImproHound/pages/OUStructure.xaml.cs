@@ -19,27 +19,51 @@ namespace ImproHound.pages
         private Dictionary<string, ADObject> forest;
         private readonly int defaultTierNumber = 1;
 
-        public OUStructurePage(MainWindow containerWindow, DBConnection connection, ConnectPage connectPage, bool startover = true)
+        public OUStructurePage(MainWindow containerWindow, DBConnection connection, ConnectPage connectPage, bool alreadyTiered, bool startover)
         {
             this.containerWindow = containerWindow;
             this.connection = connection;
             this.connectPage = connectPage;
 
             InitializeComponent();
-            Initialization(startover);
+            Initialization(alreadyTiered, startover);
         }
 
-        private async void Initialization(bool startover = true)
+        private async void Initialization(bool alreadyTiered, bool startover)
         {
             EnableGUIWait();
             if (startover) await DeleteTieringInDB();
-            await BuildOUStructure(startover);
+            await BuildOUStructure(alreadyTiered, startover);
             DisableGUIWait();
         }
 
-        private async Task BuildOUStructure(bool startover = true)
+        private async Task BuildOUStructure(bool alreadyTiered, bool startover)
         {
             forest = new Dictionary<string, ADObject>();
+
+            if (!alreadyTiered)
+            {
+                // Make sure all objects do not have more than the Base label and the type of object label
+                // I have seen service accounts in the BloodHound DB having both User and Computer label
+                try
+                {
+                    await connection.Query(@"
+                        MATCH (n) WHERE SIZE(LABELS(n)) > 2
+                        UNWIND LABELS(n) AS lbls
+                        WITH n, lbls ORDER BY lbls ASC
+                        WITH n, COLLECT(lbls) AS lblsSort
+                        CALL apoc.create.setLabels(n, lblsSort[0..2]) YIELD node
+                        RETURN NULL
+                    ");
+                }
+                catch (Exception err)
+                {
+                    // Error
+                    MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    containerWindow.NavigateToPage(connectPage);
+                    return;
+                }
+            }
 
             if (!startover)
             {
