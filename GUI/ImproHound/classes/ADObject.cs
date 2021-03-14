@@ -9,7 +9,9 @@ namespace ImproHound.classes
 {
     public class ADObject : INotifyPropertyChanged
     {
-        public ADObject(string objectid, ADObjectType type, string cn, string name, string distinguishedname, string tier)
+        readonly pages.OUStructurePage oUStructurePage;
+
+        public ADObject(string objectid, ADObjectType type, string cn, string name, string distinguishedname, string tier, pages.OUStructurePage oUStructurePage)
         {
             Objectid = objectid;
             CN = cn;
@@ -18,6 +20,7 @@ namespace ImproHound.classes
             Tier = tier;
             Type = type;
             Members = new Dictionary<string, ADObject>();
+            this.oUStructurePage = oUStructurePage;
 
             TierUpCommand = new RelayCommand(TierUp);
             TierDownCommand = new RelayCommand(TierDown);
@@ -62,22 +65,26 @@ namespace ImproHound.classes
 
         private void TierUp()
         {
-            Tier = (Int32.Parse(Tier) + 1).ToString();
+            string newTier = (Int32.Parse(Tier) + 1).ToString();
+            oUStructurePage.SetTier(Objectid, newTier);
+            Tier = newTier;
             PropertyChanged(this, new PropertyChangedEventArgs("Tier"));
         }
         private void TierDown()
         {
-            Tier = (Math.Max((Int32.Parse(Tier) - 1), 0)).ToString();
-            PropertyChanged(this, new PropertyChangedEventArgs("Tier"));
+            if (Tier != "0")
+            {
+                string newTier = (Int32.Parse(Tier) - 1).ToString();
+                oUStructurePage.SetTier(Objectid, newTier);
+                Tier = newTier;
+                PropertyChanged(this, new PropertyChangedEventArgs("Tier"));
+            }
         }
 
         public void SetTier(string tier)
         {
             Tier = tier;
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs("Tier"));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Tier"));
         }
 
         public Dictionary<string, ADObject> GetOUMembers()

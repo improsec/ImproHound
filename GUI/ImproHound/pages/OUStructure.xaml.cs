@@ -18,6 +18,7 @@ namespace ImproHound.pages
         private readonly ConnectPage connectPage;
         private Dictionary<string, ADObject> forest;
         private readonly int defaultTierNumber = 1;
+        private bool ouStructureSaved = false;
 
         public OUStructurePage(MainWindow containerWindow, DBConnection connection, ConnectPage connectPage, bool alreadyTiered, bool startover)
         {
@@ -32,6 +33,7 @@ namespace ImproHound.pages
         private async void Initialization(bool alreadyTiered, bool startover)
         {
             EnableGUIWait();
+            ouStructureSaved = alreadyTiered && !startover;
             if (startover) await DeleteTieringInDB();
             await BuildOUStructure(alreadyTiered, startover);
             DisableGUIWait();
@@ -139,7 +141,7 @@ namespace ImproHound.pages
 
                 try
                 {
-                    ADObject adObject = new ADObject((string)objectid, adType, cn, (string)name, distinguishednameStr, tierNumber);
+                    ADObject adObject = new ADObject((string)objectid, adType, cn, (string)name, distinguishednameStr, tierNumber, this);
 
                     if (adType.Equals(ADObjectType.Domain))
                     {
@@ -182,6 +184,32 @@ namespace ImproHound.pages
             forestTreeView.ItemsSource = forest.Values.ToList();
         }
 
+        internal async void SetTier(string objectid, string newTier)
+        {
+            if (!ouStructureSaved) return;
+
+            // Set new tier label for object in DB
+            List<IRecord> records;
+            try
+            {
+                records = await connection.Query(@"
+                    MATCH (o {objectid:'" + objectid + @"'})
+                    UNWIND labels(o) AS allLabels
+                    WITH DISTINCT allLabels, o WHERE NOT allLabels STARTS WITH 'Tier'
+                    WITH o, COLLECT(allLabels) + 'Tier" + newTier + @"' AS newLabels
+                    CALL apoc.create.setLabels(o, newLabels) YIELD node
+                    RETURN NULL
+                ");
+            }
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                containerWindow.NavigateToPage(connectPage);
+                return;
+            }
+        }
+
         private ADObject GetParent(string distinguishedname)
         {
             // Find the domain the object belongs to
@@ -211,7 +239,7 @@ namespace ImproHound.pages
                             if (!parentFound)
                             {
                                 string containerDistinguishedname = oupath[i] + "," + parent.Distinguishedname;
-                                ADObject adContainer = new ADObject("manually-created-" + containerDistinguishedname, ADObjectType.OU, oupath[i].Replace("CN=", ""), oupath[i].Replace("CN=", ""), containerDistinguishedname, defaultTierNumber.ToString());
+                                ADObject adContainer = new ADObject("manually-created-" + containerDistinguishedname, ADObjectType.OU, oupath[i].Replace("CN=", ""), oupath[i].Replace("CN=", ""), containerDistinguishedname, defaultTierNumber.ToString(), this);
                                 parent.Members.Add(oupath[i], adContainer);
                                 parent = adContainer;
                             }
@@ -379,6 +407,7 @@ namespace ImproHound.pages
 
             if (messageBoxResult.Equals(MessageBoxResult.OK))
             {
+                ouStructureSaved = false;
                 resetOUStructure();
                 await DeleteTieringInDB();
             }
@@ -388,23 +417,52 @@ namespace ImproHound.pages
         private async void saveButton_Click(object sender, RoutedEventArgs e)
         {
             EnableGUIWait();
-            await DeleteTieringInDB();
-            await SetTieringInDB();
+            if (!ouStructureSaved)
+            {
+                await DeleteTieringInDB();
+                await SetTieringInDB();
+                ouStructureSaved = true;
+            }
             DisableGUIWait();
         }
 
         private async void setChildrenButton_Click(object sender, RoutedEventArgs e)
         {
-            EnableGUIWait();
-            await DeleteTieringInDB();
-
             if (forestTreeView.SelectedItem == null) return;
 
+            EnableGUIWait();
+
+            // Set GUI
             ADObject parent = (ADObject)forestTreeView.SelectedItem;
             parent.GetAllChildren().ForEach(child => child.SetTier(parent.Tier));
             forestTreeView.Focus();
 
-            await SetTieringInDB();
+            if (ouStructureSaved)
+            {
+                // Update DB
+                List<IRecord> records;
+                try
+                {
+                    records = await connection.Query(@"
+                    CALL db.labels()
+                    YIELD label WHERE label STARTS WITH 'Tier'
+                    WITH COLLECT(label) AS labels
+                    MATCH (n) WHERE n.distinguishedname ENDS WITH '," + parent.Distinguishedname + @"'
+                    WITH COLLECT(n) AS nodes, labels
+                    CALL apoc.create.removeLabels(nodes, labels) YIELD node
+                    WITH nodes
+                    CALL apoc.create.addLabels(nodes, ['Tier" + parent.Tier + @"']) YIELD node
+                    RETURN NULL LIMIT 1
+                ");
+                }
+                catch (Exception err)
+                {
+                    // Error
+                    MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+            }
+
             DisableGUIWait();
         }
 
@@ -412,9 +470,12 @@ namespace ImproHound.pages
         {
             EnableGUIWait();
 
-            // Make sure data is consistent
-            await DeleteTieringInDB();
-            await SetTieringInDB();
+            if (!ouStructureSaved)
+            {
+                await DeleteTieringInDB();
+                await SetTieringInDB();
+                ouStructureSaved = true;
+            }
 
             // Set GPOs to the lowest tier of the GPOs they are linked to
             List<IRecord> records;
@@ -463,9 +524,12 @@ namespace ImproHound.pages
         {
             EnableGUIWait();
 
-            // Make sure data is consistent
-            await DeleteTieringInDB();
-            await SetTieringInDB();
+            if (!ouStructureSaved)
+            {
+                await DeleteTieringInDB();
+                await SetTieringInDB();
+                ouStructureSaved = true;
+            }
 
             // Generate list of tier pairs (source, target)
             List<ADObject> allADObjects = GetAllADObjects();
