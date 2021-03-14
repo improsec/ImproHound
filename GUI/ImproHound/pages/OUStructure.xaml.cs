@@ -55,7 +55,7 @@ namespace ImproHound.pages
                         WITH n, lbls ORDER BY lbls ASC
                         WITH n, COLLECT(lbls) AS lblsSort
                         CALL apoc.create.setLabels(n, lblsSort[0..2]) YIELD node
-                        RETURN NULL
+                        RETURN NULL LIMIT 1
                     ");
                 }
                 catch (Exception err)
@@ -265,9 +265,9 @@ namespace ImproHound.pages
                     MATCH (n)
                     WITH COLLECT(n) AS nodes, labels
                     CALL apoc.create.removeLabels(nodes, labels)
-                    YIELD node RETURN null
+                    YIELD node RETURN NULL LIMIT 1
                 ");
-                if (!records[0].Values.TryGetValue("null", out output))
+                if (!records[0].Values.TryGetValue("NULL", out output))
                 {
                     // Unknown error
                     MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -306,10 +306,10 @@ namespace ImproHound.pages
                 string query = @"
                         MATCH(obj) WHERE EXISTS(obj.distinguishedname)
                         CALL apoc.create.addLabels(obj, ['Tier' + " + largestTier.Key + @"]) YIELD node
-                        RETURN null
+                        RETURN NULL LIMIT 1
                     ";
                 records = await connection.Query(query);
-                if (!records[0].Values.TryGetValue("null", out output))
+                if (!records[0].Values.TryGetValue("NULL", out output))
                 {
                     // Unknown error
                     MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -336,10 +336,10 @@ namespace ImproHound.pages
                         WHERE n.objectid IN " + tierObjectIdsString + @"
                         WITH COLLECT(n) AS nList
                         CALL apoc.refactor.rename.label('Tier' + " + largestTier.Key + ", 'Tier' + " + tier.Key + @", nList) YIELD indexes
-                        RETURN null
+                        RETURN NULL LIMIT 1
                     ";
                     records = await connection.Query(query);
-                    if (!records[0].Values.TryGetValue("null", out output))
+                    if (!records[0].Values.TryGetValue("NULL", out output))
                     {
                         // Unknown error
                         MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
