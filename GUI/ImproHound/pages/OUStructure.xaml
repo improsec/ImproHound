@@ -21,7 +21,7 @@
         </DockPanel>
         <TreeView DockPanel.Dock="Top" x:Name="forestTreeView" Background="Transparent" Margin="10" SelectedItemChanged="forestTreeView_SelectedItemChanged">
             <TreeView.Resources>
-                <HierarchicalDataTemplate DataType="{x:Type classes:ADObject}" ItemsSource="{Binding MemberList}">
+                <HierarchicalDataTemplate DataType="{x:Type classes:ADObject}" ItemsSource="{Binding MemberListSorted}">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="{Binding Iconpath}" Margin="0,0,5,0" Width="20" />
                         <TextBlock Text="{Binding CN}" ToolTip="{Binding Name}" Width="300" FontFamily="Verdana" FontSize="11" Foreground="White" VerticalAlignment="Center"/>

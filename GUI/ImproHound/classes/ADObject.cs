@@ -61,6 +61,8 @@ namespace ImproHound.classes
         public ICommand TierDownCommand { get; set; }
         public Dictionary<string, ADObject> Members { get; set; }
         public List<ADObject> MemberList => Members.Values.ToList();
+        public List<ADObject> MemberListSorted => Members.Values.OrderBy(m => m.CN).ToList();
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void TierUp()
