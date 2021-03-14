@@ -380,21 +380,13 @@ namespace ImproHound.pages
         private void EnableGUIWait()
         {
             Mouse.OverrideCursor = Cursors.Wait;
-            resetButton.IsEnabled = false;
-            saveButton.IsEnabled = false;
-            setTierGPOsButton.IsEnabled = false;
-            getTieringViolationsButton.IsEnabled = false;
-            setChildrenButton.IsEnabled = false;
+            mouseblock.Visibility = Visibility.Visible;
         }
 
         private void DisableGUIWait()
         {
             Mouse.OverrideCursor = null;
-            resetButton.IsEnabled = true;
-            saveButton.IsEnabled = true;
-            setTierGPOsButton.IsEnabled = true;
-            getTieringViolationsButton.IsEnabled = true;
-            setChildrenButton.IsEnabled = SetChildrenButtonEnabled();
+            mouseblock.Visibility = Visibility.Hidden;
         }
 
         /// BUTTON CLICKS

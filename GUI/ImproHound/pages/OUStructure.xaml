@@ -8,34 +8,37 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="OUStructurePage">
 
-    <DockPanel Margin="5">
-        <DockPanel DockPanel.Dock="Top">
-            <Label DockPanel.Dock="Left" Content="OU structure" Width="200" Margin="10"/>
-            <Button x:Name="saveButton" DockPanel.Dock="Right" Content="Save" HorizontalAlignment="Right" Margin="10" Click="saveButton_Click" Width="100"/>
-            <Button x:Name="resetButton" DockPanel.Dock="Right" Content="Reset" HorizontalAlignment="Right" Margin="10" Click="resetButton_Click" Width="100"/>
-        </DockPanel>
-        <DockPanel DockPanel.Dock="Bottom">
-            <Button x:Name="setChildrenButton" Content="Set children to tier" HorizontalAlignment="Right" Margin="10" Width="140" Click="setChildrenButton_Click"/>
-            <Button x:Name="setTierGPOsButton" Content="Set tier for GPOs" HorizontalAlignment="Right" Margin="10" Click="setTierGPOsButton_Click" Width="140"/>
-            <Button x:Name="getTieringViolationsButton" Content="Get tiering violations" HorizontalAlignment="Right" Margin="10" Width="160" Click="getTieringViolationsButton_Click"/>
-        </DockPanel>
-        <TreeView DockPanel.Dock="Top" x:Name="forestTreeView" Background="Transparent" Margin="10" SelectedItemChanged="forestTreeView_SelectedItemChanged">
-            <TreeView.Resources>
-                <HierarchicalDataTemplate DataType="{x:Type classes:ADObject}" ItemsSource="{Binding MemberListSorted}">
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="{Binding Iconpath}" Margin="0,0,5,0" Width="20" />
-                        <TextBlock Text="{Binding CN}" ToolTip="{Binding Name}" Width="300" FontFamily="Verdana" FontSize="11" Foreground="White" VerticalAlignment="Center"/>
-                        <Label Content=" Tier:" Width="45" HorizontalContentAlignment="Right" Padding="5,5,2,5"/>
+    <Grid>
+        <Rectangle x:Name="mouseblock" Panel.ZIndex="1" Fill="Transparent" Visibility="Hidden" />
+        <DockPanel Margin="5">
+            <DockPanel DockPanel.Dock="Top">
+                <Label DockPanel.Dock="Left" Content="OU structure" Width="200" Margin="10"/>
+                <Button x:Name="saveButton" DockPanel.Dock="Right" Content="Save" HorizontalAlignment="Right" Margin="10" Click="saveButton_Click" Width="100"/>
+                <Button x:Name="resetButton" DockPanel.Dock="Right" Content="Reset" HorizontalAlignment="Right" Margin="10" Click="resetButton_Click" Width="100"/>
+            </DockPanel>
+            <DockPanel DockPanel.Dock="Bottom">
+                <Button x:Name="setChildrenButton" Content="Set children to tier" HorizontalAlignment="Right" Margin="10" Width="140" Click="setChildrenButton_Click"/>
+                <Button x:Name="setTierGPOsButton" Content="Set tier for GPOs" HorizontalAlignment="Right" Margin="10" Click="setTierGPOsButton_Click" Width="140"/>
+                <Button x:Name="getTieringViolationsButton" Content="Get tiering violations" HorizontalAlignment="Right" Margin="10" Width="160" Click="getTieringViolationsButton_Click"/>
+            </DockPanel>
+            <TreeView DockPanel.Dock="Top" x:Name="forestTreeView" Background="Transparent" Margin="10" SelectedItemChanged="forestTreeView_SelectedItemChanged">
+                <TreeView.Resources>
+                    <HierarchicalDataTemplate DataType="{x:Type classes:ADObject}" ItemsSource="{Binding MemberListSorted}">
                         <StackPanel Orientation="Horizontal">
-                            <Label Width="18" Content="{Binding Tier}" HorizontalContentAlignment="Center" VerticalContentAlignment="Stretch" Height="24" />
-                            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                                <Button Height="12" Content="˄" Width="16" Command="{Binding TierUpCommand}" FontWeight="Bold" BorderBrush="Transparent" Padding="0,-1,0,0" VerticalContentAlignment="Center"/>
-                                <Button Height="12" Content="˅" Width="16" Command="{Binding TierDownCommand}" FontWeight="Bold" BorderBrush="Transparent" Padding="0,-3,0,0" />
+                            <Image Source="{Binding Iconpath}" Margin="0,0,5,0" Width="20" />
+                            <TextBlock Text="{Binding CN}" ToolTip="{Binding Name}" Width="300" FontFamily="Verdana" FontSize="11" Foreground="White" VerticalAlignment="Center"/>
+                            <Label Content=" Tier:" Width="45" HorizontalContentAlignment="Right" Padding="5,5,2,5"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Label Width="18" Content="{Binding Tier}" HorizontalContentAlignment="Center" VerticalContentAlignment="Stretch" Height="24" />
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                                    <Button Height="12" Content="˄" Width="16" Command="{Binding TierUpCommand}" FontWeight="Bold" BorderBrush="Transparent" Padding="0,-1,0,0" VerticalContentAlignment="Center"/>
+                                    <Button Height="12" Content="˅" Width="16" Command="{Binding TierDownCommand}" FontWeight="Bold" BorderBrush="Transparent" Padding="0,-3,0,0" />
+                                </StackPanel>
                             </StackPanel>
                         </StackPanel>
-                    </StackPanel>
-                </HierarchicalDataTemplate>
-            </TreeView.Resources>
-        </TreeView>
-    </DockPanel>
+                    </HierarchicalDataTemplate>
+                </TreeView.Resources>
+            </TreeView>
+        </DockPanel>
+    </Grid>
 </Page>
