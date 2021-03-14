@@ -21,7 +21,8 @@
                 <Button x:Name="setTierGPOsButton" Content="Set tier for GPOs" HorizontalAlignment="Right" Margin="10" Click="setTierGPOsButton_Click" Width="140"/>
                 <Button x:Name="getTieringViolationsButton" Content="Get tiering violations" HorizontalAlignment="Right" Margin="10" Width="160" Click="getTieringViolationsButton_Click"/>
             </DockPanel>
-            <TreeView DockPanel.Dock="Top" x:Name="forestTreeView" Background="Transparent" Margin="10" SelectedItemChanged="forestTreeView_SelectedItemChanged">
+            <TreeView DockPanel.Dock="Top" x:Name="forestTreeView" Background="Transparent" Margin="10" SelectedItemChanged="forestTreeView_SelectedItemChanged"
+                      VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling">
                 <TreeView.Resources>
                     <HierarchicalDataTemplate DataType="{x:Type classes:ADObject}" ItemsSource="{Binding MemberListSorted}">
                         <StackPanel Orientation="Horizontal">
