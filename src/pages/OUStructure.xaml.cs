@@ -213,42 +213,41 @@ namespace ImproHound.pages
         private ADObject GetParent(string distinguishedname)
         {
             // Find the domain the object belongs to
-            foreach (KeyValuePair<string, ADObject> domain in forest)
+            KeyValuePair<string, ADObject> domain = forest.Where(d => distinguishedname.EndsWith(d.Key)).OrderByDescending(d => d.Key.Length).First();
+
+            if (domain.Key != null)
             {
-                if (distinguishedname.EndsWith(domain.Key))
+                string[] oupath = distinguishedname.Replace("," + domain.Key, "").Split(',');
+                ADObject parent = domain.Value;
+                if (oupath.Length > 1)
                 {
-                    string[] oupath = distinguishedname.Replace("," + domain.Key, "").Split(',');
-                    ADObject parent = domain.Value;
-
-                    if (oupath.Length > 1)
+                    for (int i = oupath.Length - 1; i > 0; i--)
                     {
-                        for (int i = oupath.Length - 1; i > 0; i--)
+                        bool parentFound = false;
+                        foreach (KeyValuePair<string, ADObject> container in parent.GetOUMembers())
                         {
-                            bool parentFound = false;
-                            foreach (KeyValuePair<string, ADObject> container in parent.GetOUMembers())
+                            if (oupath[i].Equals(container.Key))
                             {
-                                if (oupath[i].Equals(container.Key))
-                                {
-                                    parent = container.Value;
-                                    parentFound = true;
-                                    break;
-                                }
-                            }
-
-                            // Containers are missing in BloodHound so they have to be created manually
-                            if (!parentFound)
-                            {
-                                string containerDistinguishedname = oupath[i] + "," + parent.Distinguishedname;
-                                ADObject adContainer = new ADObject("manually-created-" + containerDistinguishedname, ADObjectType.OU, oupath[i].Replace("CN=", ""), oupath[i].Replace("CN=", ""), containerDistinguishedname, defaultTierNumber.ToString(), this);
-                                parent.Members.Add(oupath[i], adContainer);
-                                parent = adContainer;
+                                parent = container.Value;
+                                parentFound = true;
+                                break;
                             }
                         }
-                    }
 
-                    return parent;
+                        // Containers are missing in BloodHound so they have to be created manually
+                        if (!parentFound)
+                        {
+                            string containerDistinguishedname = oupath[i] + "," + parent.Distinguishedname;
+                            ADObject adContainer = new ADObject("manually-created-" + containerDistinguishedname, ADObjectType.OU, oupath[i].Replace("CN=", ""), oupath[i].Replace("CN=", ""), containerDistinguishedname, defaultTierNumber.ToString(), this);
+                            parent.Members.Add(oupath[i], adContainer);
+                            parent = adContainer;
+                        }
+                    }
                 }
+
+                return parent;
             }
+
             throw new Exception("Error: Could not find ADObjects OU/Domain parent");
         }
 
