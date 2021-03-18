@@ -145,7 +145,6 @@ namespace ImproHound.pages
 
                     if (adType.Equals(ADObjectType.Domain))
                     {
-                        // TODO: Put sub domains under parent domain
                         forest.Add(adObject.Distinguishedname, adObject);
                     }
                     else
