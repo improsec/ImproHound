@@ -55,7 +55,7 @@ namespace ImproHound.pages
                         WITH n, lbls ORDER BY lbls ASC
                         WITH n, COLLECT(lbls) AS lblsSort
                         CALL apoc.create.setLabels(n, lblsSort[0..2]) YIELD node
-                        RETURN NULL LIMIT 1
+                        RETURN NULL
                     ");
                 }
                 catch (Exception err)
@@ -291,7 +291,7 @@ namespace ImproHound.pages
                     MATCH (n)
                     WITH COLLECT(n) AS nodes, labels
                     CALL apoc.create.removeLabels(nodes, labels)
-                    YIELD node RETURN NULL LIMIT 1
+                    YIELD node RETURN NULL
                 ");
                 if (!records[0].Values.TryGetValue("NULL", out output))
                 {
@@ -332,7 +332,7 @@ namespace ImproHound.pages
                 string query = @"
                         MATCH(obj) WHERE EXISTS(obj.distinguishedname)
                         CALL apoc.create.addLabels(obj, ['Tier' + " + largestTier.Key + @"]) YIELD node
-                        RETURN NULL LIMIT 1
+                        RETURN NULL
                     ";
                 records = await connection.Query(query);
                 if (!records[0].Values.TryGetValue("NULL", out output))
@@ -362,7 +362,7 @@ namespace ImproHound.pages
                         WHERE n.objectid IN " + tierObjectIdsString + @"
                         WITH COLLECT(n) AS nList
                         CALL apoc.refactor.rename.label('Tier' + " + largestTier.Key + ", 'Tier' + " + tier.Key + @", nList) YIELD indexes
-                        RETURN NULL LIMIT 1
+                        RETURN NULL
                     ";
                     records = await connection.Query(query);
                     if (!records[0].Values.TryGetValue("NULL", out output))
@@ -470,7 +470,7 @@ namespace ImproHound.pages
                     CALL apoc.create.removeLabels(nodes, labels) YIELD node
                     WITH nodes
                     CALL apoc.create.addLabels(nodes, ['Tier" + parent.Tier + @"']) YIELD node
-                    RETURN NULL LIMIT 1
+                    RETURN NULL
                 ");
                 }
                 catch (Exception err)
