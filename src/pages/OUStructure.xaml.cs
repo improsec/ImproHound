@@ -237,9 +237,17 @@ namespace ImproHound.pages
                         if (!parentFound)
                         {
                             string containerDistinguishedname = oupath[i] + "," + parent.Distinguishedname;
-                            ADObject adContainer = new ADObject("manually-created-" + containerDistinguishedname, ADObjectType.OU, oupath[i].Replace("CN=", ""), oupath[i].Replace("CN=", ""), containerDistinguishedname, defaultTierNumber.ToString(), this);
+                            string objectId = "container-" + containerDistinguishedname;
+                            string cn = oupath[i].Replace("CN=", "");
+                            string tier = defaultTierNumber.ToString();
+
+                            // Create as OU in application data
+                            ADObject adContainer = new ADObject(objectId, ADObjectType.OU, cn, cn, containerDistinguishedname, tier, this);
                             parent.Members.Add(oupath[i], adContainer);
                             parent = adContainer;
+
+                            // Create as OU in DB
+                            CreateADObjectInDB(objectId, ADObjectType.OU, cn, containerDistinguishedname, tier);
                         }
                     }
                 }
@@ -248,6 +256,26 @@ namespace ImproHound.pages
             }
 
             throw new Exception("Error: Could not find ADObjects OU/Domain parent");
+        }
+
+        private async void CreateADObjectInDB(string objectid, ADObjectType adType, string name, string distinguishedname, string tier)
+        {
+            List<IRecord> records;
+            try
+            {
+                records = await connection.Query(@"
+                    CREATE (o {objectid:'" + objectid + "', distinguishedname:'" + distinguishedname + "', name:'" + name + @"'})
+                    WITH o
+                    CALL apoc.create.setLabels(o, ['Base', '" + adType.ToString() + "', 'Tier" + tier + @"']) YIELD node
+                    RETURN NULL
+                ");
+            }
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
         }
 
         private async Task DeleteTieringInDB()
