@@ -21,14 +21,13 @@ namespace ImproHound.pages
         private async void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
             EnableGUIWait();
-            bool alreadyTieredCorrectly = false;
             object output;
-
-            // Make sure we can connect to the DB and the graph is not empty
-            DBConnection connection = new DBConnection(url.Text, username.Text, password.Password);
 
             try
             {
+                // Make sure we can connect to the DB and the graph is not empty
+                DBConnection connection = new DBConnection(url.Text, username.Text, password.Password);
+
                 List<IRecord> response = await connection.Query("CALL apoc.meta.stats() YIELD labels RETURN labels");
                 if (!response[0].Values.TryGetValue("labels", out output))
                 {
@@ -76,7 +75,20 @@ namespace ImproHound.pages
                 }
                 response[0].Values.TryGetValue("COUNT(n)", out object numOfDistinguishedname);
 
-                alreadyTieredCorrectly = numOfDistinguishedname.ToString().Equals(numOfTierLabeled.ToString());
+                bool alreadyTieredCorrectly = numOfDistinguishedname.ToString().Equals(numOfTierLabeled.ToString());
+
+                DisableGUIWait();
+
+                if (alreadyTieredCorrectly)
+                {
+                    // Jump to alreay tiered page
+                    containerWindow.NavigateToPage(new AlreadyTieredPage(containerWindow, connection, this));
+                }
+                else
+                {
+                    // Jump to OU structure page
+                    containerWindow.NavigateToPage(new OUStructurePage(containerWindow, connection, this, alreadyTiered: false, startover: false));
+                }
             }
             catch (Exception err)
             {
@@ -91,20 +103,6 @@ namespace ImproHound.pages
                 }
 
                 DisableGUIWait();
-                return;
-            }
-
-            DisableGUIWait();
-
-            if (alreadyTieredCorrectly)
-            {
-                // Jump to alreay tiered page
-                containerWindow.NavigateToPage(new AlreadyTieredPage(containerWindow, connection, this));
-            }
-            else
-            {
-                // Jump to OU structure page
-                containerWindow.NavigateToPage(new OUStructurePage(containerWindow, connection, this, alreadyTiered: false, startover: false));
             }
         }
 

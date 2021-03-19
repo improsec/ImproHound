@@ -12,7 +12,15 @@ namespace ImproHound
 
         public DBConnection(string uri, string username, string password)
         {
-            _driver = GraphDatabase.Driver(uri, AuthTokens.Basic(username, password));
+            try
+            {
+                _driver = GraphDatabase.Driver(uri, AuthTokens.Basic(username, password));
+            }
+            catch (Exception err)
+            {
+                // Error
+                throw err;
+            }
         }
 
         public async Task<List<IRecord>> Query(string query)
