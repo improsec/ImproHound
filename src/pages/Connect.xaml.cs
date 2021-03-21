@@ -41,8 +41,7 @@ namespace ImproHound.pages
                 Dictionary<string, object> dirout = (Dictionary<string, object>)output;
                 object numOfBase;
                 dirout.TryGetValue("Base", out numOfBase);
-                Console.WriteLine("Number of nodes in graph: " + numOfBase);
-                if (numOfBase.ToString().Equals("0"))
+                if (numOfBase == null)
                 {
                     // 0 nodes in graph error
                     MessageBox.Show("You have 0 nodes with label 'Base' in your graph.\nMake sure you have upload BloodHound data to graph before connecting.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
