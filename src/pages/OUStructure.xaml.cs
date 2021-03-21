@@ -571,6 +571,7 @@ namespace ImproHound.pages
                                 SourceName;
                                 SourceDistinguishedname;
                                 Relation;
+                                IsInherited;
                                 TargetTier;
                                 TargetType;
                                 TargetName;
@@ -603,7 +604,7 @@ namespace ImproHound.pages
                         WITH sourceObj, sourceObjlbls, targetObjlbls, r, targetObj
                         WHERE sourceObjlbls <> '" + sourceTier + @"' AND sourceObjlbls <> 'Base'
                         AND targetObjlbls <> '" + targetTier + @"' AND targetObjlbls <> 'Base'
-                        RETURN sourceObjlbls, sourceObj.name, sourceObj.distinguishedname, TYPE(r), targetObjlbls, targetObj.name, targetObj.distinguishedname
+                        RETURN sourceObjlbls, sourceObj.name, sourceObj.distinguishedname, TYPE(r), r.isinherited, targetObjlbls, targetObj.name, targetObj.distinguishedname
                     ");
                 }
                 catch (Exception err)
@@ -619,6 +620,7 @@ namespace ImproHound.pages
                     record.Values.TryGetValue("sourceObj.distinguishedname", out object sourceDistinguishedname);
                     record.Values.TryGetValue("sourceObjlbls", out object sourceType);
                     record.Values.TryGetValue("TYPE(r)", out object relation);
+                    record.Values.TryGetValue("r.isinherited", out object isinherited);
                     record.Values.TryGetValue("targetObj.name", out object targetName);
                     record.Values.TryGetValue("targetObj.distinguishedname", out object targetDistinguishedname);
                     record.Values.TryGetValue("targetObjlbls", out object targetType);
@@ -628,6 +630,7 @@ namespace ImproHound.pages
                         sourceName + ";" +
                         sourceDistinguishedname + ";" +
                         relation + ";" +
+                        isinherited + ";" +
                         targetTier + ";" +
                         targetType + ";" +
                         targetName + ";" +
