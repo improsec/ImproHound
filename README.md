@@ -51,3 +51,44 @@ with
 **3. Download and run the latest release of ImproHound.exe in Windows (x64)**
 
 &nbsp;&nbsp;&nbsp;&nbsp;Confirm you can log in to the BloodHound DB with the same credentials you use in the BloodHound GUI.
+
+## Usage
+
+### Connect to database
+![alt text](https://github.com/improsec/ImproHound/blob/master/readme-images/01-connect.png?raw=true)
+
+Enter the database credentials and establish a connection. It is the same credentials you use in BloodHound GUI.
+
+### Continue or start over
+![alt text](https://github.com/improsec/ImproHound/blob/master/readme-images/02-continue-startover.png?raw=true)
+
+ImproHound creates a ‘TierX’ label on nodes in the BloodHound database. If you have used ImproHound before with this BloodHound database, you will be asked if you want to continue with the tiering you have already created or if you want to start over.
+
+### OU structure
+![alt text](https://github.com/improsec/ImproHound/blob/master/readme-images/03-ou-structure.png?raw=true)
+
+This is the page where you will categorize the AD objects into tiers. The window displays the OU structure. Each AD object has a Tier value which can be increased and decreased with the arrows.
+
+**Set children to tier**
+
+If you select a domain or an AD container, you can click ‘Set children to tier’ to set all the children to the Tier level of the given domain/container recursively.
+
+**Set tier for GPOs**
+
+If you click ‘Set tier for GPOs’ each GPO will have their tier level set to the tier level of the OU with highest tier (closest to zero) which the GPO is linked to. GPOs not linked to an OU will not have their tier level changed.
+
+The tier levels will be saved in the BloodHound first, if not already done.
+
+**Get tiering violations**
+
+Find all relations in the BloodHound database where an AD object has control of an AD object from a higher tier (closer to zero). The tier violations will be written to a csv file. Another csv file will be created with all AD objects and their tier levels. 
+
+The tier levels will be saved in the BloodHound first, if not already done.
+
+**Reset**
+
+All tier levels will be set to 1 in ImproHound. All ‘TierX’ labels in the BloodHound database will be removed.
+
+**Save**
+
+Save the tier levels as a ‘TierX’ label in the BloodHound database. 
