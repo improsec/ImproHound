@@ -452,20 +452,26 @@ namespace ImproHound.pages
             if (ouStructureSaved)
             {
                 // Update DB
-                List<IRecord> records;
                 try
                 {
-                    records = await connection.Query(@"
-                    CALL db.labels()
-                    YIELD label WHERE label STARTS WITH 'Tier'
-                    WITH COLLECT(label) AS labels
-                    MATCH (n) WHERE n.distinguishedname ENDS WITH '," + parent.Distinguishedname + @"'
-                    WITH COLLECT(n) AS nodes, labels
-                    CALL apoc.create.removeLabels(nodes, labels) YIELD node
-                    WITH nodes
-                    CALL apoc.create.addLabels(nodes, ['Tier" + parent.Tier + @"']) YIELD node
-                    RETURN NULL
-                ");
+                    // Delete current tier label
+                    await connection.Query(@"
+                        CALL db.labels()
+                        YIELD label WHERE label STARTS WITH 'Tier'
+                        WITH COLLECT(label) AS labels
+                        MATCH (n) WHERE n.distinguishedname ENDS WITH '," + parent.Distinguishedname + @"'
+                        WITH COLLECT(n) AS nodes, labels
+                        CALL apoc.create.removeLabels(nodes, labels) YIELD node
+                        RETURN NULL
+                    ");
+
+                    // Add new tier label
+                    await connection.Query(@"
+                        MATCH (n) WHERE n.distinguishedname ENDS WITH '," + parent.Distinguishedname + @"'
+                        WITH COLLECT(n) AS nodes
+                        CALL apoc.create.addLabels(nodes, ['Tier" + parent.Tier + @"']) YIELD node
+                        RETURN NULL
+                    ");
                 }
                 catch (Exception err)
                 {
