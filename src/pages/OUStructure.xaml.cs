@@ -247,7 +247,7 @@ namespace ImproHound.pages
                             parent = adContainer;
 
                             // Create as OU in DB
-                            CreateADObjectInDB(objectId, ADObjectType.OU, cn, containerDistinguishedname, tier);
+                            CreateADObjectInDB(objectId, ADObjectType.OU, cn, containerDistinguishedname, domain.Value.Name, tier);
                         }
                     }
                 }
@@ -258,13 +258,13 @@ namespace ImproHound.pages
             throw new Exception("Error: Could not find ADObjects OU/Domain parent");
         }
 
-        private async void CreateADObjectInDB(string objectid, ADObjectType adType, string name, string distinguishedname, string tier)
+        private async void CreateADObjectInDB(string objectid, ADObjectType adType, string name, string distinguishedname, string domain, string tier)
         {
             List<IRecord> records;
             try
             {
                 records = await connection.Query(@"
-                    CREATE (o {objectid:'" + objectid + "', distinguishedname:'" + distinguishedname + "', name:'" + name + @"'})
+                    CREATE (o {objectid:'" + objectid + "', domain:'" + domain + "', distinguishedname:'" + distinguishedname + "', name:'" + name + @"'})
                     WITH o
                     CALL apoc.create.setLabels(o, ['Base', '" + adType.ToString() + "', 'Tier" + tier + @"']) YIELD node
                     RETURN NULL
@@ -454,24 +454,48 @@ namespace ImproHound.pages
                 // Update DB
                 try
                 {
-                    // Delete current tier label
-                    await connection.Query(@"
-                        CALL db.labels()
-                        YIELD label WHERE label STARTS WITH 'Tier'
-                        WITH COLLECT(label) AS labels
-                        MATCH (n) WHERE n.distinguishedname ENDS WITH '," + parent.Distinguishedname + @"'
-                        WITH COLLECT(n) AS nodes, labels
-                        CALL apoc.create.removeLabels(nodes, labels) YIELD node
-                        RETURN NULL
-                    ");
+                    if (parent.Type.Equals(ADObjectType.Domain))
+                    {
+                        // Delete current tier label
+                        await connection.Query(@"
+                            CALL db.labels()
+                            YIELD label WHERE label STARTS WITH 'Tier'
+                            WITH COLLECT(label) AS labels
+                            MATCH (n {domain:'" + parent.Name + @"'}) WHERE EXISTS(n.distinguishedname)
+                            WITH COLLECT(n) AS nodes, labels
+                            CALL apoc.create.removeLabels(nodes, labels) YIELD node
+                            RETURN NULL
+                        ");
 
-                    // Add new tier label
-                    await connection.Query(@"
-                        MATCH (n) WHERE n.distinguishedname ENDS WITH '," + parent.Distinguishedname + @"'
-                        WITH COLLECT(n) AS nodes
-                        CALL apoc.create.addLabels(nodes, ['Tier" + parent.Tier + @"']) YIELD node
-                        RETURN NULL
-                    ");
+                        // Add new tier label
+                        await connection.Query(@"
+                            MATCH (n {domain:'" + parent.Name + @"'}) WHERE EXISTS(n.distinguishedname)
+                            WITH COLLECT(n) AS nodes
+                            CALL apoc.create.addLabels(nodes, ['Tier" + parent.Tier + @"']) YIELD node
+                            RETURN NULL
+                        ");
+                    }
+                    else
+                    {
+                        // Delete current tier label
+                        await connection.Query(@"
+                            CALL db.labels()
+                            YIELD label WHERE label STARTS WITH 'Tier'
+                            WITH COLLECT(label) AS labels
+                            MATCH (n) WHERE n.distinguishedname ENDS WITH '," + parent.Distinguishedname + @"'
+                            WITH COLLECT(n) AS nodes, labels
+                            CALL apoc.create.removeLabels(nodes, labels) YIELD node
+                            RETURN NULL
+                        ");
+
+                        // Add new tier label
+                        await connection.Query(@"
+                            MATCH (n) WHERE n.distinguishedname ENDS WITH '," + parent.Distinguishedname + @"'
+                            WITH COLLECT(n) AS nodes
+                            CALL apoc.create.addLabels(nodes, ['Tier" + parent.Tier + @"']) YIELD node
+                            RETURN NULL
+                        ");
+                    }
                 }
                 catch (Exception err)
                 {
