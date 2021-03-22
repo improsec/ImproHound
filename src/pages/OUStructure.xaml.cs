@@ -528,7 +528,7 @@ namespace ImproHound.pages
             try
             {
                 records = await connection.Query(@"
-                    MATCH(o)-[:MemberOf*1..]->(group:Group {objectid:'" + group.Objectid + @"'})
+                    MATCH(o)-[:MemberOf*1..]->(group:Group {objectid:'" + group.Objectid + @"'}) WHERE EXISTS(o.distinguishedname)
                     UNWIND labels(o) AS tierlabel
                     WITH o, tierlabel
                     WHERE tierlabel STARTS WITH 'Tier'
