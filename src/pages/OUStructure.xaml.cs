@@ -151,7 +151,7 @@ namespace ImproHound.pages
                     {
                         ADObject parent = GetParent(adObject.Distinguishedname);
                         string rdnName = adObject.Distinguishedname.Substring(0, adObject.Distinguishedname.IndexOf(","));
-                        parent.Members.Add(rdnName, adObject);
+                        parent.Children.Add(rdnName, adObject);
                     }
                 }
                 catch
@@ -223,7 +223,7 @@ namespace ImproHound.pages
                     for (int i = oupath.Length - 1; i > 0; i--)
                     {
                         bool parentFound = false;
-                        foreach (KeyValuePair<string, ADObject> container in parent.GetOUMembers())
+                        foreach (KeyValuePair<string, ADObject> container in parent.GetOUChildren())
                         {
                             if (oupath[i].Equals(container.Key))
                             {
@@ -243,7 +243,7 @@ namespace ImproHound.pages
 
                             // Create as OU in application data
                             ADObject adContainer = new ADObject(objectId, ADObjectType.OU, cn, cn, containerDistinguishedname, tier, this);
-                            parent.Members.Add(oupath[i], adContainer);
+                            parent.Children.Add(oupath[i], adContainer);
                             parent = adContainer;
 
                             // Create as OU in DB
@@ -521,7 +521,7 @@ namespace ImproHound.pages
                 record.Values.TryGetValue("o.distinguishedname", out object distinguishedname);
 
                 ADObject parent = GetParent((string)distinguishedname);
-                ADObject adObject = parent.MemberList.Where(member => member.Distinguishedname.Equals((string)distinguishedname)).FirstOrDefault();
+                ADObject adObject = parent.ChildrenList.Where(child => child.Distinguishedname.Equals((string)distinguishedname)).FirstOrDefault();
                 adObject.SetTier(group.Tier);
             }
 
@@ -577,7 +577,7 @@ namespace ImproHound.pages
                 record.Values.TryGetValue("lowestTier", out object lowestTier);
 
                 ADObject parent = GetParent((string)distinguishedname);
-                ADObject gpo = parent.MemberList.Where(member => member.Distinguishedname.Equals((string)distinguishedname)).FirstOrDefault();
+                ADObject gpo = parent.ChildrenList.Where(child => child.Distinguishedname.Equals((string)distinguishedname)).FirstOrDefault();
                 gpo.SetTier(lowestTier.ToString().Replace("Tier", ""));
             }
 

@@ -19,7 +19,7 @@ namespace ImproHound.classes
             Distinguishedname = distinguishedname;
             Tier = tier;
             Type = type;
-            Members = new Dictionary<string, ADObject>();
+            Children = new Dictionary<string, ADObject>();
             this.oUStructurePage = oUStructurePage;
 
             TierUpCommand = new RelayCommand(TierUp);
@@ -59,9 +59,9 @@ namespace ImproHound.classes
         public string Iconpath { get; set; }
         public ICommand TierUpCommand { get; set; }
         public ICommand TierDownCommand { get; set; }
-        public Dictionary<string, ADObject> Members { get; set; }
-        public List<ADObject> MemberList => Members.Values.ToList();
-        public List<ADObject> MemberListSorted => Members.Values.OrderBy(m => m.CN).ToList();
+        public Dictionary<string, ADObject> Children { get; set; }
+        public List<ADObject> ChildrenList => Children.Values.ToList();
+        public List<ADObject> ChildrenListSorted => Children.Values.OrderBy(m => m.CN).ToList();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -89,10 +89,10 @@ namespace ImproHound.classes
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Tier"));
         }
 
-        public Dictionary<string, ADObject> GetOUMembers()
+        public Dictionary<string, ADObject> GetOUChildren()
         {
             Dictionary<string, ADObject> ous = new Dictionary<string, ADObject>();
-            foreach (KeyValuePair<string, ADObject> member in Members)
+            foreach (KeyValuePair<string, ADObject> member in Children)
             {
                 if (member.Value.Type is ADObjectType.OU)
                 {
@@ -104,8 +104,8 @@ namespace ImproHound.classes
 
         public List<ADObject> GetAllChildren()
         {
-            List<ADObject> children = MemberList;
-            foreach (ADObject child in MemberList)
+            List<ADObject> children = ChildrenList;
+            foreach (ADObject child in ChildrenList)
             {
                 children.AddRange(child.GetAllChildren());
             }
