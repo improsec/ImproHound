@@ -1,7 +1,7 @@
 # ImproHound
 Identify the attack paths in BloodHound breaking your AD tiering
 
-ImproHound is a dotnet GUI program compiled to a standalone win x64 exe. 
+ImproHound is a dotnet standalone win x64 exe with GUI. 
 To use ImproHound, you must run SharpHound to collect the necessary data from the AD. You will then upload the data to your BloodHound installation. ImproHound will connect to the underlying Neo4j database of BloodHound. In ImproHound, you will categorize the AD into tiers via the OU structure, and ImproHound will identify the AD relations that enable AD objects to compromise an object of a higher (closer to zero) tier and save the tiering violations in a csv file.
 
 ## Install
