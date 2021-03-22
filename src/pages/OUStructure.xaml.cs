@@ -397,12 +397,6 @@ namespace ImproHound.pages
             return allADObjects;
         }
 
-        private bool SetChildrenButtonEnabled()
-        {
-            return forestTreeView.SelectedItem != null &&
-                (((ADObject)forestTreeView.SelectedItem).Type.Equals(ADObjectType.Domain) || ((ADObject)forestTreeView.SelectedItem).Type.Equals(ADObjectType.OU));
-        }
-
         private void EnableGUIWait()
         {
             Mouse.OverrideCursor = Cursors.Wait;
@@ -484,6 +478,58 @@ namespace ImproHound.pages
             DisableGUIWait();
         }
 
+        private async void setMembersButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (forestTreeView.SelectedItem == null) return;
+
+            EnableGUIWait();
+
+            ADObject group = (ADObject)forestTreeView.SelectedItem;
+
+            if (!ouStructureSaved)
+            {
+                await DeleteTieringInDB();
+                await SetTieringInDB();
+                ouStructureSaved = true;
+            }
+
+            // Update DB
+            List<IRecord> records;
+            try
+            {
+                records = await connection.Query(@"
+                    MATCH(o)-[:MemberOf*1..]->(group:Group {objectid:'" + group.Objectid + @"'})
+                    UNWIND labels(o) AS tierlabel
+                    WITH o, tierlabel
+                    WHERE tierlabel STARTS WITH 'Tier'
+                    CALL apoc.create.removeLabels(o, [tierlabel]) YIELD node
+                    WITH o
+                    CALL apoc.create.addLabels(o, ['Tier" + group.Tier + @"']) YIELD node
+                    RETURN o.distinguishedname
+                ");
+            }
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // Update application data
+            foreach (IRecord record in records)
+            {
+                record.Values.TryGetValue("o.distinguishedname", out object distinguishedname);
+
+                ADObject parent = GetParent((string)distinguishedname);
+                ADObject adObject = parent.MemberList.Where(member => member.Distinguishedname.Equals((string)distinguishedname)).FirstOrDefault();
+                adObject.SetTier(group.Tier);
+            }
+
+            forestTreeView.Focus();
+            DisableGUIWait();
+        }
+
+
         private async void setTierGPOsButton_Click(object sender, RoutedEventArgs e)
         {
             EnableGUIWait();
@@ -535,6 +581,7 @@ namespace ImproHound.pages
                 gpo.SetTier(lowestTier.ToString().Replace("Tier", ""));
             }
 
+            forestTreeView.Focus();
             DisableGUIWait();
         }
 
@@ -654,7 +701,10 @@ namespace ImproHound.pages
 
         private void forestTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            setChildrenButton.IsEnabled = SetChildrenButtonEnabled();
+            setChildrenButton.IsEnabled = (forestTreeView.SelectedItem != null) &&
+                (((ADObject)forestTreeView.SelectedItem).Type.Equals(ADObjectType.Domain) || ((ADObject)forestTreeView.SelectedItem).Type.Equals(ADObjectType.OU));
+            setMembersButton.IsEnabled = (forestTreeView.SelectedItem != null) &&
+                ((ADObject)forestTreeView.SelectedItem).Type.Equals(ADObjectType.Group);
         }
     }
 }

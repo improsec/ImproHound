@@ -21,7 +21,7 @@ namespace ImproHound
                 case "OUStructurePage":
                     ResizeMode = ResizeMode.CanResize;
                     MinHeight = 400;
-                    MinWidth = 600;
+                    MinWidth = 700;
                     break;
 
                 default:
