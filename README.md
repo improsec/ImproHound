@@ -72,11 +72,15 @@ ImproHound creates a ‘TierX’ label on nodes in the BloodHound database. If y
 ### OU structure
 ![alt text](https://github.com/improsec/ImproHound/blob/master/readme-images/03-ou-structure.png?raw=true)
 
-This is the page where you will categorize the AD objects into tiers. The window displays the OU structure. Each AD object has a Tier value which can be increased and decreased with the arrows.
+This is the page where you will categorize the AD objects into tiers. The window displays the OU structure. Each AD object has a tier value which can be increased and decreased with the arrows.
 
 **Set children to tier**
 
-If you select a domain or an AD container, you can click ‘Set children to tier’ to set all the children to the Tier level of the given domain/container recursively.
+If you select a domain or an AD container, you can click ‘Set children to tier’ to set all children (recursively) to the tier level of the given domain/container.
+
+**Set members to tier**
+
+If you select a group, you can click ‘Set children to tier’ to set all members (recursively) to the tier level of the given group.
 
 **Set tier for GPOs**
 
