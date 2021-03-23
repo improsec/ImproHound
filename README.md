@@ -92,3 +92,39 @@ All tier levels will be set to 1 in ImproHound. All ‘TierX’ labels in the Bl
 **Save**
 
 Save the tier levels as a ‘TierX’ label in the BloodHound database. 
+
+
+## Guidelines for tiering AD objects
+
+It is important to tier the AD objects correctly. If you set a DC and a regular user to be Tier 0 objects, ImproHound will not find that the user's admin access to the DC is a violation. Same case if you add the two of them to Tier 2.
+
+### Computer
+
+Computers are tiered after how critical it would be if the computer was compromised.
+
+* Tier 0 – Domain Controllers and other systems categorized as critical. Systems such as SCCM, ADFS, PKI, and virtualization servers (VMware, Hyper V, etc.)
+* Tier 1 – The rest of the server infrastructure
+* Tier 2 – Regular workstations
+
+### User
+
+Users are tiered after the computers they can logon to and after the AD objects they have a control over. An example of control permission could be a user with rights to edit GPOs linked to Tier 1 servers, which would make the user a Tier 1 object.
+
+### Group
+
+A group belongs to the lowest tier (highest number) of its members, unless the group have bad members, e.g. a regular user as member of Domain Admins.
+
+Example: Domain Users is a Tier 2 group even through your Tier 0 users are members of the group because it is not the membership of Domain Users that gives the users privileges. On the other hand, the Domain Admins group is a Tier 0 group because the membership of this group makes your account very privileged.
+
+### Container (incl. OU and Domain)
+
+A container belongs to the highest tier (closest to zero) of its child objects, or higher.
+
+Example: You have all Tier 0, Tier 1, and Tier 2 users in the Users container. A user with Full Control permission on the Users container would be able to compromise all the users including the Tier 0 users (except some which are protected but that is not important for the example), so the Users container must be a Tier 0 object.
+
+### GPO
+
+A GPO’s tier level is determined by the tier level of the OUs it is linked to. The GPO belongs to the highest tier (closest to zero) of the OUs it is linked to.
+Use the ‘Set tier for GPOs’ button to make sure all GPOs follow this principle.
+
+Example: A user with permission to edit a GPO linked to a Tier 1 OU would be able to control membership of Administrators on all servers under the Tier 1 OU by modifying the GPO.
