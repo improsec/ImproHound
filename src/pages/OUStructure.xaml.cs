@@ -45,6 +45,67 @@ namespace ImproHound.pages
 
             if (!alreadyTiered)
             {
+                // Set name and distinguishedname for objects without
+                List<IRecord> records1;
+                try
+                {
+                    records1 = await connection.Query(@"
+                        MATCH (o) WHERE o.distinguishedname IS NULL
+                        MATCH (d:Domain) WHERE o.objectid STARTS WITH d.domain
+                        RETURN o.objectid, o.name, d.domain, d.distinguishedname
+                    ");
+                }
+                catch (Exception err)
+                {
+                    // Error
+                    MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    containerWindow.NavigateToPage(connectPage);
+                    return;
+                }
+
+                foreach (IRecord record in records1)
+                {
+                    record.Values.TryGetValue("o.objectid", out object objectid);
+                    record.Values.TryGetValue("o.name", out object name);
+                    record.Values.TryGetValue("d.domain", out object domain);
+                    record.Values.TryGetValue("d.distinguishedname", out object domainDistinguishedname);
+
+                    if (name == null)
+                    {
+                        if (objectid.ToString().EndsWith("S-1-5-4"))
+                        {
+                            name = "Interactive (S-1-5-4)@" + (string)domain;
+                        }
+                        else if (objectid.ToString().EndsWith("S-1-5-17"))
+                        {
+                            name = "This Organization (S-1-5-17)@" + (string)domain;
+                        }
+                        else
+                        {
+                            name = objectid + "@" + (string)domain;
+                        }
+                    }
+
+                    string cn = name.ToString().Substring(0, name.ToString().IndexOf("@"));
+                    string distinguishedname = "CN=" + cn + "," + domainDistinguishedname;
+
+                    try
+                    {
+                        await connection.Query(@"
+                            MATCH (o {objectid:'" + (string)objectid + @"'})
+                            SET o.name = '" + name.ToString() + @"'
+                            SET o.distinguishedname = '" + distinguishedname + @"'
+                        ");
+                    }
+                    catch (Exception err)
+                    {
+                        // Error
+                        MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        containerWindow.NavigateToPage(connectPage);
+                        return;
+                    }
+                }
+
                 // Make sure all objects do not have more than the Base label and the type of object label
                 // I have seen service accounts in the BloodHound DB having both User and Computer label
                 try
@@ -95,7 +156,6 @@ namespace ImproHound.pages
                 object output;
                 records = await connection.Query(@"
                         MATCH (o)
-                        WHERE NOT o.distinguishedname IS NULL
 					    UNWIND LABELS(o) AS adtype
                         WITH o.objectid AS objectid, o.name AS name, o.distinguishedname AS distinguishedname, o.tier AS tier, adtype
                         WHERE adtype IN ['Domain', 'OU', 'Group', 'User', 'Computer', 'GPO']
