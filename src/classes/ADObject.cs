@@ -61,7 +61,7 @@ namespace ImproHound.classes
         public ICommand TierDownCommand { get; set; }
         public Dictionary<string, ADObject> Children { get; set; }
         public List<ADObject> ChildrenList => Children.Values.ToList();
-        public List<ADObject> ChildrenListSorted => Children.Values.OrderBy(m => m.CN).ToList();
+        public List<ADObject> ChildrenListSorted => Children.Values.OrderBy(c => c.Type.ToString().Length).ThenBy(c => c.CN).ToList();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
