@@ -141,9 +141,9 @@ Users are tiered after the computers they can logon to and after the AD objects 
 
 ### Group
 
-A group belongs to the lowest tier (highest number) of its members, unless the group have bad members, e.g. a regular user as member of Domain Admins.
+A group belongs to the lowest tier (closest to infinity) of its members, unless the group have bad members, e.g. a regular user as member of Domain Admins.
 
-Example: Domain Users is a Tier 2 group even through your Tier 0 users are members of the group because it is not the membership of Domain Users that gives the users privileges. On the other hand, the Domain Admins group is a Tier 0 group because the membership of this group makes your account very privileged.
+Example: Domain Users is a Tier 2 group even though your Tier 0 users are members of the group because it is not the membership of Domain Users that gives the users privileges. On the other hand, the Domain Admins group is a Tier 0 group because the membership of this group makes users very privileged.
 
 ### Container (incl. OU and Domain)
 
