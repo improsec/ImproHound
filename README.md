@@ -125,7 +125,7 @@ Save the tier levels as a ‘TierX’ label in the BloodHound database.
 
 ## Guidelines for tiering AD objects
 
-It is important to tier the AD objects correctly. If you set a DC and a regular user to be Tier 0 objects, ImproHound will not find that the user's admin access to the DC is a violation. Same case if you add the two of them to Tier 2.
+It is important to tier the AD objects correctly. If you set a DC and a regular low privileged user to be Tier 0 objects, ImproHound will not find that the user's admin access to the DC is a tiering violation. Same case if you add the two of them to Tier 2.
 
 ### Computer
 
