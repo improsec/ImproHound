@@ -90,9 +90,29 @@ The tier levels will be saved in the BloodHound first, if not already done.
 
 **Get tiering violations**
 
-Find all relations in the BloodHound database where an AD object has control of an AD object from a higher tier (closer to zero). The tier violations will be written to a csv file. Another csv file will be created with all AD objects and their tier levels. 
+Find all relations in the BloodHound database where an AD object has control of an AD object from a higher tier (closer to zero). 
 
 The tier levels will be saved in the BloodHound first, if not already done.
+
+Two CSV files are generated as output:
+
+* adobjects-[timestamp].csv: All AD objects and which tier they are in.
+
+* tiering-violations-[timestamp].csv: The tiering violations.
+
+Example of records in violations CSV:
+
+
+|SourceTier	| SourceType	| SourceName	| SourceDistinguishedname	| Relation	| IsInherited	| TargetTier	| TargetType	| TargetName	| TargetDistinguishedname|
+|-----------|---------------|---------------|---------------------------|-----------|---------------|---------------|---------------|---------------|------------------------|
+|Tier1 | User | svc-monitor@HOT.LOCAL | CN=svc-monitor,CN=Users,DC=hot,DC=local | ForceChangePassword | True | Tier0 | User | T0_JBK@HOT.LOCAL | CN=T0_JBK,CN=Users,DC=hot,DC=local |
+|Tier2 | Group | Wrk-Admins@HOT.LOCAL | CN=Wrk-Admins,CN=Groups,DC=hot,DC=local | GenericWrite | | Tier0 | GPO | PowerShellLogging@HOT.LOCAL | CN={6AC1786C-016F-11D2-945F-00C04fB984F9},CN=Policies,CN=System,DC=hot,DC=local |
+
+The first record is a Tier 1 service account with permission to change the password of a Tier 0 user account. The relation is inherited. Unfortunately, it is not always possible to view where the relation is inherited from in the BloodHound data, but you can check it manually by inspecting the permissions on the targeted AD object in Users and Computers. The second record is a group with permission to edit a GPO, which is likely linked to OU containing Tier 0 servers since it is a Tier 0 GPO.
+
+You can look up all the relation types and how they are exploited [here](https://bloodhound.readthedocs.io/en/latest/data-analysis/edges.html).
+
+If you discover that an object is in a too high tier (closest to zero), you should correct it in ImproHound, and then check for violations with this object as SOURCE. If an object is in a too low tier (closest to infinity), you should correct it in ImproHound and check for violations with the object as TARGET.
 
 **Reset**
 
@@ -100,7 +120,7 @@ All tier levels will be set to 1 in ImproHound. All ‘TierX’ labels in the Bl
 
 **Save**
 
-Save the tier levels as a ‘TierX’ label in the BloodHound database. 
+Save the tier levels as a ‘TierX’ label in the BloodHound database.
 
 
 ## Guidelines for tiering AD objects
