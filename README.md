@@ -33,6 +33,9 @@ To use ImproHound, you must run SharpHound to collect the necessary data from th
 **2. Install APOC Neo4j plugin**
 (enables awesome graph operations we need) 
 1. Download the [APOC](https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases) version matching your Neo4j version (apoc-x.x.x.x-all.jar).
+
+	Find the APOC version matching your Neo4j version in the [version compatibility matrix](https://github.com/neo4j-contrib/neo4j-apoc-procedures#version-compatibility-matrix). 
+
 1. Try to remember where you installed Neo4j and place the APOC jar-file under: ```$NEO4J_HOME/plugins/```
 	
 	* $NEO4J_HOME in Linux: ```/var/lib/neo4j/```
