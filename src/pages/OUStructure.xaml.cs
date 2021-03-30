@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Threading.Tasks;
 using System.IO;
 using ImproHound.classes;
+using System.Text.RegularExpressions;
 
 namespace ImproHound.pages
 {
@@ -50,7 +51,7 @@ namespace ImproHound.pages
                 try
                 {
                     records1 = await connection.Query(@"
-                        MATCH (o) WHERE o.distinguishedname IS NULL
+                        MATCH (o) WHERE NOT EXISTS(o.distinguishedname)
                         MATCH (d:Domain) WHERE o.objectid STARTS WITH d.domain
                         RETURN o.objectid, o.name, d.domain, d.distinguishedname
                     ");
@@ -155,8 +156,8 @@ namespace ImproHound.pages
             {
                 object output;
                 records = await connection.Query(@"
-                        MATCH (o)
-					    UNWIND LABELS(o) AS adtype
+                        MATCH (o) WHERE EXISTS(o.distinguishedname)
+                        UNWIND LABELS(o) AS adtype
                         WITH o.objectid AS objectid, o.name AS name, o.distinguishedname AS distinguishedname, o.tier AS tier, adtype
                         WHERE adtype IN ['Domain', 'OU', 'Group', 'User', 'Computer', 'GPO']
                         RETURN objectid, name, distinguishedname, tier, adtype ORDER BY size(distinguishedname)
@@ -193,24 +194,21 @@ namespace ImproHound.pages
                 bool gotTypeEnum = Enum.TryParse((string)type, out ADObjectType adType);
                 if (!gotTypeEnum) adType = ADObjectType.Unknown;
 
-                // Get CN
-                string distinguishednameStr = (string)distinguishedname;
-                string cn = adType.Equals(ADObjectType.Domain)
-                    ? distinguishednameStr
-                    : distinguishednameStr.Substring(distinguishednameStr.IndexOf("=") + 1, distinguishednameStr.IndexOf(",") - distinguishednameStr.IndexOf("=") - 1);
+                string distinguishednameStr = distinguishedname.ToString();
 
                 try
                 {
-                    ADObject adObject = new ADObject((string)objectid, adType, cn, (string)name, distinguishednameStr, tierNumber, this);
-
                     if (adType.Equals(ADObjectType.Domain))
                     {
+                        ADObject adObject = new ADObject((string)objectid, adType, distinguishednameStr, (string)name, distinguishednameStr, tierNumber, this);
                         forest.Add(adObject.Distinguishedname, adObject);
                     }
                     else
                     {
-                        ADObject parent = GetParent(adObject.Distinguishedname);
-                        string rdnName = adObject.Distinguishedname.Substring(0, adObject.Distinguishedname.IndexOf(","));
+                        ADObject parent = GetParent(distinguishednameStr);
+                        string rdnName = distinguishednameStr.Replace("," + parent.Distinguishedname, "");
+                        string cn = rdnName.Substring(distinguishednameStr.IndexOf("=") + 1);
+                        ADObject adObject = new ADObject((string)objectid, adType, cn, (string)name, distinguishednameStr, tierNumber, this);
                         parent.Children.Add(rdnName, adObject);
                     }
                 }
@@ -276,7 +274,7 @@ namespace ImproHound.pages
 
             if (domain.Key != null)
             {
-                string[] oupath = distinguishedname.Replace("," + domain.Key, "").Split(',');
+                string[] oupath = Regex.Split(distinguishedname.Replace("," + domain.Key, ""), @"(?<!\\),");
                 ADObject parent = domain.Value;
                 if (oupath.Length > 1)
                 {
