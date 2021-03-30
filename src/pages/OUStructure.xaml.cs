@@ -19,7 +19,7 @@ namespace ImproHound.pages
         private readonly DBConnection connection;
         private readonly ConnectPage connectPage;
         private Dictionary<string, ADObject> forest;
-        private Hashtable sidLookupTable;
+        private Hashtable idLookupTable;
         private readonly int defaultTierNumber = 1;
         private bool ouStructureSaved = false;
 
@@ -36,7 +36,7 @@ namespace ImproHound.pages
         private async void Initialization(bool alreadyTiered, bool startover)
         {
             EnableGUIWait();
-            sidLookupTable = new Hashtable();
+            idLookupTable = new Hashtable();
             ouStructureSaved = alreadyTiered && !startover;
             if (startover) await DeleteTieringInDB();
             await BuildOUStructure(alreadyTiered, startover);
@@ -205,7 +205,7 @@ namespace ImproHound.pages
                     {
                         ADObject adObject = new ADObject((string)objectid, adType, distinguishednameStr, (string)name, distinguishednameStr, tierNumber, this);
                         forest.Add(adObject.Distinguishedname, adObject);
-                        sidLookupTable.Add((string)objectid, adObject);
+                        idLookupTable.Add((string)objectid, adObject);
                     }
                     else
                     {
@@ -214,7 +214,7 @@ namespace ImproHound.pages
                         string cn = rdnName.Substring(distinguishednameStr.IndexOf("=") + 1);
                         ADObject adObject = new ADObject((string)objectid, adType, cn, (string)name, distinguishednameStr, tierNumber, this);
                         parent.Children.Add(rdnName, adObject);
-                        sidLookupTable.Add((string)objectid, adObject);
+                        idLookupTable.Add((string)objectid, adObject);
                     }
                 }
                 catch
@@ -613,7 +613,7 @@ namespace ImproHound.pages
             {
                 record.Values.TryGetValue("o.objectid", out object objectid);
 
-                ADObject adObject = (ADObject)sidLookupTable[(string)objectid];
+                ADObject adObject = (ADObject)idLookupTable[(string)objectid];
                 adObject.SetTier(group.Tier);
             }
 
@@ -637,7 +637,6 @@ namespace ImproHound.pages
             List<IRecord> records;
             try
             {
-                object output;
                 records = await connection.Query(@"
                     MATCH(gpo: GPO)
                     MATCH(gpo) -[:GpLink]->(ou)
@@ -646,14 +645,8 @@ namespace ImproHound.pages
                     WITH gpo, allLabels ORDER BY allLabels ASC
                     WITH gpo, head(collect(allLabels)) AS lowestTier
                     CALL apoc.create.setLabels(gpo, ['Base', 'GPO', lowestTier]) YIELD node
-                    RETURN gpo.distinguishedname, lowestTier
+                    RETURN gpo.objectid, lowestTier
                 ");
-                if (!records[0].Values.TryGetValue("lowestTier", out output))
-                {
-                    // Unknown error
-                    MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
             }
             catch (Exception err)
             {
@@ -665,11 +658,10 @@ namespace ImproHound.pages
             // Update application data
             foreach (IRecord record in records)
             {
-                record.Values.TryGetValue("gpo.distinguishedname", out object distinguishedname);
+                record.Values.TryGetValue("gpo.objectid", out object objectid);
                 record.Values.TryGetValue("lowestTier", out object lowestTier);
 
-                ADObject parent = GetParent((string)distinguishedname);
-                ADObject gpo = parent.ChildrenList.Where(child => child.Distinguishedname.Equals((string)distinguishedname)).FirstOrDefault();
+                ADObject gpo = (ADObject)idLookupTable[(string)objectid];
                 gpo.SetTier(lowestTier.ToString().Replace("Tier", ""));
             }
 
