@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.IO;
 using ImproHound.classes;
 using System.Text.RegularExpressions;
+using System.Collections;
 
 namespace ImproHound.pages
 {
@@ -18,6 +19,7 @@ namespace ImproHound.pages
         private readonly DBConnection connection;
         private readonly ConnectPage connectPage;
         private Dictionary<string, ADObject> forest;
+        private Hashtable sidLookupTable;
         private readonly int defaultTierNumber = 1;
         private bool ouStructureSaved = false;
 
@@ -34,6 +36,7 @@ namespace ImproHound.pages
         private async void Initialization(bool alreadyTiered, bool startover)
         {
             EnableGUIWait();
+            sidLookupTable = new Hashtable();
             ouStructureSaved = alreadyTiered && !startover;
             if (startover) await DeleteTieringInDB();
             await BuildOUStructure(alreadyTiered, startover);
@@ -202,6 +205,7 @@ namespace ImproHound.pages
                     {
                         ADObject adObject = new ADObject((string)objectid, adType, distinguishednameStr, (string)name, distinguishednameStr, tierNumber, this);
                         forest.Add(adObject.Distinguishedname, adObject);
+                        sidLookupTable.Add((string)objectid, adObject);
                     }
                     else
                     {
@@ -210,6 +214,7 @@ namespace ImproHound.pages
                         string cn = rdnName.Substring(distinguishednameStr.IndexOf("=") + 1);
                         ADObject adObject = new ADObject((string)objectid, adType, cn, (string)name, distinguishednameStr, tierNumber, this);
                         parent.Children.Add(rdnName, adObject);
+                        sidLookupTable.Add((string)objectid, adObject);
                     }
                 }
                 catch
@@ -593,7 +598,7 @@ namespace ImproHound.pages
                     CALL apoc.create.removeLabels(o, [tierlabel]) YIELD node
                     WITH o
                     CALL apoc.create.addLabels(o, ['Tier" + group.Tier + @"']) YIELD node
-                    RETURN o.distinguishedname
+                    RETURN o.objectid
                 ");
             }
             catch (Exception err)
@@ -606,10 +611,9 @@ namespace ImproHound.pages
             // Update application data
             foreach (IRecord record in records)
             {
-                record.Values.TryGetValue("o.distinguishedname", out object distinguishedname);
+                record.Values.TryGetValue("o.objectid", out object objectid);
 
-                ADObject parent = GetParent((string)distinguishedname);
-                ADObject adObject = parent.ChildrenList.Where(child => child.Distinguishedname.Equals((string)distinguishedname)).FirstOrDefault();
+                ADObject adObject = (ADObject)sidLookupTable[(string)objectid];
                 adObject.SetTier(group.Tier);
             }
 
