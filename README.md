@@ -54,7 +54,7 @@ with
 1. Restart Neo4j
 
 	* Linux: ```systemctl restart neo4j```
-	* Windows: ```net stop neo4j && net start neo4j```
+	* Windows (cmd): ```net stop neo4j && net start neo4j``` (PowerShell: ```net stop neo4j; net start neo4j```) 
 	    
 **3. Download and run the latest release of ImproHound.exe in Windows (x64)**
 
