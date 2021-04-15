@@ -472,15 +472,16 @@ namespace ImproHound.pages
                             string containerDistinguishedname = oupath[i] + "," + parent.Distinguishedname;
                             string objectId = "container-" + containerDistinguishedname;
                             string cn = oupath[i].Replace("CN=", "");
+                            string name = (cn + "@" + domain.Value.Name).ToUpper();
                             string tier = defaultTierNumber.ToString();
 
                             // Create as OU in application data
-                            ADObject adContainer = new ADObject(objectId, ADObjectType.OU, cn, cn, containerDistinguishedname, tier, this);
+                            ADObject adContainer = new ADObject(objectId, ADObjectType.OU, name, cn, containerDistinguishedname, tier, this);
                             parent.Children.Add(oupath[i], adContainer);
                             parent = adContainer;
 
                             // Create as OU in DB
-                            CreateADObjectInDB(objectId, ADObjectType.OU, cn, containerDistinguishedname, domain.Value.Name, tier);
+                            CreateADObjectInDB(objectId, ADObjectType.OU, name, containerDistinguishedname, domain.Value.Name, tier);
                         }
                     }
                 }
