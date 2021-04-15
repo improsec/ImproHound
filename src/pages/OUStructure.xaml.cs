@@ -102,6 +102,47 @@ namespace ImproHound.pages
 
         private async Task PrepareDB()
         {
+            // Fix domains without distinguishedname and domain property
+            // Happens if you upload BloodHound data in the 'wrong' order
+            List<IRecord> records;
+            try
+            {
+                records = await connection.Query(@"
+                    MATCH (n:Domain)
+                    WHERE NOT EXISTS (n.distinguishedname)
+                    RETURN n.name
+                ");
+            }
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                containerWindow.NavigateToPage(connectPage);
+                return;
+            }
+
+            foreach (IRecord record in records)
+            {
+                record.Values.TryGetValue("n.name", out object name);
+                string distinguishedname = "DC=" + ((string)name).ToLower().Replace(".", ",DC=");
+
+                try
+                {
+                    await connection.Query(@"
+                        MATCH (n:Domain {name:'" + (string)name + @"'})
+                        SET n.distinguishedname = '" + distinguishedname + @"', n.domain = n.name, n.highvalue = true
+                        RETURN NULL
+                    ");
+                }
+                catch (Exception err)
+                {
+                    // Error
+                    MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    containerWindow.NavigateToPage(connectPage);
+                    return;
+                }
+            }
+
             // Set name and distinguishedname for objects without
             List<IRecord> records1;
             try
