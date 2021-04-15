@@ -517,7 +517,7 @@ namespace ImproHound.pages
                             string tier = defaultTierNumber.ToString();
 
                             // Create as OU in application data
-                            ADObject adContainer = new ADObject(objectId, ADObjectType.OU, name, cn, containerDistinguishedname, tier, this);
+                            ADObject adContainer = new ADObject(objectId, ADObjectType.OU, cn, name, containerDistinguishedname, tier, this);
                             parent.Children.Add(oupath[i], adContainer);
                             parent = adContainer;
 
