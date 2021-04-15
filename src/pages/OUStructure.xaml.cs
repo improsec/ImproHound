@@ -18,110 +18,141 @@ namespace ImproHound.pages
         private readonly MainWindow containerWindow;
         private readonly DBConnection connection;
         private readonly ConnectPage connectPage;
+        private readonly DBAction dBAction;
+        private readonly int defaultTierNumber = 1;
+
         private Dictionary<string, ADObject> forest;
         private Hashtable idLookupTable;
-        private readonly int defaultTierNumber = 1;
-        private bool ouStructureSaved = false;
+        private bool ouStructureSaved = true;
 
-        public OUStructurePage(MainWindow containerWindow, DBConnection connection, ConnectPage connectPage, bool alreadyTiered, bool startover)
+
+        public OUStructurePage(MainWindow containerWindow, DBConnection connection, ConnectPage connectPage, DBAction dBAction)
         {
             this.containerWindow = containerWindow;
             this.connection = connection;
             this.connectPage = connectPage;
+            this.dBAction = dBAction;
 
             InitializeComponent();
-            Initialization(alreadyTiered, startover);
+            Initialization();
         }
 
-        private async void Initialization(bool alreadyTiered, bool startover)
+        private async void Initialization()
         {
             EnableGUIWait();
             idLookupTable = new Hashtable();
-            ouStructureSaved = alreadyTiered && !startover;
-            if (startover) await DeleteTieringInDB();
-            await BuildOUStructure(alreadyTiered, startover);
+
+            if (dBAction.Equals(DBAction.StartFromScratch))
+            {
+                await PrepareDB();
+                await SetDefaultTiers();
+            }
+            else if (dBAction.Equals(DBAction.StartOver))
+            {
+                await DeleteTieringInDB();
+                await SetDefaultTiers();
+            }
+
+            await BuildOUStructure();
+
+            if (dBAction.Equals(DBAction.StartFromScratch) || dBAction.Equals(DBAction.StartOver))
+                await SetDefaultTiersForImprohoundCreatedOUs();
+
             DisableGUIWait();
         }
 
-        private async Task BuildOUStructure(bool alreadyTiered, bool startover)
+        private async Task SetDefaultTiersForImprohoundCreatedOUs()
         {
-            forest = new Dictionary<string, ADObject>();
-
-            if (!alreadyTiered)
+            // Update DB
+            List<IRecord> records;
+            try
             {
-                // Set name and distinguishedname for objects without
-                List<IRecord> records1;
-                try
+                records = await connection.Query(@"
+                        MATCH (ou:OU {improhoundcreated: true})
+                        MATCH (n) WHERE n.distinguishedname ENDS WITH ou.distinguishedname
+                        UNWIND labels(n) AS allLabels
+                        WITH DISTINCT allLabels, ou WHERE allLabels STARTS WITH 'Tier'
+                        WITH ou, allLabels ORDER BY allLabels ASC
+                        WITH ou, head(collect(allLabels)) AS rightTier
+                        CALL apoc.create.setLabels(ou, ['Base', 'OU', rightTier]) YIELD node
+                        RETURN ou.objectid, rightTier
+                ");
+            }
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                containerWindow.NavigateToPage(connectPage);
+                return;
+            }
+
+            // Update application data
+            foreach (IRecord record in records)
+            {
+                record.Values.TryGetValue("ou.objectid", out object objectid);
+                record.Values.TryGetValue("rightTier", out object tier);
+
+                if (idLookupTable.ContainsKey((string)objectid))
                 {
-                    records1 = await connection.Query(@"
+                    ADObject adObject = (ADObject)idLookupTable[(string)objectid];
+                    adObject.SetTier(((string)tier).Replace("Tier", ""));
+                }
+            }
+        }
+
+        private async Task PrepareDB()
+        {
+            // Set name and distinguishedname for objects without
+            List<IRecord> records1;
+            try
+            {
+                records1 = await connection.Query(@"
                         MATCH (o) WHERE NOT EXISTS(o.distinguishedname)
                         MATCH (d:Domain) WHERE o.objectid STARTS WITH d.domain
                         RETURN o.objectid, o.name, d.domain, d.distinguishedname
                     ");
-                }
-                catch (Exception err)
-                {
-                    // Error
-                    MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    containerWindow.NavigateToPage(connectPage);
-                    return;
-                }
+            }
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                containerWindow.NavigateToPage(connectPage);
+                return;
+            }
 
-                foreach (IRecord record in records1)
-                {
-                    record.Values.TryGetValue("o.objectid", out object objectid);
-                    record.Values.TryGetValue("o.name", out object name);
-                    record.Values.TryGetValue("d.domain", out object domain);
-                    record.Values.TryGetValue("d.distinguishedname", out object domainDistinguishedname);
+            foreach (IRecord record in records1)
+            {
+                record.Values.TryGetValue("o.objectid", out object objectid);
+                record.Values.TryGetValue("o.name", out object name);
+                record.Values.TryGetValue("d.domain", out object domain);
+                record.Values.TryGetValue("d.distinguishedname", out object domainDistinguishedname);
 
-                    if (name == null)
+                if (name == null)
+                {
+                    if (objectid.ToString().EndsWith("S-1-5-4"))
                     {
-                        if (objectid.ToString().EndsWith("S-1-5-4"))
-                        {
-                            name = "Interactive (S-1-5-4)@" + (string)domain;
-                        }
-                        else if (objectid.ToString().EndsWith("S-1-5-17"))
-                        {
-                            name = "This Organization (S-1-5-17)@" + (string)domain;
-                        }
-                        else
-                        {
-                            name = objectid + "@" + (string)domain;
-                        }
+                        name = "Interactive (S-1-5-4)@" + (string)domain;
                     }
-
-                    string cn = name.ToString().Substring(0, name.ToString().IndexOf("@"));
-                    string distinguishedname = "CN=" + cn + "," + domainDistinguishedname;
-
-                    try
+                    else if (objectid.ToString().EndsWith("S-1-5-17"))
                     {
-                        await connection.Query(@"
+                        name = "This Organization (S-1-5-17)@" + (string)domain;
+                    }
+                    else
+                    {
+                        name = objectid + "@" + (string)domain;
+                    }
+                }
+
+                string cn = name.ToString().Substring(0, name.ToString().IndexOf("@"));
+                string distinguishedname = "CN=" + cn + "," + domainDistinguishedname;
+
+                try
+                {
+                    await connection.Query(@"
                             MATCH (o {objectid:'" + (string)objectid + @"'})
                             SET o.name = '" + name.ToString() + @"'
                             SET o.distinguishedname = '" + distinguishedname + @"'
                         ");
-                    }
-                    catch (Exception err)
-                    {
-                        // Error
-                        MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                        containerWindow.NavigateToPage(connectPage);
-                        return;
-                    }
-                }
-
-                // Make sure all objects do not have more than the Base label and the type of object label
-                // I have seen service accounts in the BloodHound DB having both User and Computer label
-                try
-                {
-                    await connection.Query(@"
-                        MATCH (n) WHERE SIZE(LABELS(n)) > 2
-                        UNWIND LABELS(n) AS lbls
-                        WITH n, lbls ORDER BY lbls ASC
-                        WITH n, COLLECT(lbls) AS lblsSort
-                        CALL apoc.create.setLabels(n, lblsSort[0..2]) YIELD node
-                        RETURN NULL
-                    ");
                 }
                 catch (Exception err)
                 {
@@ -132,25 +163,167 @@ namespace ImproHound.pages
                 }
             }
 
-            if (!startover)
+            // Make sure all objects do not have more than the Base label and the type of object label
+            // I have seen service accounts in the BloodHound DB having both User and Computer label
+            try
             {
-                // Create temp tier property on objects
-                try
-                {
-                    await connection.Query(@"
-                        MATCH (o)
-                        UNWIND LABELS(o) AS lbls
-                        WITH o, lbls WHERE lbls STARTS WITH 'Tier'
-                        SET o.tier = lbls
+                await connection.Query(@"
+                        MATCH (n) WHERE SIZE(LABELS(n)) > 2
+                        UNWIND LABELS(n) AS lbls
+                        WITH n, lbls ORDER BY lbls ASC
+                        WITH n, COLLECT(lbls) AS lblsSort
+                        CALL apoc.create.setLabels(n, lblsSort[0..2]) YIELD node
+                        RETURN NULL
                     ");
-                }
-                catch (Exception err)
-                {
-                    // Error
-                    MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    containerWindow.NavigateToPage(connectPage);
-                    return;
-                }
+            }
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                containerWindow.NavigateToPage(connectPage);
+                return;
+            }
+
+        }
+
+        private async Task SetDefaultTiers()
+        {
+            try
+            {
+                // Set standard Tier 2 groups and group members
+                await connection.Query(@"
+                    MATCH (group:Group) WHERE EXISTS(group.distinguishedname)
+                    AND substring(group.objectid, size(group.objectid) - 4, 4) IN ['" + String.Join("','", DefaultTieringConstants.tier2GroupRids) + @"']
+                    CALL apoc.create.addLabels(group, ['Tier2']) YIELD node
+                    WITH group
+                    MATCH (principal)-[:MemberOf*1..]->(group) WHERE EXISTS(principal.distinguishedname)
+                    CALL apoc.create.addLabels(principal, ['Tier2']) YIELD node
+                    RETURN NULL
+                ");
+
+                // Set standard Tier 0 groups and group members
+                await connection.Query(@"
+                    MATCH (group:Group) WHERE EXISTS(group.distinguishedname)
+                    AND substring(group.objectid, size(group.objectid) - 4, 4) IN ['" + String.Join("','", DefaultTieringConstants.tier0GroupRids) + @"']
+                    CALL apoc.create.addLabels(group, ['Tier0']) YIELD node
+                    WITH group
+                    MATCH (principal)-[:MemberOf*1..]->(group) WHERE EXISTS(principal.distinguishedname)
+                    CALL apoc.create.addLabels(principal, ['Tier0']) YIELD node
+                    RETURN NULL
+                ");
+
+                // DnsAdmins
+                await connection.Query(@"
+                    MATCH (group:Group) WHERE EXISTS(group.distinguishedname)
+                    AND group.distinguishedname STARTS WITH '" + DefaultTieringConstants.tier0DnsAdmins + @"'
+                    CALL apoc.create.addLabels(group, ['Tier0']) YIELD node
+                    WITH group
+                    MATCH (principal)-[:MemberOf*1..]->(group) WHERE EXISTS(principal.distinguishedname)
+                    CALL apoc.create.addLabels(principal, ['Tier0']) YIELD node
+                    RETURN NULL
+                ");
+
+                // WinRMRemoteWMIUsers__
+                await connection.Query(@"
+                    MATCH (group:Group) WHERE EXISTS(group.distinguishedname)
+                    AND group.distinguishedname STARTS WITH '" + DefaultTieringConstants.tier0WinRMRemoteWMIUsers__ + @"'
+                    CALL apoc.create.addLabels(group, ['Tier0']) YIELD node
+                    WITH group
+                    MATCH (principal)-[:MemberOf*1..]->(group) WHERE EXISTS(principal.distinguishedname)
+                    CALL apoc.create.addLabels(principal, ['Tier0']) YIELD node
+                    RETURN NULL
+                ");
+
+
+                // Set standard Tier 0 users
+                await connection.Query(@"
+                    MATCH (user) WHERE EXISTS(user.distinguishedname)
+                    AND substring(user.objectid, size(user.objectid) - 4, 4) IN ['" + String.Join("','", DefaultTieringConstants.tier0UserRids) + @"']
+                    CALL apoc.create.addLabels(user, ['Tier0']) YIELD node
+                    RETURN NULL
+                ");
+
+                // Set OUs to be in the same tier as the lowest tier of their content
+                await connection.Query(@"
+                    MATCH (ou:OU) WHERE EXISTS(ou.distinguishedname)
+                    MATCH (ou)-[:Contains*1..]->(obj)
+                    UNWIND labels(obj) AS allLabels
+                    WITH DISTINCT allLabels, ou WHERE allLabels STARTS WITH 'Tier'
+                    WITH ou, allLabels ORDER BY allLabels ASC
+                    WITH ou, head(collect(allLabels)) AS rightTier
+                    CALL apoc.create.setLabels(ou, ['Base', 'OU', rightTier]) YIELD node
+                    RETURN NULL
+                ");
+
+                // Set domains to Tier 0
+                await connection.Query(@"
+                    MATCH (domain:Domain) WHERE EXISTS(domain.distinguishedname)
+                    CALL apoc.create.addLabels(domain, ['Tier0']) YIELD node
+                    RETURN NULL
+                ");
+
+                // Set GPOs to be in the same tier as the lowest tier of the OUs (or domain) linked to
+                await connection.Query(@"
+                    MATCH (gpo:GPO) WHERE EXISTS(gpo.distinguishedname)
+                    MATCH (gpo)-[:GpLink]->(ou)
+                    UNWIND labels(ou) AS allLabels
+                    WITH DISTINCT allLabels, gpo WHERE allLabels STARTS WITH 'Tier'
+                    WITH gpo, allLabels ORDER BY allLabels ASC
+                    WITH gpo, head(collect(allLabels)) AS rightTier
+                    CALL apoc.create.setLabels(gpo, ['Base', 'GPO', rightTier]) YIELD node
+                    RETURN NULL
+                ");
+
+                // Set all objects without tier label to default tier
+                await connection.Query(@"
+                    MATCH (o) WHERE EXISTS(o.distinguishedname)
+                    AND NOT ('Tier0' IN labels(o) OR 'Tier1' IN labels(o) OR 'Tier2' IN labels(o))
+                    UNWIND labels(o) AS allLabels
+                    WITH o, COLLECT(allLabels) + 'Tier" + defaultTierNumber + @"' AS newLabels
+                    CALL apoc.create.setLabels(o, newLabels) YIELD node
+                    RETURN NULL
+                ");
+
+                // Delete higher tier labels for objects in multiple tiers
+                await connection.Query(@"
+                    MATCH (n)
+                    UNWIND labels(n) AS label
+                    WITH n, label WHERE label STARTS WITH 'Tier'
+                    WITH n, label ORDER BY label ASC
+                    WITH n, tail(collect(label)) AS wrongTiers
+                    CALL apoc.create.removeLabels(n, wrongTiers) YIELD node
+                    RETURN NULL
+                ");
+            }
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                containerWindow.NavigateToPage(connectPage);
+                return;
+            }
+        }
+
+        private async Task BuildOUStructure()
+        {
+            forest = new Dictionary<string, ADObject>();
+
+            // Create temp tier property on objects
+            try
+            {
+                await connection.Query(@"
+                    MATCH (o)
+                    UNWIND LABELS(o) AS lbls
+                    WITH o, lbls WHERE lbls STARTS WITH 'Tier'
+                    SET o.tier = lbls
+                ");
+            }
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                containerWindow.NavigateToPage(connectPage);
+                return;
             }
 
             // Get all obejcts with distinguishedname (incl. objects with o.tier = null)
@@ -223,23 +396,20 @@ namespace ImproHound.pages
                 }
             }
 
-            if (!startover)
+            // Delete temp tier property on objects
+            try
             {
-                // Delete temp tier property on objects
-                try
-                {
-                    await connection.Query(@"
-                        MATCH(o)
-                        SET o.tier = NULL
-                    ");
-                }
-                catch (Exception err)
-                {
-                    // Error
-                    MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    containerWindow.NavigateToPage(connectPage);
-                    return;
-                }
+                await connection.Query(@"
+                    MATCH(o)
+                    SET o.tier = NULL
+                ");
+            }
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                containerWindow.NavigateToPage(connectPage);
+                return;
             }
 
             Console.WriteLine("OU Structure build");
@@ -327,7 +497,8 @@ namespace ImproHound.pages
             try
             {
                 records = await connection.Query(@"
-                    CREATE (o {objectid:'" + objectid + "', domain:'" + domain + "', distinguishedname:'" + distinguishedname + "', name:'" + name + @"'})
+                    CREATE (o {objectid:'" + objectid + "', domain:'" + domain + "', distinguishedname:'" + distinguishedname + "', name:'" + name +
+                    @"', improhoundcreated: true})
                     WITH o
                     CALL apoc.create.setLabels(o, ['Base', '" + adType.ToString() + "', 'Tier" + tier + @"']) YIELD node
                     RETURN NULL
@@ -790,5 +961,10 @@ namespace ImproHound.pages
             setMembersButton.IsEnabled = (forestTreeView.SelectedItem != null) &&
                 ((ADObject)forestTreeView.SelectedItem).Type.Equals(ADObjectType.Group);
         }
+    }
+
+    public enum DBAction
+    {
+        StartFromScratch, Continue, StartOver
     }
 }

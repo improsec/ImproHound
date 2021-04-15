@@ -21,13 +21,13 @@ namespace ImproHound.pages
         private void StartoverButton_Click(object sender, RoutedEventArgs e)
         {
             // Jump to OU structure page
-            containerWindow.NavigateToPage(new OUStructurePage(containerWindow, connection, connectPage, alreadyTiered: true, startover: true));
+            containerWindow.NavigateToPage(new OUStructurePage(containerWindow, connection, connectPage, DBAction.StartOver));
         }
 
         private void ContinueButton_Click(object sender, RoutedEventArgs e)
         {
             // Jump to OU structure page
-            containerWindow.NavigateToPage(new OUStructurePage(containerWindow, connection, connectPage, alreadyTiered: true, startover: false));
+            containerWindow.NavigateToPage(new OUStructurePage(containerWindow, connection, connectPage, DBAction.Continue));
         }
     }
 }

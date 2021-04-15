@@ -86,7 +86,7 @@ namespace ImproHound.pages
                 else
                 {
                     // Jump to OU structure page
-                    containerWindow.NavigateToPage(new OUStructurePage(containerWindow, connection, this, alreadyTiered: false, startover: false));
+                    containerWindow.NavigateToPage(new OUStructurePage(containerWindow, connection, this, DBAction.StartFromScratch));
                 }
             }
             catch (Exception err)
