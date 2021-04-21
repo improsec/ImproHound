@@ -518,6 +518,7 @@ namespace ImproHound.pages
 
                             // Create as OU in application data
                             ADObject adContainer = new ADObject(objectId, ADObjectType.OU, cn, name, containerDistinguishedname, tier, this);
+                            idLookupTable.Add((string)objectId, adContainer);
                             parent.Children.Add(oupath[i], adContainer);
                             parent = adContainer;
 
