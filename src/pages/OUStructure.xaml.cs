@@ -148,10 +148,10 @@ namespace ImproHound.pages
             try
             {
                 records1 = await connection.Query(@"
-                        MATCH (o) WHERE NOT EXISTS(o.distinguishedname)
-                        MATCH (d:Domain) WHERE o.objectid STARTS WITH d.domain
-                        RETURN o.objectid, o.name, d.domain, d.distinguishedname
-                    ");
+                    MATCH (o) WHERE NOT EXISTS(o.distinguishedname)
+                    MATCH (d:Domain) WHERE o.objectid STARTS WITH d.domain
+                    RETURN o.objectid, o.name, d.domain, d.distinguishedname
+                ");
             }
             catch (Exception err)
             {
@@ -168,31 +168,43 @@ namespace ImproHound.pages
                 record.Values.TryGetValue("d.domain", out object domain);
                 record.Values.TryGetValue("d.distinguishedname", out object domainDistinguishedname);
 
-                if (name == null)
+                string objectidStr = (string)objectid;
+                string domainStr = (string)domain;
+                string cn = objectidStr;
+
+                // Check if the SID match a well known one
+                IEnumerable<WellKnownADObject> matchingObj = DefaultTieringConstants.WellKnownADObjects.Where(o => o.sidEndsWith != null && objectidStr.EndsWith(o.sidEndsWith));
+                if (matchingObj.Count() > 0)
                 {
-                    if (objectid.ToString().EndsWith("S-1-5-4"))
-                    {
-                        name = "Interactive (S-1-5-4)@" + (string)domain;
-                    }
-                    else if (objectid.ToString().EndsWith("S-1-5-17"))
-                    {
-                        name = "This Organization (S-1-5-17)@" + (string)domain;
-                    }
-                    else
-                    {
-                        name = objectid + "@" + (string)domain;
+                    cn = matchingObj.FirstOrDefault().name;
+
+                    if (name == null) {
+                        name = (cn + "@" + domainStr).ToUpper();
                     }
                 }
+                // Use the name as CN if name is present
+                else if (name != null && name.ToString().Contains("@"))
+                {
+                    cn = name.ToString().Substring(0, name.ToString().IndexOf("@"));
+                }
+                else if (name != null)
+                {
+                    cn = name.ToString();
+                }
+                else
+                {
+                    name = objectidStr + "@" + domainStr;
+                }
 
-                string cn = name.ToString().Substring(0, name.ToString().IndexOf("@"));
-                string distinguishedname = "CN=" + cn + "," + domainDistinguishedname;
+                string distinguishedname = "CN=" + cn + "," + domainDistinguishedname.ToString();
 
                 try
                 {
                     await connection.Query(@"
-                            MATCH (o {objectid:'" + (string)objectid + @"'})
+                            MATCH (o {objectid:'" + objectidStr + @"'})
                             SET o.name = '" + name.ToString() + @"'
                             SET o.distinguishedname = '" + distinguishedname + @"'
+                            SET o.domain = '" + domainStr + @"'
                         ");
                 }
                 catch (Exception err)
@@ -231,58 +243,48 @@ namespace ImproHound.pages
         {
             try
             {
-                // Set standard Tier 2 groups and group members
-                await connection.Query(@"
-                    MATCH (group:Group) WHERE EXISTS(group.distinguishedname)
-                    AND substring(group.objectid, size(group.objectid) - 4, 4) IN ['" + String.Join("','", DefaultTieringConstants.tier2GroupRids) + @"']
-                    CALL apoc.create.addLabels(group, ['Tier2']) YIELD node
-                    WITH group
-                    MATCH (principal)-[:MemberOf*1..]->(group) WHERE EXISTS(principal.distinguishedname)
-                    CALL apoc.create.addLabels(principal, ['Tier2']) YIELD node
-                    RETURN NULL
-                ");
+                // Well known objects with static SIDs
+                IOrderedEnumerable<string> defaultTiers = DefaultTieringConstants.WellKnownADObjects.Where(o => o.sidEndsWith != null).Select(o => o.tier).Distinct().OrderByDescending(o => o);
+                int shortestSIDEnding = DefaultTieringConstants.WellKnownADObjects.Where(o => o.sidEndsWith != null).OrderBy(o => o.sidEndsWith.Length).First().sidEndsWith.Length;
+                int longestSIDEnding = DefaultTieringConstants.WellKnownADObjects.Where(o => o.sidEndsWith != null).OrderByDescending(o => o.sidEndsWith.Length).First().sidEndsWith.Length;
 
-                // Set standard Tier 0 groups and group members
-                await connection.Query(@"
-                    MATCH (group:Group) WHERE EXISTS(group.distinguishedname)
-                    AND substring(group.objectid, size(group.objectid) - 4, 4) IN ['" + String.Join("','", DefaultTieringConstants.tier0GroupRids) + @"']
-                    CALL apoc.create.addLabels(group, ['Tier0']) YIELD node
-                    WITH group
-                    MATCH (principal)-[:MemberOf*1..]->(group) WHERE EXISTS(principal.distinguishedname)
-                    CALL apoc.create.addLabels(principal, ['Tier0']) YIELD node
-                    RETURN NULL
-                ");
+                foreach (string tier in defaultTiers)
+                {
+                    IEnumerable<string> wellKnownSIDEndings = DefaultTieringConstants.WellKnownADObjects.Where(o => o.sidEndsWith != null && o.tier.Equals(tier)).Select(o => o.sidEndsWith);
 
-                // DnsAdmins
-                await connection.Query(@"
-                    MATCH (group:Group) WHERE EXISTS(group.distinguishedname)
-                    AND group.distinguishedname STARTS WITH '" + DefaultTieringConstants.tier0DnsAdmins + @"'
-                    CALL apoc.create.addLabels(group, ['Tier0']) YIELD node
-                    WITH group
-                    MATCH (principal)-[:MemberOf*1..]->(group) WHERE EXISTS(principal.distinguishedname)
-                    CALL apoc.create.addLabels(principal, ['Tier0']) YIELD node
-                    RETURN NULL
-                ");
+                    for (int i = shortestSIDEnding; i <= longestSIDEnding; i++)
+                    {
+                        if (!wellKnownSIDEndings.Count().Equals(0) && !wellKnownSIDEndings.Where(o => o.Length.Equals(i)).Count().Equals(0))
+                        {
+                            await connection.Query(@"
+                                MATCH (obj1) WHERE EXISTS(obj1.distinguishedname)
+                                AND size(obj1.objectid) >= " + i + @"
+                                AND substring(obj1.objectid, size(obj1.objectid) - " + i + ", " + i + ") IN ['" + String.Join("','", wellKnownSIDEndings.Where(o => o.Length.Equals(i))) + @"']
+                                CALL apoc.create.addLabels(obj1, ['Tier" + tier + @"']) YIELD node
+                                WITH obj1
+                                MATCH (obj2)-[:MemberOf*1..]->(obj1) WHERE EXISTS(obj2.distinguishedname)
+                                CALL apoc.create.addLabels(obj2, ['Tier" + tier + @"']) YIELD node
+                                RETURN NULL
+                            ");
+                        }
+                    }
+                }
 
-                // WinRMRemoteWMIUsers__
-                await connection.Query(@"
-                    MATCH (group:Group) WHERE EXISTS(group.distinguishedname)
-                    AND group.distinguishedname STARTS WITH '" + DefaultTieringConstants.tier0WinRMRemoteWMIUsers__ + @"'
-                    CALL apoc.create.addLabels(group, ['Tier0']) YIELD node
-                    WITH group
-                    MATCH (principal)-[:MemberOf*1..]->(group) WHERE EXISTS(principal.distinguishedname)
-                    CALL apoc.create.addLabels(principal, ['Tier0']) YIELD node
-                    RETURN NULL
-                ");
+                // Well known objects with non-static SIDs
+                IEnumerable<WellKnownADObject> wellKnownObjects = DefaultTieringConstants.WellKnownADObjects.Where(o => o.sidEndsWith == null);
 
-
-                // Set standard Tier 0 users
-                await connection.Query(@"
-                    MATCH (user) WHERE EXISTS(user.distinguishedname)
-                    AND substring(user.objectid, size(user.objectid) - 4, 4) IN ['" + String.Join("','", DefaultTieringConstants.tier0UserRids) + @"']
-                    CALL apoc.create.addLabels(user, ['Tier0']) YIELD node
-                    RETURN NULL
-                ");
+                foreach (WellKnownADObject wellKnownObject in wellKnownObjects)
+                {
+                    await connection.Query(@"
+                        MATCH (obj1) WHERE EXISTS(obj1.distinguishedname)
+                        AND obj1.distinguishedname STARTS WITH 'CN=" + wellKnownObject.name + @"'
+                        CALL apoc.create.addLabels(obj1, ['Tier" + wellKnownObject.tier + @"']) YIELD node
+                        WITH obj1
+                        MATCH (obj2)-[:MemberOf*1..]->(obj1) WHERE EXISTS(obj2.distinguishedname)
+                        CALL apoc.create.addLabels(obj2, ['Tier" + wellKnownObject.tier + @"']) YIELD node
+                        RETURN NULL
+                    ");
+                }
 
                 // Set OUs to be in the same tier as the lowest tier of their content
                 await connection.Query(@"
