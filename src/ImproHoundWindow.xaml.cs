@@ -4,12 +4,13 @@ using System.Windows.Controls;
 
 namespace ImproHound
 {
-    public partial class MainWindow : Window
+    public partial class ImproHoundWindow : Window
     {
-        public MainWindow()
+        public ImproHoundWindow()
         {
             InitializeComponent();
-            MainFrame.Navigate(new ConnectPage(this));
+            MainWindow.SetWindow(this);
+            MainFrame.Navigate(new ConnectPage());
         }
 
         public void NavigateToPage(Page page)

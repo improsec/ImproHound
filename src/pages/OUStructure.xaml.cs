@@ -15,9 +15,6 @@ namespace ImproHound.pages
 {
     public partial class OUStructurePage : Page
     {
-        private readonly MainWindow containerWindow;
-        private readonly DBConnection connection;
-        private readonly ConnectPage connectPage;
         private readonly DBAction dBAction;
         private readonly int defaultTierNumber = 1;
 
@@ -25,12 +22,8 @@ namespace ImproHound.pages
         private Hashtable idLookupTable;
         private bool ouStructureSaved = true;
 
-
-        public OUStructurePage(MainWindow containerWindow, DBConnection connection, ConnectPage connectPage, DBAction dBAction)
+        public OUStructurePage(DBAction dBAction)
         {
-            this.containerWindow = containerWindow;
-            this.connection = connection;
-            this.connectPage = connectPage;
             this.dBAction = dBAction;
 
             InitializeComponent();
@@ -67,7 +60,7 @@ namespace ImproHound.pages
             List<IRecord> records;
             try
             {
-                records = await connection.Query(@"
+                records = await DBConnection.Query(@"
                         MATCH (ou:OU {improhoundcreated: true})
                         MATCH (n) WHERE n.distinguishedname ENDS WITH ou.distinguishedname
                         UNWIND labels(n) AS allLabels
@@ -82,7 +75,7 @@ namespace ImproHound.pages
             {
                 // Error
                 MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                containerWindow.NavigateToPage(connectPage);
+                MainWindow.BackToConnectPage();
                 return;
             }
 
@@ -107,7 +100,7 @@ namespace ImproHound.pages
             List<IRecord> records;
             try
             {
-                records = await connection.Query(@"
+                records = await DBConnection.Query(@"
                     MATCH (n:Domain)
                     WHERE NOT EXISTS (n.distinguishedname)
                     RETURN n.name
@@ -117,7 +110,7 @@ namespace ImproHound.pages
             {
                 // Error
                 MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                containerWindow.NavigateToPage(connectPage);
+                MainWindow.BackToConnectPage();
                 return;
             }
 
@@ -128,7 +121,7 @@ namespace ImproHound.pages
 
                 try
                 {
-                    await connection.Query(@"
+                    await DBConnection.Query(@"
                         MATCH (n:Domain {name:'" + (string)name + @"'})
                         SET n.distinguishedname = '" + distinguishedname + @"', n.domain = n.name, n.highvalue = true
                         RETURN NULL
@@ -138,7 +131,7 @@ namespace ImproHound.pages
                 {
                     // Error
                     MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    containerWindow.NavigateToPage(connectPage);
+                    MainWindow.BackToConnectPage();
                     return;
                 }
             }
@@ -147,7 +140,7 @@ namespace ImproHound.pages
             List<IRecord> records1;
             try
             {
-                records1 = await connection.Query(@"
+                records1 = await DBConnection.Query(@"
                     MATCH (o) WHERE NOT EXISTS(o.distinguishedname)
                     MATCH (d:Domain) WHERE o.objectid STARTS WITH d.domain
                     RETURN o.objectid, o.name, d.domain, d.distinguishedname
@@ -157,7 +150,7 @@ namespace ImproHound.pages
             {
                 // Error
                 MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                containerWindow.NavigateToPage(connectPage);
+                MainWindow.BackToConnectPage();
                 return;
             }
 
@@ -200,7 +193,7 @@ namespace ImproHound.pages
 
                 try
                 {
-                    await connection.Query(@"
+                    await DBConnection.Query(@"
                             MATCH (o {objectid:'" + objectidStr + @"'})
                             SET o.name = '" + name.ToString() + @"'
                             SET o.distinguishedname = '" + distinguishedname + @"'
@@ -211,7 +204,7 @@ namespace ImproHound.pages
                 {
                     // Error
                     MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    containerWindow.NavigateToPage(connectPage);
+                    MainWindow.BackToConnectPage();
                     return;
                 }
             }
@@ -220,7 +213,7 @@ namespace ImproHound.pages
             // I have seen service accounts in the BloodHound DB having both User and Computer label
             try
             {
-                await connection.Query(@"
+                await DBConnection.Query(@"
                         MATCH (n) WHERE SIZE(LABELS(n)) > 2
                         UNWIND LABELS(n) AS lbls
                         WITH n, lbls ORDER BY lbls ASC
@@ -233,7 +226,7 @@ namespace ImproHound.pages
             {
                 // Error
                 MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                containerWindow.NavigateToPage(connectPage);
+                MainWindow.BackToConnectPage();
                 return;
             }
 
@@ -256,7 +249,7 @@ namespace ImproHound.pages
                     {
                         if (!wellKnownSIDEndings.Count().Equals(0) && !wellKnownSIDEndings.Where(o => o.Length.Equals(i)).Count().Equals(0))
                         {
-                            await connection.Query(@"
+                            await DBConnection.Query(@"
                                 MATCH (obj1) WHERE EXISTS(obj1.distinguishedname)
                                 AND size(obj1.objectid) >= " + i + @"
                                 AND substring(obj1.objectid, size(obj1.objectid) - " + i + ", " + i + ") IN ['" + String.Join("','", wellKnownSIDEndings.Where(o => o.Length.Equals(i))) + @"']
@@ -275,7 +268,7 @@ namespace ImproHound.pages
 
                 foreach (WellKnownADObject wellKnownObject in wellKnownObjects)
                 {
-                    await connection.Query(@"
+                    await DBConnection.Query(@"
                         MATCH (obj1) WHERE EXISTS(obj1.distinguishedname)
                         AND obj1.distinguishedname STARTS WITH 'CN=" + wellKnownObject.name + @"'
                         CALL apoc.create.addLabels(obj1, ['Tier" + wellKnownObject.tier + @"']) YIELD node
@@ -287,7 +280,7 @@ namespace ImproHound.pages
                 }
 
                 // Set OUs to be in the same tier as the lowest tier of their content
-                await connection.Query(@"
+                await DBConnection.Query(@"
                     MATCH (ou:OU) WHERE EXISTS(ou.distinguishedname)
                     MATCH (ou)-[:Contains*1..]->(obj)
                     UNWIND labels(obj) AS allLabels
@@ -299,14 +292,14 @@ namespace ImproHound.pages
                 ");
 
                 // Set domains to Tier 0
-                await connection.Query(@"
+                await DBConnection.Query(@"
                     MATCH (domain:Domain) WHERE EXISTS(domain.distinguishedname)
                     CALL apoc.create.addLabels(domain, ['Tier0']) YIELD node
                     RETURN NULL
                 ");
 
                 // Set GPOs to be in the same tier as the lowest tier of the OUs (or domain) linked to
-                await connection.Query(@"
+                await DBConnection.Query(@"
                     MATCH (gpo:GPO) WHERE EXISTS(gpo.distinguishedname)
                     MATCH (gpo)-[:GpLink]->(ou)
                     UNWIND labels(ou) AS allLabels
@@ -318,7 +311,7 @@ namespace ImproHound.pages
                 ");
 
                 // Set all objects without tier label to default tier
-                await connection.Query(@"
+                await DBConnection.Query(@"
                     MATCH (o) WHERE EXISTS(o.distinguishedname)
                     AND NOT ('Tier0' IN labels(o) OR 'Tier1' IN labels(o) OR 'Tier2' IN labels(o))
                     UNWIND labels(o) AS allLabels
@@ -328,7 +321,7 @@ namespace ImproHound.pages
                 ");
 
                 // Delete higher tier labels for objects in multiple tiers
-                await connection.Query(@"
+                await DBConnection.Query(@"
                     MATCH (n)
                     UNWIND labels(n) AS label
                     WITH n, label WHERE label STARTS WITH 'Tier'
@@ -342,7 +335,7 @@ namespace ImproHound.pages
             {
                 // Error
                 MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                containerWindow.NavigateToPage(connectPage);
+                MainWindow.BackToConnectPage();
                 return;
             }
         }
@@ -354,7 +347,7 @@ namespace ImproHound.pages
             // Create temp tier property on objects
             try
             {
-                await connection.Query(@"
+                await DBConnection.Query(@"
                     MATCH (o)
                     UNWIND LABELS(o) AS lbls
                     WITH o, lbls WHERE lbls STARTS WITH 'Tier'
@@ -365,7 +358,7 @@ namespace ImproHound.pages
             {
                 // Error
                 MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                containerWindow.NavigateToPage(connectPage);
+                MainWindow.BackToConnectPage();
                 return;
             }
 
@@ -374,7 +367,7 @@ namespace ImproHound.pages
             try
             {
                 object output;
-                records = await connection.Query(@"
+                records = await DBConnection.Query(@"
                         MATCH (o) WHERE EXISTS(o.distinguishedname)
                         UNWIND LABELS(o) AS adtype
                         WITH o.objectid AS objectid, o.name AS name, o.distinguishedname AS distinguishedname, o.tier AS tier, adtype
@@ -385,7 +378,7 @@ namespace ImproHound.pages
                 {
                     // Unknown error
                     MessageBox.Show("Something went wrong. Neo4j server response format is unexpected.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    containerWindow.NavigateToPage(connectPage);
+                    MainWindow.BackToConnectPage();
                     return;
                 }
             }
@@ -393,7 +386,7 @@ namespace ImproHound.pages
             {
                 // Error
                 MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                containerWindow.NavigateToPage(connectPage);
+                MainWindow.BackToConnectPage();
                 return;
             }
 
@@ -442,7 +435,7 @@ namespace ImproHound.pages
             // Delete temp tier property on objects
             try
             {
-                await connection.Query(@"
+                await DBConnection.Query(@"
                     MATCH(o)
                     SET o.tier = NULL
                 ");
@@ -451,7 +444,7 @@ namespace ImproHound.pages
             {
                 // Error
                 MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                containerWindow.NavigateToPage(connectPage);
+                MainWindow.BackToConnectPage();
                 return;
             }
 
@@ -467,7 +460,7 @@ namespace ImproHound.pages
             List<IRecord> records;
             try
             {
-                records = await connection.Query(@"
+                records = await DBConnection.Query(@"
                     MATCH (o {objectid:'" + objectid + @"'})
                     UNWIND labels(o) AS allLabels
                     WITH DISTINCT allLabels, o WHERE NOT allLabels STARTS WITH 'Tier'
@@ -480,7 +473,7 @@ namespace ImproHound.pages
             {
                 // Error
                 MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                containerWindow.NavigateToPage(connectPage);
+                MainWindow.BackToConnectPage();
                 return;
             }
         }
@@ -541,7 +534,7 @@ namespace ImproHound.pages
             List<IRecord> records;
             try
             {
-                records = await connection.Query(@"
+                records = await DBConnection.Query(@"
                     CREATE (o {objectid:'" + objectid + "', domain:'" + domain + "', distinguishedname:'" + distinguishedname + "', name:'" + name +
                     @"', improhoundcreated: true})
                     WITH o
@@ -563,7 +556,7 @@ namespace ImproHound.pages
             try
             {
                 object output;
-                records = await connection.Query(@"
+                records = await DBConnection.Query(@"
                     CALL db.labels()
                     YIELD label WHERE label STARTS WITH 'Tier'
                     WITH COLLECT(label) AS labels
@@ -613,7 +606,7 @@ namespace ImproHound.pages
                         CALL apoc.create.addLabels(obj, ['Tier' + " + largestTier.Key + @"]) YIELD node
                         RETURN NULL
                     ";
-                records = await connection.Query(query);
+                records = await DBConnection.Query(query);
                 if (!records[0].Values.TryGetValue("NULL", out output))
                 {
                     // Unknown error
@@ -643,7 +636,7 @@ namespace ImproHound.pages
                         CALL apoc.refactor.rename.label('Tier' + " + largestTier.Key + ", 'Tier' + " + tier.Key + @", nList) YIELD indexes
                         RETURN NULL
                     ";
-                    records = await connection.Query(query);
+                    records = await DBConnection.Query(query);
                     if (!records[0].Values.TryGetValue("NULL", out output))
                     {
                         // Unknown error
@@ -736,7 +729,7 @@ namespace ImproHound.pages
                     if (parent.Type.Equals(ADObjectType.Domain))
                     {
                         // Delete current tier label
-                        await connection.Query(@"
+                        await DBConnection.Query(@"
                             CALL db.labels()
                             YIELD label WHERE label STARTS WITH 'Tier'
                             WITH COLLECT(label) AS labels
@@ -747,7 +740,7 @@ namespace ImproHound.pages
                         ");
 
                         // Add new tier label
-                        await connection.Query(@"
+                        await DBConnection.Query(@"
                             MATCH (n {domain:'" + parent.Name + @"'}) WHERE EXISTS(n.distinguishedname)
                             WITH COLLECT(n) AS nodes
                             CALL apoc.create.addLabels(nodes, ['Tier" + parent.Tier + @"']) YIELD node
@@ -757,7 +750,7 @@ namespace ImproHound.pages
                     else
                     {
                         // Delete current tier label
-                        await connection.Query(@"
+                        await DBConnection.Query(@"
                             CALL db.labels()
                             YIELD label WHERE label STARTS WITH 'Tier'
                             WITH COLLECT(label) AS labels
@@ -768,7 +761,7 @@ namespace ImproHound.pages
                         ");
 
                         // Add new tier label
-                        await connection.Query(@"
+                        await DBConnection.Query(@"
                             MATCH (n) WHERE n.distinguishedname ENDS WITH '," + parent.Distinguishedname + @"'
                             WITH COLLECT(n) AS nodes
                             CALL apoc.create.addLabels(nodes, ['Tier" + parent.Tier + @"']) YIELD node
@@ -806,7 +799,7 @@ namespace ImproHound.pages
             List<IRecord> records;
             try
             {
-                records = await connection.Query(@"
+                records = await DBConnection.Query(@"
                     MATCH(o)-[:MemberOf*1..]->(group:Group {objectid:'" + group.Objectid + @"'}) WHERE EXISTS(o.distinguishedname)
                     UNWIND labels(o) AS tierlabel
                     WITH o, tierlabel
@@ -853,7 +846,7 @@ namespace ImproHound.pages
             List<IRecord> records;
             try
             {
-                records = await connection.Query(@"
+                records = await DBConnection.Query(@"
                     MATCH(gpo: GPO)
                     MATCH(gpo) -[:GpLink]->(ou)
                     UNWIND labels(ou) AS allLabels
@@ -944,7 +937,7 @@ namespace ImproHound.pages
                 List<IRecord> records;
                 try
                 {
-                    records = await connection.Query(@"
+                    records = await DBConnection.Query(@"
                         MATCH (sourceObj:" + sourceTier + ") -[r]->(targetObj:" + targetTier + @")
                         UNWIND LABELS(sourceObj) AS sourceObjlbls
                         UNWIND LABELS(targetObj) AS targetObjlbls

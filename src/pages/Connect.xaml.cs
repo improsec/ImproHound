@@ -9,12 +9,9 @@ namespace ImproHound.pages
 {
     public partial class ConnectPage : Page
     {
-        MainWindow containerWindow;
-
-        public ConnectPage(MainWindow containerWindow)
+        public ConnectPage()
         {
-            this.containerWindow = containerWindow;
-
+            MainWindow.SetConnectPage(this);
             InitializeComponent();
         }
 
@@ -26,9 +23,10 @@ namespace ImproHound.pages
             try
             {
                 // Make sure we can connect to the DB and the graph is not empty
-                DBConnection connection = new DBConnection(url.Text, username.Text, password.Password);
 
-                List<IRecord> response = await connection.Query("CALL apoc.meta.stats() YIELD labels RETURN labels");
+                DBConnection.Connect(url.Text, username.Text, password.Password);
+
+                List<IRecord> response = await DBConnection.Query("CALL apoc.meta.stats() YIELD labels RETURN labels");
                 if (!response[0].Values.TryGetValue("labels", out output))
                 {
                     // Unknown error
@@ -50,7 +48,7 @@ namespace ImproHound.pages
                 }
 
                 // Get number of nodes with tier label in db
-                response = await connection.Query(@"CALL db.labels()
+                response = await DBConnection.Query(@"CALL db.labels()
                     YIELD label WHERE label STARTS WITH 'Tier'
                     MATCH(n) WHERE label IN labels(n)
                     RETURN COUNT(n)");
@@ -64,7 +62,7 @@ namespace ImproHound.pages
                 response[0].Values.TryGetValue("COUNT(n)", out object numOfTierLabeled);
 
                 // Get number of nodes with distinguished name in db
-                response = await connection.Query("MATCH(n) WHERE EXISTS(n.distinguishedname) RETURN COUNT(n)");
+                response = await DBConnection.Query("MATCH(n) WHERE EXISTS(n.distinguishedname) RETURN COUNT(n)");
                 if (!response[0].Values.TryGetValue("COUNT(n)", out output))
                 {
                     // Unknown error
@@ -81,12 +79,12 @@ namespace ImproHound.pages
                 if (alreadyTieredCorrectly)
                 {
                     // Jump to alreay tiered page
-                    containerWindow.NavigateToPage(new AlreadyTieredPage(containerWindow, connection, this));
+                    MainWindow.NavigateToPage(new AlreadyTieredPage());
                 }
                 else
                 {
                     // Jump to OU structure page
-                    containerWindow.NavigateToPage(new OUStructurePage(containerWindow, connection, this, DBAction.StartFromScratch));
+                    MainWindow.NavigateToPage(new OUStructurePage(DBAction.StartFromScratch));
                 }
             }
             catch (Exception err)
