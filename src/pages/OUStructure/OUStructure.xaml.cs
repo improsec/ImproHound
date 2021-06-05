@@ -87,7 +87,7 @@ namespace ImproHound.pages
                 if (idLookupTable.ContainsKey((string)objectid))
                 {
                     ADObject adObject = (ADObject)idLookupTable[(string)objectid];
-                    adObject.SetTier(((string)tier).Replace("Tier", ""));
+                    adObject.Tier = ((string)tier).Replace("Tier", "");
                 }
             }
         }
@@ -257,7 +257,7 @@ namespace ImproHound.pages
 
         private void resetOUStructure()
         {
-            GetAllADObjects().ForEach(obj => obj.SetTier(defaultTierNumber.ToString()));
+            GetAllADObjects().ForEach(obj => obj.Tier = defaultTierNumber.ToString());
         }
 
         private List<ADObject> GetAllADObjects()

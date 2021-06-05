@@ -10,6 +10,7 @@ namespace ImproHound.classes
     public class ADObject : INotifyPropertyChanged
     {
         readonly pages.OUStructurePage oUStructurePage;
+        private string tier;
 
         public ADObject(string objectid, ADObjectType type, string cn, string name, string distinguishedname, string tier, pages.OUStructurePage oUStructurePage)
         {
@@ -55,7 +56,16 @@ namespace ImproHound.classes
         public string Name { get; set; }
         public string Distinguishedname { get; set; }
         public ADObjectType Type { get; set; }
-        public string Tier { get; set; }
+        public string Tier
+        {
+            get => tier;
+            set
+            {
+                tier = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Tier"));
+            }
+        }
+
         public string Iconpath { get; set; }
         public ICommand TierUpCommand { get; set; }
         public ICommand TierDownCommand { get; set; }
@@ -70,7 +80,6 @@ namespace ImproHound.classes
             string newTier = (Int32.Parse(Tier) + 1).ToString();
             oUStructurePage.SetTier(Objectid, newTier);
             Tier = newTier;
-            PropertyChanged(this, new PropertyChangedEventArgs("Tier"));
         }
         private void TierDown()
         {
@@ -79,14 +88,7 @@ namespace ImproHound.classes
                 string newTier = (Int32.Parse(Tier) - 1).ToString();
                 oUStructurePage.SetTier(Objectid, newTier);
                 Tier = newTier;
-                PropertyChanged(this, new PropertyChangedEventArgs("Tier"));
             }
-        }
-
-        public void SetTier(string tier)
-        {
-            Tier = tier;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Tier"));
         }
 
         public Dictionary<string, ADObject> GetOUChildren()

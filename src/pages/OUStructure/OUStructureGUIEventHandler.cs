@@ -47,7 +47,7 @@ namespace ImproHound.pages
 
             // Set GUI
             ADObject parent = (ADObject)forestTreeView.SelectedItem;
-            parent.GetAllChildren().ForEach(child => child.SetTier(parent.Tier));
+            parent.GetAllChildren().ForEach(child => child.Tier = parent.Tier);
             forestTreeView.Focus();
 
             if (ouStructureSaved)
@@ -152,7 +152,7 @@ namespace ImproHound.pages
                 record.Values.TryGetValue("o.objectid", out object objectid);
 
                 ADObject adObject = (ADObject)idLookupTable[(string)objectid];
-                adObject.SetTier(group.Tier);
+                adObject.Tier = group.Tier;
             }
 
             forestTreeView.Focus();
@@ -199,7 +199,7 @@ namespace ImproHound.pages
                 record.Values.TryGetValue("lowestTier", out object lowestTier);
 
                 ADObject gpo = (ADObject)idLookupTable[(string)objectid];
-                gpo.SetTier(lowestTier.ToString().Replace("Tier", ""));
+                gpo.Tier = lowestTier.ToString().Replace("Tier", "");
             }
 
             forestTreeView.Focus();
