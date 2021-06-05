@@ -83,10 +83,10 @@ namespace ImproHound.pages
                 string cn = objectidStr;
 
                 // Check if the SID match a well known one
-                IEnumerable<WellKnownADObject> matchingObj = DefaultTieringConstants.WellKnownADObjects.Where(o => o.sidEndsWith != null && objectidStr.EndsWith(o.sidEndsWith));
+                IEnumerable<WellKnownADObject> matchingObj = DefaultTieringConstants.WellKnownADObjects.Where(o => o.SidEndsWith != null && objectidStr.EndsWith(o.SidEndsWith));
                 if (matchingObj.Count() > 0)
                 {
-                    cn = matchingObj.FirstOrDefault().name;
+                    cn = matchingObj.FirstOrDefault().Name;
 
                     if (name == null)
                     {
@@ -154,13 +154,13 @@ namespace ImproHound.pages
             try
             {
                 // Well known objects with static SIDs
-                IOrderedEnumerable<string> defaultTiers = DefaultTieringConstants.WellKnownADObjects.Where(o => o.sidEndsWith != null).Select(o => o.tier).Distinct().OrderByDescending(o => o);
-                int shortestSIDEnding = DefaultTieringConstants.WellKnownADObjects.Where(o => o.sidEndsWith != null).OrderBy(o => o.sidEndsWith.Length).First().sidEndsWith.Length;
-                int longestSIDEnding = DefaultTieringConstants.WellKnownADObjects.Where(o => o.sidEndsWith != null).OrderByDescending(o => o.sidEndsWith.Length).First().sidEndsWith.Length;
+                IOrderedEnumerable<string> defaultTiers = DefaultTieringConstants.WellKnownADObjects.Where(o => o.SidEndsWith != null).Select(o => o.Tier).Distinct().OrderByDescending(o => o);
+                int shortestSIDEnding = DefaultTieringConstants.WellKnownADObjects.Where(o => o.SidEndsWith != null).OrderBy(o => o.SidEndsWith.Length).First().SidEndsWith.Length;
+                int longestSIDEnding = DefaultTieringConstants.WellKnownADObjects.Where(o => o.SidEndsWith != null).OrderByDescending(o => o.SidEndsWith.Length).First().SidEndsWith.Length;
 
                 foreach (string tier in defaultTiers)
                 {
-                    IEnumerable<string> wellKnownSIDEndings = DefaultTieringConstants.WellKnownADObjects.Where(o => o.sidEndsWith != null && o.tier.Equals(tier)).Select(o => o.sidEndsWith);
+                    IEnumerable<string> wellKnownSIDEndings = DefaultTieringConstants.WellKnownADObjects.Where(o => o.SidEndsWith != null && o.Tier.Equals(tier)).Select(o => o.SidEndsWith);
 
                     for (int i = shortestSIDEnding; i <= longestSIDEnding; i++)
                     {
@@ -181,17 +181,17 @@ namespace ImproHound.pages
                 }
 
                 // Well known objects with non-static SIDs
-                IEnumerable<WellKnownADObject> wellKnownObjects = DefaultTieringConstants.WellKnownADObjects.Where(o => o.sidEndsWith == null);
+                IEnumerable<WellKnownADObject> wellKnownObjects = DefaultTieringConstants.WellKnownADObjects.Where(o => o.SidEndsWith == null);
 
                 foreach (WellKnownADObject wellKnownObject in wellKnownObjects)
                 {
                     await DBConnection.Query(@"
                         MATCH (obj1) WHERE EXISTS(obj1.distinguishedname)
-                        AND obj1.distinguishedname STARTS WITH 'CN=" + wellKnownObject.name + @"'
-                        CALL apoc.create.addLabels(obj1, ['Tier" + wellKnownObject.tier + @"']) YIELD node
+                        AND obj1.distinguishedname STARTS WITH 'CN=" + wellKnownObject.Name + @"'
+                        CALL apoc.create.addLabels(obj1, ['Tier" + wellKnownObject.Tier + @"']) YIELD node
                         WITH obj1
                         MATCH (obj2)-[:MemberOf*1..]->(obj1) WHERE EXISTS(obj2.distinguishedname)
-                        CALL apoc.create.addLabels(obj2, ['Tier" + wellKnownObject.tier + @"']) YIELD node
+                        CALL apoc.create.addLabels(obj2, ['Tier" + wellKnownObject.Tier + @"']) YIELD node
                         RETURN NULL
                     ");
                 }

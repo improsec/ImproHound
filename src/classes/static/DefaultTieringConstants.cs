@@ -1,4 +1,4 @@
-﻿namespace ImproHound.classes
+﻿namespace ImproHound
 {
     public static class DefaultTieringConstants
     {
@@ -140,19 +140,5 @@
             new WellKnownADObject(null, "DnsUpdateProxy", "0"),
             new WellKnownADObject(null, "WinRMRemoteWMIUsers__", "0"),
         };
-    }
-
-    public class WellKnownADObject
-    {
-        public readonly string sidEndsWith;
-        public readonly string name;
-        public readonly string tier;
-
-        public WellKnownADObject(string sidEndsWith, string name, string tier)
-        {
-            this.sidEndsWith = sidEndsWith;
-            this.name = name;
-            this.tier = tier;
-        }
     }
 }
