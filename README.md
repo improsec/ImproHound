@@ -6,6 +6,8 @@ To use ImproHound, you must run SharpHound to collect the necessary data from th
 
 ImproHound blogpost: https://improsec.com/tech-blog/improhound-identify-ad-tiering-violations
 
+ImproHound demo video: https://www.youtube.com/watch?v=zQ01tvTr6H0 
+
 ##### Table of Contents  
 * [Install](#install)
 * [Usage](#usage)
