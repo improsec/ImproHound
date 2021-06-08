@@ -15,8 +15,6 @@ namespace ImproHound.pages
     public partial class OUStructurePage : Page
     {
         private readonly DBAction dBAction;
-        private readonly int defaultTierNumber = 1;
-
         private Dictionary<string, ADObject> forest;
         private Hashtable idLookupTable;
         private bool ouStructureSaved = true;
@@ -151,7 +149,7 @@ namespace ImproHound.pages
                 record.Values.TryGetValue("tier", out object tier);
 
                 // Get tier
-                string tierNumber = defaultTierNumber.ToString();
+                string tierNumber = DefaultTieringConstants.DefaultTierNumber.ToString();
                 if (tier != null) tierNumber = tier.ToString().Replace("Tier", "");
 
                 // Get AD type
@@ -235,7 +233,7 @@ namespace ImproHound.pages
                             string objectId = "container-" + containerDistinguishedname;
                             string cn = oupath[i].Replace("CN=", "");
                             string name = (cn + "@" + domain.Value.Name).ToUpper();
-                            string tier = defaultTierNumber.ToString();
+                            string tier = DefaultTieringConstants.DefaultTierNumber.ToString();
 
                             // Create as OU in application data
                             ADObject adContainer = new ADObject(objectId, ADObjectType.OU, cn, name, containerDistinguishedname, tier, this);
@@ -257,7 +255,7 @@ namespace ImproHound.pages
 
         private void resetOUStructure()
         {
-            GetAllADObjects().ForEach(obj => obj.Tier = defaultTierNumber.ToString());
+            GetAllADObjects().ForEach(obj => obj.Tier = DefaultTieringConstants.DefaultTierNumber.ToString());
         }
 
         private List<ADObject> GetAllADObjects()

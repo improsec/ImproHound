@@ -2,6 +2,8 @@
 {
     public static class DefaultTieringConstants
     {
+        public const int DefaultTierNumber = 1;
+
         public static WellKnownADObject[] WellKnownADObjects = {
 
             // Well-known Tier 0 SIDs

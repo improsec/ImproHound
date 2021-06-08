@@ -232,7 +232,7 @@ namespace ImproHound.pages
                     MATCH (o) WHERE EXISTS(o.distinguishedname)
                     AND NOT ('Tier0' IN labels(o) OR 'Tier1' IN labels(o) OR 'Tier2' IN labels(o))
                     UNWIND labels(o) AS allLabels
-                    WITH o, COLLECT(allLabels) + 'Tier" + defaultTierNumber + @"' AS newLabels
+                    WITH o, COLLECT(allLabels) + 'Tier" + DefaultTieringConstants.DefaultTierNumber + @"' AS newLabels
                     CALL apoc.create.setLabels(o, newLabels) YIELD node
                     RETURN NULL
                 ");
