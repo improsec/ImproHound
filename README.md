@@ -77,7 +77,7 @@ Enter the database credentials and establish a connection. It is the same creden
 ImproHound creates a ‘TierX’ label on nodes in the BloodHound database. If you have used ImproHound before with this BloodHound database, you will be asked if you want to continue with the tiering you have already created or if you want to start over.
 
 ### OU structure
-![alt text](https://github.com/improsec/ImproHound/blob/master/readme-images/03-ou-structure.png?raw=true)
+![alt text](https://github.com/improsec/ImproHound/blob/master/readme-images/03-ou-structure-v1_1.png?raw=true)
 
 This is the page where you will categorize the AD objects into tiers. The window displays the OU structure. Each AD object has a tier value which can be increased and decreased with the arrows.
 
@@ -93,13 +93,9 @@ If you select a group, you can click ‘Set children to tier’ to set all membe
 
 If you click ‘Set tier for GPOs’ each GPO will have their tier level set to the tier level of the OU with highest tier (closest to zero) which the GPO is linked to. GPOs not linked to an OU will not have their tier level changed.
 
-The tier levels will be saved in the BloodHound first, if not already done.
-
 **Get tiering violations**
 
 Find all relations in the BloodHound database where an AD object has control of an AD object from a higher tier (closer to zero). 
-
-The tier levels will be saved in the BloodHound first, if not already done.
 
 Two CSV files are generated as output:
 
@@ -121,13 +117,9 @@ You can look up all the relation types and how they are exploited [here](https:/
 
 If you discover that an object is in a too high tier (closest to zero), you should correct it in ImproHound, and then check for violations with this object as SOURCE. If an object is in a too low tier (closest to infinity), you should correct it in ImproHound and check for violations with the object as TARGET.
 
-**Reset**
+**Delete tiering**
 
-All tier levels will be set to 1 in ImproHound. All ‘TierX’ labels in the BloodHound database will be removed.
-
-**Save**
-
-Save the tier levels as a ‘TierX’ label in the BloodHound database.
+All tier labels and ImproHound created nodes in the BloodHound database will be deleted.
 
 
 ## Guidelines for tiering AD objects
