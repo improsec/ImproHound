@@ -43,14 +43,8 @@ namespace ImproHound.pages
             try
             {
                 EnableGUIWait();
-                if (!ouStructureSaved)
-                {
-                    await DeleteTieringInDB();
-                    await SetTieringInDB();
-
-
-                    ouStructureSaved = true;
-                }
+                await DeleteTieringInDB();
+                await SetTieringInDB();
                 DisableGUIWait();
             }
             catch (Exception err)
