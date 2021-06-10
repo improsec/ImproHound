@@ -14,9 +14,9 @@ namespace ImproHound.pages
 {
     public partial class OUStructurePage : Page
     {
+        private const string DBCustomNodeProperty = "improhoundcreated";
         private Dictionary<string, ADObject> forest;
         private Hashtable idLookupTable;
-        private bool ouStructureSaved = true;
 
         public OUStructurePage(DBAction dBAction)
         {
@@ -73,7 +73,7 @@ namespace ImproHound.pages
             {
                 // Update DB
                 List<IRecord> records = await DBConnection.Query(@"
-                    MATCH (ou:OU {improhoundcreated: true})
+                    MATCH (ou:OU {" + DBCustomNodeProperty + @": true})
                     MATCH (n) WHERE n.distinguishedname ENDS WITH ou.distinguishedname
                     UNWIND labels(n) AS allLabels
                     WITH DISTINCT allLabels, ou WHERE allLabels STARTS WITH 'Tier'
@@ -238,11 +238,6 @@ namespace ImproHound.pages
             }
 
             throw new Exception("Error: Could not find ADObjects OU/Domain parent");
-        }
-
-        private void ResetOUStructure()
-        {
-            GetAllADObjects().ForEach(obj => obj.Tier = DefaultTieringConstants.DefaultTierNumber.ToString());
         }
 
         private List<ADObject> GetAllADObjects()

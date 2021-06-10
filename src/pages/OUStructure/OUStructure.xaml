@@ -13,8 +13,7 @@
         <DockPanel Margin="5">
             <DockPanel DockPanel.Dock="Top">
                 <Label DockPanel.Dock="Left" Content="OU structure" Width="200" Margin="10"/>
-                <Button x:Name="saveButton" DockPanel.Dock="Right" Content="Save" HorizontalAlignment="Right" Margin="10" Click="saveButton_Click" Width="100"/>
-                <Button x:Name="resetButton" DockPanel.Dock="Right" Content="Reset" HorizontalAlignment="Right" Margin="10" Click="resetButton_Click" Width="100"/>
+                <Button x:Name="deleteTieringButton" DockPanel.Dock="Right" Content="Delete tiering" HorizontalAlignment="Right" Margin="10" Click="deleteTieringButton_Click" Width="140"/>
             </DockPanel>
             <DockPanel DockPanel.Dock="Bottom">
                 <Button x:Name="setChildrenButton" Content="Set children to tier" IsEnabled="False" HorizontalAlignment="Right" Margin="10" Width="140" Click="setChildrenButton_Click"/>

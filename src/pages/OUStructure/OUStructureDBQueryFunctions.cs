@@ -9,6 +9,7 @@ namespace ImproHound.pages
 {
     public partial class OUStructurePage
     {
+
         private async Task PrepareDB()
         {
             try
@@ -214,7 +215,7 @@ namespace ImproHound.pages
             {
                 await DBConnection.Query(@"
                     CREATE (o {objectid:'" + objectid + "', domain:'" + domain + "', distinguishedname:'" + distinguishedname + "', name:'" + name +
-                    @"', improhoundcreated: true})
+                    @"', " + DBCustomNodeProperty + @": true})
                     WITH o
                     CALL apoc.create.setLabels(o, ['Base', '" + adType.ToString() + "', 'Tier" + tier + @"']) YIELD node
                     RETURN NULL
@@ -230,8 +231,6 @@ namespace ImproHound.pages
         {
             try
             {
-                if (!ouStructureSaved) return;
-
                 // Set new tier label for object in DB
                 await DBConnection.Query(@"
                     MATCH (o {objectid:'" + objectid + @"'})
@@ -251,6 +250,7 @@ namespace ImproHound.pages
         {
             try
             {
+                // Delete Tier labels
                 await DBConnection.Query(@"
                     CALL db.labels()
                     YIELD label WHERE label STARTS WITH 'Tier'
@@ -260,51 +260,13 @@ namespace ImproHound.pages
                     CALL apoc.create.removeLabels(nodes, labels)
                     YIELD node RETURN NULL
                 ");
-            }
-            catch
-            {
-                throw;
-            }
-        }
 
-        private async Task SetTieringInDB()
-        {
-            try
-            {
-                // Get all AD objects
-                List<ADObject> allADObjects = new List<ADObject>();
-                foreach (ADObject topADObject in forest.Values)
-                {
-                    allADObjects.Add(topADObject);
-                    allADObjects.AddRange(topADObject.GetAllChildren());
-                }
-
-                // Devide AD objects into tiers and sort by number of objects in tiers
-                Dictionary<string, List<ADObject>> tierDict = allADObjects.GroupBy(g => g.Tier).ToDictionary(group => group.Key, group => group.ToList());
-                List<KeyValuePair<string, List<ADObject>>> sortedTierDict = (from entry in tierDict orderby entry.Value.Count descending select entry).ToList();
-
-                // Set all AD object in DB to largest tier
-                KeyValuePair<string, List<ADObject>> largestTier = sortedTierDict.First();
-                sortedTierDict.RemoveAt(0);
+                // Delete nodes created by ImproHound
                 await DBConnection.Query(@"
-                    MATCH(obj) WHERE EXISTS(obj.distinguishedname)
-                    CALL apoc.create.addLabels(obj, ['Tier' + " + largestTier.Key + @"]) YIELD node
-                    RETURN NULL
+                    MATCH (o)
+                    WHERE EXISTS(o." + DBCustomNodeProperty + @")
+                    DETACH DELETE o
                 ");
-
-                // Replace tier label for AD object not in largest tier to the right tier
-                foreach (var tier in sortedTierDict)
-                {
-                    List<string> tierObjectIds = tier.Value.Select(obj => obj.Objectid).ToList();
-                    string tierObjectIdsString = "['" + String.Join("','", tierObjectIds) + "']";
-                    await DBConnection.Query(@"
-                        MATCH (n:Tier" + largestTier.Key + @")
-                        WHERE n.objectid IN " + tierObjectIdsString + @"
-                        WITH COLLECT(n) AS nList
-                        CALL apoc.refactor.rename.label('Tier' + " + largestTier.Key + ", 'Tier' + " + tier.Key + @", nList) YIELD indexes
-                        RETURN NULL
-                    ");
-                }
             }
             catch
             {

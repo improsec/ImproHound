@@ -12,39 +12,20 @@ namespace ImproHound.pages
     {
         /// BUTTON CLICKS
 
-        private async void resetButton_Click(object sender, RoutedEventArgs e)
+        private async void deleteTieringButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 EnableGUIWait();
-                MessageBoxResult messageBoxResult = MessageBox.Show("Reset will delete tier labels in DB and set all objects in the OU structure to Tier " + DefaultTieringConstants.DefaultTierNumber.ToString(),
+                MessageBoxResult messageBoxResult = MessageBox.Show("This will delete all tier labels and ImproHound created nodes in the DB",
                     "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
 
                 if (messageBoxResult.Equals(MessageBoxResult.OK))
                 {
-                    ouStructureSaved = false;
-                    ResetOUStructure();
                     await DeleteTieringInDB();
+                    MainWindow.BackToConnectPage();
                 }
 
-                DisableGUIWait();
-            }
-            catch (Exception err)
-            {
-                // Error
-                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                DisableGUIWait();
-                MainWindow.BackToConnectPage();
-            }
-        }
-
-        private async void saveButton_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                EnableGUIWait();
-                await DeleteTieringInDB();
-                await SetTieringInDB();
                 DisableGUIWait();
             }
             catch (Exception err)
@@ -69,50 +50,47 @@ namespace ImproHound.pages
                 parent.GetAllChildren().ForEach(child => child.Tier = parent.Tier);
                 forestTreeView.Focus();
 
-                if (ouStructureSaved)
+                if (parent.Type.Equals(ADObjectType.Domain))
                 {
-                    if (parent.Type.Equals(ADObjectType.Domain))
-                    {
-                        // Delete current tier label
-                        await DBConnection.Query(@"
-                            CALL db.labels()
-                            YIELD label WHERE label STARTS WITH 'Tier'
-                            WITH COLLECT(label) AS labels
-                            MATCH (n {domain:'" + parent.Name + @"'}) WHERE EXISTS(n.distinguishedname)
-                            WITH COLLECT(n) AS nodes, labels
-                            CALL apoc.create.removeLabels(nodes, labels) YIELD node
-                            RETURN NULL
-                        ");
+                    // Delete current tier label
+                    await DBConnection.Query(@"
+                        CALL db.labels()
+                        YIELD label WHERE label STARTS WITH 'Tier'
+                        WITH COLLECT(label) AS labels
+                        MATCH (n {domain:'" + parent.Name + @"'}) WHERE EXISTS(n.distinguishedname)
+                        WITH COLLECT(n) AS nodes, labels
+                        CALL apoc.create.removeLabels(nodes, labels) YIELD node
+                        RETURN NULL
+                    ");
 
-                        // Add new tier label
-                        await DBConnection.Query(@"
-                            MATCH (n {domain:'" + parent.Name + @"'}) WHERE EXISTS(n.distinguishedname)
-                            WITH COLLECT(n) AS nodes
-                            CALL apoc.create.addLabels(nodes, ['Tier" + parent.Tier + @"']) YIELD node
-                            RETURN NULL
-                        ");
-                    }
-                    else
-                    {
-                        // Delete current tier label
-                        await DBConnection.Query(@"
-                            CALL db.labels()
-                            YIELD label WHERE label STARTS WITH 'Tier'
-                            WITH COLLECT(label) AS labels
-                            MATCH (n) WHERE n.distinguishedname ENDS WITH '," + parent.Distinguishedname + @"'
-                            WITH COLLECT(n) AS nodes, labels
-                            CALL apoc.create.removeLabels(nodes, labels) YIELD node
-                            RETURN NULL
-                        ");
+                    // Add new tier label
+                    await DBConnection.Query(@"
+                        MATCH (n {domain:'" + parent.Name + @"'}) WHERE EXISTS(n.distinguishedname)
+                        WITH COLLECT(n) AS nodes
+                        CALL apoc.create.addLabels(nodes, ['Tier" + parent.Tier + @"']) YIELD node
+                        RETURN NULL
+                    ");
+                }
+                else
+                {
+                    // Delete current tier label
+                    await DBConnection.Query(@"
+                        CALL db.labels()
+                        YIELD label WHERE label STARTS WITH 'Tier'
+                        WITH COLLECT(label) AS labels
+                        MATCH (n) WHERE n.distinguishedname ENDS WITH '," + parent.Distinguishedname + @"'
+                        WITH COLLECT(n) AS nodes, labels
+                        CALL apoc.create.removeLabels(nodes, labels) YIELD node
+                        RETURN NULL
+                    ");
 
-                        // Add new tier label
-                        await DBConnection.Query(@"
-                            MATCH (n) WHERE n.distinguishedname ENDS WITH '," + parent.Distinguishedname + @"'
-                            WITH COLLECT(n) AS nodes
-                            CALL apoc.create.addLabels(nodes, ['Tier" + parent.Tier + @"']) YIELD node
-                            RETURN NULL
-                        ");
-                    }
+                    // Add new tier label
+                    await DBConnection.Query(@"
+                        MATCH (n) WHERE n.distinguishedname ENDS WITH '," + parent.Distinguishedname + @"'
+                        WITH COLLECT(n) AS nodes
+                        CALL apoc.create.addLabels(nodes, ['Tier" + parent.Tier + @"']) YIELD node
+                        RETURN NULL
+                    ");
                 }
 
                 DisableGUIWait();
@@ -136,14 +114,6 @@ namespace ImproHound.pages
                 EnableGUIWait();
 
                 ADObject group = (ADObject)forestTreeView.SelectedItem;
-
-                if (!ouStructureSaved)
-                {
-                    await DeleteTieringInDB();
-                    await SetTieringInDB();
-                    ouStructureSaved = true;
-                }
-
                 List<IRecord> records = await DBConnection.Query(@"
                     MATCH(o)-[:MemberOf*1..]->(group:Group {objectid:'" + group.Objectid + @"'}) WHERE EXISTS(o.distinguishedname)
                     UNWIND labels(o) AS tierlabel
@@ -184,13 +154,6 @@ namespace ImproHound.pages
             {
                 EnableGUIWait();
 
-                if (!ouStructureSaved)
-                {
-                    await DeleteTieringInDB();
-                    await SetTieringInDB();
-                    ouStructureSaved = true;
-                }
-
                 List<IRecord> records = await DBConnection.Query(@"
                     MATCH(gpo: GPO)
                     MATCH(gpo) -[:GpLink]->(ou)
@@ -230,13 +193,6 @@ namespace ImproHound.pages
             try
             {
                 EnableGUIWait();
-
-                if (!ouStructureSaved)
-                {
-                    await DeleteTieringInDB();
-                    await SetTieringInDB();
-                    ouStructureSaved = true;
-                }
 
                 // Generate list of tier pairs (source, target)
                 List<ADObject> allADObjects = GetAllADObjects();
