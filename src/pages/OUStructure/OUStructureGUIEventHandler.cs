@@ -14,46 +14,68 @@ namespace ImproHound.pages
 
         private async void resetButton_Click(object sender, RoutedEventArgs e)
         {
-            EnableGUIWait();
-            MessageBoxResult messageBoxResult = MessageBox.Show("Reset will delete tier labels in DB and set all objects in the OU structure to Tier " + DefaultTieringConstants.DefaultTierNumber.ToString(),
-                "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-
-            if (messageBoxResult.Equals(MessageBoxResult.OK))
+            try
             {
-                ouStructureSaved = false;
-                resetOUStructure();
-                await DeleteTieringInDB();
+                EnableGUIWait();
+                MessageBoxResult messageBoxResult = MessageBox.Show("Reset will delete tier labels in DB and set all objects in the OU structure to Tier " + DefaultTieringConstants.DefaultTierNumber.ToString(),
+                    "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+
+                if (messageBoxResult.Equals(MessageBoxResult.OK))
+                {
+                    ouStructureSaved = false;
+                    ResetOUStructure();
+                    await DeleteTieringInDB();
+                }
+
+                DisableGUIWait();
             }
-            DisableGUIWait();
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisableGUIWait();
+                MainWindow.BackToConnectPage();
+            }
         }
 
         private async void saveButton_Click(object sender, RoutedEventArgs e)
         {
-            EnableGUIWait();
-            if (!ouStructureSaved)
+            try
             {
-                await DeleteTieringInDB();
-                await SetTieringInDB();
-                ouStructureSaved = true;
+                EnableGUIWait();
+                if (!ouStructureSaved)
+                {
+                    await DeleteTieringInDB();
+                    await SetTieringInDB();
+
+
+                    ouStructureSaved = true;
+                }
+                DisableGUIWait();
             }
-            DisableGUIWait();
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisableGUIWait();
+                MainWindow.BackToConnectPage();
+            }
         }
 
         private async void setChildrenButton_Click(object sender, RoutedEventArgs e)
         {
-            if (forestTreeView.SelectedItem == null) return;
-
-            EnableGUIWait();
-
-            // Set GUI
-            ADObject parent = (ADObject)forestTreeView.SelectedItem;
-            parent.GetAllChildren().ForEach(child => child.Tier = parent.Tier);
-            forestTreeView.Focus();
-
-            if (ouStructureSaved)
+            try
             {
-                // Update DB
-                try
+                if (forestTreeView.SelectedItem == null) return;
+
+                EnableGUIWait();
+
+                // Set GUI
+                ADObject parent = (ADObject)forestTreeView.SelectedItem;
+                parent.GetAllChildren().ForEach(child => child.Tier = parent.Tier);
+                forestTreeView.Focus();
+
+                if (ouStructureSaved)
                 {
                     if (parent.Type.Equals(ADObjectType.Domain))
                     {
@@ -98,37 +120,37 @@ namespace ImproHound.pages
                         ");
                     }
                 }
-                catch (Exception err)
-                {
-                    // Error
-                    MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-            }
 
-            DisableGUIWait();
+                DisableGUIWait();
+            }
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisableGUIWait();
+                MainWindow.BackToConnectPage();
+            }
         }
 
         private async void setMembersButton_Click(object sender, RoutedEventArgs e)
         {
-            if (forestTreeView.SelectedItem == null) return;
-
-            EnableGUIWait();
-
-            ADObject group = (ADObject)forestTreeView.SelectedItem;
-
-            if (!ouStructureSaved)
-            {
-                await DeleteTieringInDB();
-                await SetTieringInDB();
-                ouStructureSaved = true;
-            }
-
-            // Update DB
-            List<IRecord> records;
             try
             {
-                records = await DBConnection.Query(@"
+
+                if (forestTreeView.SelectedItem == null) return;
+
+                EnableGUIWait();
+
+                ADObject group = (ADObject)forestTreeView.SelectedItem;
+
+                if (!ouStructureSaved)
+                {
+                    await DeleteTieringInDB();
+                    await SetTieringInDB();
+                    ouStructureSaved = true;
+                }
+
+                List<IRecord> records = await DBConnection.Query(@"
                     MATCH(o)-[:MemberOf*1..]->(group:Group {objectid:'" + group.Objectid + @"'}) WHERE EXISTS(o.distinguishedname)
                     UNWIND labels(o) AS tierlabel
                     WITH o, tierlabel
@@ -138,43 +160,44 @@ namespace ImproHound.pages
                     CALL apoc.create.addLabels(o, ['Tier" + group.Tier + @"']) YIELD node
                     RETURN o.objectid
                 ");
+
+
+                // Update application data
+                foreach (IRecord record in records)
+                {
+                    record.Values.TryGetValue("o.objectid", out object objectid);
+
+                    ADObject adObject = (ADObject)idLookupTable[(string)objectid];
+                    adObject.Tier = group.Tier;
+                }
+
+                forestTreeView.Focus();
+                DisableGUIWait();
             }
             catch (Exception err)
             {
                 // Error
                 MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                DisableGUIWait();
+                MainWindow.BackToConnectPage();
             }
-
-            // Update application data
-            foreach (IRecord record in records)
-            {
-                record.Values.TryGetValue("o.objectid", out object objectid);
-
-                ADObject adObject = (ADObject)idLookupTable[(string)objectid];
-                adObject.Tier = group.Tier;
-            }
-
-            forestTreeView.Focus();
-            DisableGUIWait();
         }
 
+        // Set GPOs to the lowest tier of the GPOs they are linked to
         private async void setTierGPOsButton_Click(object sender, RoutedEventArgs e)
         {
-            EnableGUIWait();
-
-            if (!ouStructureSaved)
-            {
-                await DeleteTieringInDB();
-                await SetTieringInDB();
-                ouStructureSaved = true;
-            }
-
-            // Set GPOs to the lowest tier of the GPOs they are linked to
-            List<IRecord> records;
             try
             {
-                records = await DBConnection.Query(@"
+                EnableGUIWait();
+
+                if (!ouStructureSaved)
+                {
+                    await DeleteTieringInDB();
+                    await SetTieringInDB();
+                    ouStructureSaved = true;
+                }
+
+                List<IRecord> records = await DBConnection.Query(@"
                     MATCH(gpo: GPO)
                     MATCH(gpo) -[:GpLink]->(ou)
                     UNWIND labels(ou) AS allLabels
@@ -184,57 +207,61 @@ namespace ImproHound.pages
                     CALL apoc.create.setLabels(gpo, ['Base', 'GPO', lowestTier]) YIELD node
                     RETURN gpo.objectid, lowestTier
                 ");
+
+
+                // Update application data
+                foreach (IRecord record in records)
+                {
+                    record.Values.TryGetValue("gpo.objectid", out object objectid);
+                    record.Values.TryGetValue("lowestTier", out object lowestTier);
+
+                    ADObject gpo = (ADObject)idLookupTable[(string)objectid];
+                    gpo.Tier = lowestTier.ToString().Replace("Tier", "");
+                }
+
+                forestTreeView.Focus();
+                DisableGUIWait();
             }
             catch (Exception err)
             {
                 // Error
                 MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                DisableGUIWait();
+                MainWindow.BackToConnectPage();
             }
-
-            // Update application data
-            foreach (IRecord record in records)
-            {
-                record.Values.TryGetValue("gpo.objectid", out object objectid);
-                record.Values.TryGetValue("lowestTier", out object lowestTier);
-
-                ADObject gpo = (ADObject)idLookupTable[(string)objectid];
-                gpo.Tier = lowestTier.ToString().Replace("Tier", "");
-            }
-
-            forestTreeView.Focus();
-            DisableGUIWait();
         }
 
         private async void getTieringViolationsButton_Click(object sender, RoutedEventArgs e)
         {
-            EnableGUIWait();
-
-            if (!ouStructureSaved)
+            try
             {
-                await DeleteTieringInDB();
-                await SetTieringInDB();
-                ouStructureSaved = true;
-            }
+                EnableGUIWait();
 
-            // Generate list of tier pairs (source, target)
-            List<ADObject> allADObjects = GetAllADObjects();
-            List<string> tiers = allADObjects.Select(o => o.Tier).Distinct().OrderByDescending(tier => tier).ToList();
-            List<string[]> tierPairs = new List<string[]>();
-            for (int i = 0; i < tiers.Count - 1; i++)
-            {
-                for (int j = i + 1; j < tiers.Count; j++)
+                if (!ouStructureSaved)
                 {
-                    tierPairs.Add(new string[] { tiers.ElementAt(i), tiers.ElementAt(j) });
+                    await DeleteTieringInDB();
+                    await SetTieringInDB();
+                    ouStructureSaved = true;
                 }
-            }
 
-            // Prepare csv contents
-            string csvHeaderADObjects = @"Tier;
+                // Generate list of tier pairs (source, target)
+                List<ADObject> allADObjects = GetAllADObjects();
+                List<string> tiers = allADObjects.Select(o => o.Tier).Distinct().OrderByDescending(tier => tier).ToList();
+                List<string[]> tierPairs = new List<string[]>();
+                for (int i = 0; i < tiers.Count - 1; i++)
+                {
+                    for (int j = i + 1; j < tiers.Count; j++)
+                    {
+                        tierPairs.Add(new string[] { tiers.ElementAt(i), tiers.ElementAt(j) });
+                    }
+                }
+
+                // Prepare csv contents
+                string csvHeaderADObjects = @"Tier;
                                 Type;
                                 Name;
                                 Distinguishedname";
-            string csvHeaderViolations = @"SourceTier;
+                string csvHeaderViolations = @"SourceTier;
                                 SourceType;
                                 SourceName;
                                 SourceDistinguishedname;
@@ -244,28 +271,25 @@ namespace ImproHound.pages
                                 TargetType;
                                 TargetName;
                                 TargetDistinguishedname";
-            List<string> csvADObjects = new List<string>() { String.Concat(csvHeaderADObjects.Where(c => !Char.IsWhiteSpace(c))) };
-            List<string> csvViolations = new List<string>() { String.Concat(csvHeaderViolations.Where(c => !Char.IsWhiteSpace(c))) };
+                List<string> csvADObjects = new List<string>() { String.Concat(csvHeaderADObjects.Where(c => !Char.IsWhiteSpace(c))) };
+                List<string> csvViolations = new List<string>() { String.Concat(csvHeaderViolations.Where(c => !Char.IsWhiteSpace(c))) };
 
-            // Create csv content: ADobjects
-            foreach (ADObject aDObject in allADObjects)
-            {
-                csvADObjects.Add("Tier" + aDObject.Tier + ";" +
-                    aDObject.Type + ";" +
-                    aDObject.Name + ";" +
-                    aDObject.Distinguishedname);
-            }
-
-            // Create csv content: Tiering violations
-            foreach (string[] tierPair in tierPairs)
-            {
-                string sourceTier = "Tier" + tierPair[0];
-                string targetTier = "Tier" + tierPair[1];
-
-                List<IRecord> records;
-                try
+                // Create csv content: ADobjects
+                foreach (ADObject aDObject in allADObjects)
                 {
-                    records = await DBConnection.Query(@"
+                    csvADObjects.Add("Tier" + aDObject.Tier + ";" +
+                        aDObject.Type + ";" +
+                        aDObject.Name + ";" +
+                        aDObject.Distinguishedname);
+                }
+
+                // Create csv content: Tiering violations
+                foreach (string[] tierPair in tierPairs)
+                {
+                    string sourceTier = "Tier" + tierPair[0];
+                    string targetTier = "Tier" + tierPair[1];
+
+                    List<IRecord> records = await DBConnection.Query(@"
                         MATCH (sourceObj:" + sourceTier + ") -[r]->(targetObj:" + targetTier + @")
                         UNWIND LABELS(sourceObj) AS sourceObjlbls
                         UNWIND LABELS(targetObj) AS targetObjlbls
@@ -274,59 +298,71 @@ namespace ImproHound.pages
                         AND targetObjlbls <> '" + targetTier + @"' AND targetObjlbls <> 'Base'
                         RETURN sourceObjlbls, sourceObj.name, sourceObj.distinguishedname, TYPE(r), r.isinherited, targetObjlbls, targetObj.name, targetObj.distinguishedname
                     ");
-                }
-                catch (Exception err)
-                {
-                    // Error
-                    MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
+
+
+                    foreach (IRecord record in records)
+                    {
+                        record.Values.TryGetValue("sourceObj.name", out object sourceName);
+                        record.Values.TryGetValue("sourceObj.distinguishedname", out object sourceDistinguishedname);
+                        record.Values.TryGetValue("sourceObjlbls", out object sourceType);
+                        record.Values.TryGetValue("TYPE(r)", out object relation);
+                        record.Values.TryGetValue("r.isinherited", out object isinherited);
+                        record.Values.TryGetValue("targetObj.name", out object targetName);
+                        record.Values.TryGetValue("targetObj.distinguishedname", out object targetDistinguishedname);
+                        record.Values.TryGetValue("targetObjlbls", out object targetType);
+
+                        csvViolations.Add(sourceTier + ";" +
+                            sourceType + ";" +
+                            sourceName + ";" +
+                            sourceDistinguishedname + ";" +
+                            relation + ";" +
+                            isinherited + ";" +
+                            targetTier + ";" +
+                            targetType + ";" +
+                            targetName + ";" +
+                            targetDistinguishedname);
+                    }
                 }
 
-                foreach (IRecord record in records)
-                {
-                    record.Values.TryGetValue("sourceObj.name", out object sourceName);
-                    record.Values.TryGetValue("sourceObj.distinguishedname", out object sourceDistinguishedname);
-                    record.Values.TryGetValue("sourceObjlbls", out object sourceType);
-                    record.Values.TryGetValue("TYPE(r)", out object relation);
-                    record.Values.TryGetValue("r.isinherited", out object isinherited);
-                    record.Values.TryGetValue("targetObj.name", out object targetName);
-                    record.Values.TryGetValue("targetObj.distinguishedname", out object targetDistinguishedname);
-                    record.Values.TryGetValue("targetObjlbls", out object targetType);
+                // Save csvs
+                string timeStamp = DateTime.Now.ToString("yyyyMMddHHmmssffff");
+                string csvFilenameADObjects = "adobjects-" + timeStamp + ".csv";
+                string csvFilenameViolations = "tiering-violations-" + timeStamp + ".csv";
+                File.AppendAllLines(csvFilenameADObjects, csvADObjects);
+                File.AppendAllLines(csvFilenameViolations, csvViolations);
+                MessageBox.Show("ADObject list and tiering violations csvs saved in:\n\n" + Path.GetFullPath(csvFilenameADObjects) + "\n\n" + Path.GetFullPath(csvFilenameViolations),
+                    "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    csvViolations.Add(sourceTier + ";" +
-                        sourceType + ";" +
-                        sourceName + ";" +
-                        sourceDistinguishedname + ";" +
-                        relation + ";" +
-                        isinherited + ";" +
-                        targetTier + ";" +
-                        targetType + ";" +
-                        targetName + ";" +
-                        targetDistinguishedname);
-                }
+                DisableGUIWait();
             }
-
-            // Save csvs
-            string timeStamp = DateTime.Now.ToString("yyyyMMddHHmmssffff");
-            string csvFilenameADObjects = "adobjects-" + timeStamp + ".csv";
-            string csvFilenameViolations = "tiering-violations-" + timeStamp + ".csv";
-            File.AppendAllLines(csvFilenameADObjects, csvADObjects);
-            File.AppendAllLines(csvFilenameViolations, csvViolations);
-            MessageBox.Show("ADObject list and tiering violations csvs saved in:\n\n" + Path.GetFullPath(csvFilenameADObjects) + "\n\n" + Path.GetFullPath(csvFilenameViolations),
-                "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-
-            DisableGUIWait();
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisableGUIWait();
+                MainWindow.BackToConnectPage();
+            }
         }
 
         /// OTHER GUI CHANGES
 
         private void forestTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            setChildrenButton.IsEnabled = (forestTreeView.SelectedItem != null) &&
-                (((ADObject)forestTreeView.SelectedItem).Type.Equals(ADObjectType.Domain) || ((ADObject)forestTreeView.SelectedItem).Type.Equals(ADObjectType.OU));
-            setMembersButton.IsEnabled = (forestTreeView.SelectedItem != null) &&
-                ((ADObject)forestTreeView.SelectedItem).Type.Equals(ADObjectType.Group);
+            try
+            {
+                setChildrenButton.IsEnabled = (forestTreeView.SelectedItem != null) &&
+                    (((ADObject)forestTreeView.SelectedItem).Type.Equals(ADObjectType.Domain) || ((ADObject)forestTreeView.SelectedItem).Type.Equals(ADObjectType.OU));
+                setMembersButton.IsEnabled = (forestTreeView.SelectedItem != null) &&
+                    ((ADObject)forestTreeView.SelectedItem).Type.Equals(ADObjectType.Group);
+
+            }
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisableGUIWait();
+                MainWindow.BackToConnectPage();
+            }
         }
     }
-
 }

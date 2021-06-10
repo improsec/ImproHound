@@ -17,17 +17,15 @@ namespace ImproHound.pages
 
         private async void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
-            EnableGUIWait();
-            object output;
-
             try
             {
-                // Make sure we can connect to the DB and the graph is not empty
+                EnableGUIWait();
 
+                // Make sure we can connect to the DB and the graph is not empty
                 DBConnection.Connect(url.Text, username.Text, password.Password);
 
                 List<IRecord> response = await DBConnection.Query("CALL apoc.meta.stats() YIELD labels RETURN labels");
-                if (!response[0].Values.TryGetValue("labels", out output))
+                if (!response[0].Values.TryGetValue("labels", out object output))
                 {
                     // Unknown error
                     MessageBox.Show("Something went wrong.\nNo authentication error but could not fetch number of nodes in graph.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Windows;
 using System.Windows.Input;
 
 namespace ImproHound.classes
@@ -75,20 +76,44 @@ namespace ImproHound.classes
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void TierUp()
+        private async void TierUp()
         {
-            string newTier = (Int32.Parse(Tier) + 1).ToString();
-            oUStructurePage.SetTier(Objectid, newTier);
-            Tier = newTier;
-        }
-        private void TierDown()
-        {
-            if (Tier != "0")
+            try
             {
-                string newTier = (Int32.Parse(Tier) - 1).ToString();
-                oUStructurePage.SetTier(Objectid, newTier);
+                oUStructurePage.EnableGUIWait();
+                string newTier = (Int32.Parse(Tier) + 1).ToString();
                 Tier = newTier;
+                await oUStructurePage.SetTier(Objectid, newTier);
             }
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                oUStructurePage.DisableGUIWait();
+                MainWindow.BackToConnectPage();
+            }
+            oUStructurePage.DisableGUIWait();
+        }
+        private async void TierDown()
+        {
+            try
+            {
+                oUStructurePage.EnableGUIWait();
+                if (Tier != "0")
+                {
+                    string newTier = (Int32.Parse(Tier) - 1).ToString();
+                    Tier = newTier;
+                    await oUStructurePage.SetTier(Objectid, newTier);
+                }
+            }
+            catch (Exception err)
+            {
+                // Error
+                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                oUStructurePage.DisableGUIWait();
+                MainWindow.BackToConnectPage();
+            }
+            oUStructurePage.DisableGUIWait();
         }
 
         public Dictionary<string, ADObject> GetOUChildren()
