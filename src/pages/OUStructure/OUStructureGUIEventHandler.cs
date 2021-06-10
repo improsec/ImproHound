@@ -125,7 +125,6 @@ namespace ImproHound.pages
                     RETURN o.objectid
                 ");
 
-
                 // Update application data
                 foreach (IRecord record in records)
                 {

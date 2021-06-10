@@ -17,10 +17,10 @@ namespace ImproHound.pages
                 // Fix domains without distinguishedname and domain property
                 // Happens if you upload BloodHound data in the 'wrong' order
                 List<IRecord> records = await DBConnection.Query(@"
-                MATCH (n:Domain)
-                WHERE NOT EXISTS (n.distinguishedname)
-                RETURN n.name
-            ");
+                    MATCH (n:Domain)
+                    WHERE NOT EXISTS (n.distinguishedname)
+                    RETURN n.name
+                ");
 
                 foreach (IRecord record in records)
                 {
@@ -28,18 +28,18 @@ namespace ImproHound.pages
                     string distinguishedname = "DC=" + ((string)name).ToLower().Replace(".", ",DC=");
 
                     await DBConnection.Query(@"
-                    MATCH (n:Domain {name:'" + (string)name + @"'})
-                    SET n.distinguishedname = '" + distinguishedname + @"', n.domain = n.name, n.highvalue = true
-                    RETURN NULL
-                ");
+                        MATCH (n:Domain {name:'" + (string)name + @"'})
+                        SET n.distinguishedname = '" + distinguishedname + @"', n.domain = n.name, n.highvalue = true
+                        RETURN NULL
+                    ");
                 }
 
                 // Set name and distinguishedname for objects without
                 List<IRecord> records1 = await DBConnection.Query(@"
-                MATCH (o) WHERE NOT EXISTS(o.distinguishedname)
-                MATCH (d:Domain) WHERE o.objectid STARTS WITH d.domain
-                RETURN o.objectid, o.name, d.domain, d.distinguishedname
-            ");
+                    MATCH (o) WHERE NOT EXISTS(o.distinguishedname)
+                    MATCH (d:Domain) WHERE o.objectid STARTS WITH d.domain
+                    RETURN o.objectid, o.name, d.domain, d.distinguishedname
+                ");
 
                 foreach (IRecord record in records1)
                 {
@@ -80,23 +80,23 @@ namespace ImproHound.pages
                     string distinguishedname = "CN=" + cn + "," + domainDistinguishedname.ToString();
 
                     await DBConnection.Query(@"
-                    MATCH (o {objectid:'" + objectidStr + @"'})
-                    SET o.name = '" + name.ToString() + @"'
-                    SET o.distinguishedname = '" + distinguishedname + @"'
-                    SET o.domain = '" + domainStr + @"'
-                ");
+                        MATCH (o {objectid:'" + objectidStr + @"'})
+                        SET o.name = '" + name.ToString() + @"'
+                        SET o.distinguishedname = '" + distinguishedname + @"'
+                        SET o.domain = '" + domainStr + @"'
+                    ");
                 }
 
                 // Make sure all objects do not have more than the Base label and the type of object label
                 // I have seen service accounts in the BloodHound DB having both User and Computer label
                 await DBConnection.Query(@"
-                MATCH (n) WHERE SIZE(LABELS(n)) > 2
-                UNWIND LABELS(n) AS lbls
-                WITH n, lbls ORDER BY lbls ASC
-                WITH n, COLLECT(lbls) AS lblsSort
-                CALL apoc.create.setLabels(n, lblsSort[0..2]) YIELD node
-                RETURN NULL
-            ");
+                    MATCH (n) WHERE SIZE(LABELS(n)) > 2
+                    UNWIND LABELS(n) AS lbls
+                    WITH n, lbls ORDER BY lbls ASC
+                    WITH n, COLLECT(lbls) AS lblsSort
+                    CALL apoc.create.setLabels(n, lblsSort[0..2]) YIELD node
+                    RETURN NULL
+                ");
             }
             catch
             {
@@ -122,15 +122,15 @@ namespace ImproHound.pages
                         if (!wellKnownSIDEndings.Count().Equals(0) && !wellKnownSIDEndings.Where(o => o.Length.Equals(i)).Count().Equals(0))
                         {
                             await DBConnection.Query(@"
-                            MATCH (obj1) WHERE EXISTS(obj1.distinguishedname)
-                            AND size(obj1.objectid) >= " + i + @"
-                            AND substring(obj1.objectid, size(obj1.objectid) - " + i + ", " + i + ") IN ['" + String.Join("','", wellKnownSIDEndings.Where(o => o.Length.Equals(i))) + @"']
-                            CALL apoc.create.addLabels(obj1, ['Tier" + tier + @"']) YIELD node
-                            WITH obj1
-                            MATCH (obj2)-[:MemberOf*1..]->(obj1) WHERE EXISTS(obj2.distinguishedname)
-                            CALL apoc.create.addLabels(obj2, ['Tier" + tier + @"']) YIELD node
-                            RETURN NULL
-                        ");
+                                MATCH (obj1) WHERE EXISTS(obj1.distinguishedname)
+                                AND size(obj1.objectid) >= " + i + @"
+                                AND substring(obj1.objectid, size(obj1.objectid) - " + i + ", " + i + ") IN ['" + String.Join("','", wellKnownSIDEndings.Where(o => o.Length.Equals(i))) + @"']
+                                CALL apoc.create.addLabels(obj1, ['Tier" + tier + @"']) YIELD node
+                                WITH obj1
+                                MATCH (obj2)-[:MemberOf*1..]->(obj1) WHERE EXISTS(obj2.distinguishedname)
+                                CALL apoc.create.addLabels(obj2, ['Tier" + tier + @"']) YIELD node
+                                RETURN NULL
+                            ");
                         }
                     }
                 }
@@ -141,67 +141,67 @@ namespace ImproHound.pages
                 foreach (WellKnownADObject wellKnownObject in wellKnownObjects)
                 {
                     await DBConnection.Query(@"
-                    MATCH (obj1) WHERE EXISTS(obj1.distinguishedname)
-                    AND obj1.distinguishedname STARTS WITH 'CN=" + wellKnownObject.Name + @"'
-                    CALL apoc.create.addLabels(obj1, ['Tier" + wellKnownObject.Tier + @"']) YIELD node
-                    WITH obj1
-                    MATCH (obj2)-[:MemberOf*1..]->(obj1) WHERE EXISTS(obj2.distinguishedname)
-                    CALL apoc.create.addLabels(obj2, ['Tier" + wellKnownObject.Tier + @"']) YIELD node
-                    RETURN NULL
-                ");
+                        MATCH (obj1) WHERE EXISTS(obj1.distinguishedname)
+                        AND obj1.distinguishedname STARTS WITH 'CN=" + wellKnownObject.Name + @"'
+                        CALL apoc.create.addLabels(obj1, ['Tier" + wellKnownObject.Tier + @"']) YIELD node
+                        WITH obj1
+                        MATCH (obj2)-[:MemberOf*1..]->(obj1) WHERE EXISTS(obj2.distinguishedname)
+                        CALL apoc.create.addLabels(obj2, ['Tier" + wellKnownObject.Tier + @"']) YIELD node
+                        RETURN NULL
+                    ");
                 }
 
                 // Set OUs to be in the same tier as the lowest tier of their content
                 await DBConnection.Query(@"
-                MATCH (ou:OU) WHERE EXISTS(ou.distinguishedname)
-                MATCH (ou)-[:Contains*1..]->(obj)
-                UNWIND labels(obj) AS allLabels
-                WITH DISTINCT allLabels, ou WHERE allLabels STARTS WITH 'Tier'
-                WITH ou, allLabels ORDER BY allLabels ASC
-                WITH ou, head(collect(allLabels)) AS rightTier
-                CALL apoc.create.setLabels(ou, ['Base', 'OU', rightTier]) YIELD node
-                RETURN NULL
-            ");
+                    MATCH (ou:OU) WHERE EXISTS(ou.distinguishedname)
+                    MATCH (ou)-[:Contains*1..]->(obj)
+                    UNWIND labels(obj) AS allLabels
+                    WITH DISTINCT allLabels, ou WHERE allLabels STARTS WITH 'Tier'
+                    WITH ou, allLabels ORDER BY allLabels ASC
+                    WITH ou, head(collect(allLabels)) AS rightTier
+                    CALL apoc.create.setLabels(ou, ['Base', 'OU', rightTier]) YIELD node
+                    RETURN NULL
+                ");
 
                 // Set domains to Tier 0
                 await DBConnection.Query(@"
-                MATCH (domain:Domain) WHERE EXISTS(domain.distinguishedname)
-                CALL apoc.create.addLabels(domain, ['Tier0']) YIELD node
-                RETURN NULL
-            ");
+                    MATCH (domain:Domain) WHERE EXISTS(domain.distinguishedname)
+                    CALL apoc.create.addLabels(domain, ['Tier0']) YIELD node
+                    RETURN NULL
+                ");
 
                 // Set GPOs to be in the same tier as the lowest tier of the OUs (or domain) linked to
                 await DBConnection.Query(@"
-                MATCH (gpo:GPO) WHERE EXISTS(gpo.distinguishedname)
-                MATCH (gpo)-[:GpLink]->(ou)
-                UNWIND labels(ou) AS allLabels
-                WITH DISTINCT allLabels, gpo WHERE allLabels STARTS WITH 'Tier'
-                WITH gpo, allLabels ORDER BY allLabels ASC
-                WITH gpo, head(collect(allLabels)) AS rightTier
-                CALL apoc.create.setLabels(gpo, ['Base', 'GPO', rightTier]) YIELD node
-                RETURN NULL
-            ");
+                    MATCH (gpo:GPO) WHERE EXISTS(gpo.distinguishedname)
+                    MATCH (gpo)-[:GpLink]->(ou)
+                    UNWIND labels(ou) AS allLabels
+                    WITH DISTINCT allLabels, gpo WHERE allLabels STARTS WITH 'Tier'
+                    WITH gpo, allLabels ORDER BY allLabels ASC
+                    WITH gpo, head(collect(allLabels)) AS rightTier
+                    CALL apoc.create.setLabels(gpo, ['Base', 'GPO', rightTier]) YIELD node
+                    RETURN NULL
+                ");
 
                 // Set all objects without tier label to default tier
                 await DBConnection.Query(@"
-                MATCH (o) WHERE EXISTS(o.distinguishedname)
-                AND NOT ('Tier0' IN labels(o) OR 'Tier1' IN labels(o) OR 'Tier2' IN labels(o))
-                UNWIND labels(o) AS allLabels
-                WITH o, COLLECT(allLabels) + 'Tier" + DefaultTieringConstants.DefaultTierNumber + @"' AS newLabels
-                CALL apoc.create.setLabels(o, newLabels) YIELD node
-                RETURN NULL
-            ");
+                    MATCH (o) WHERE EXISTS(o.distinguishedname)
+                    AND NOT ('Tier0' IN labels(o) OR 'Tier1' IN labels(o) OR 'Tier2' IN labels(o))
+                    UNWIND labels(o) AS allLabels
+                    WITH o, COLLECT(allLabels) + 'Tier" + DefaultTieringConstants.DefaultTierNumber + @"' AS newLabels
+                    CALL apoc.create.setLabels(o, newLabels) YIELD node
+                    RETURN NULL
+                ");
 
                 // Delete higher tier labels for objects in multiple tiers
                 await DBConnection.Query(@"
-                MATCH (n)
-                UNWIND labels(n) AS label
-                WITH n, label WHERE label STARTS WITH 'Tier'
-                WITH n, label ORDER BY label ASC
-                WITH n, tail(collect(label)) AS wrongTiers
-                CALL apoc.create.removeLabels(n, wrongTiers) YIELD node
-                RETURN NULL
-            ");
+                    MATCH (n)
+                    UNWIND labels(n) AS label
+                    WITH n, label WHERE label STARTS WITH 'Tier'
+                    WITH n, label ORDER BY label ASC
+                    WITH n, tail(collect(label)) AS wrongTiers
+                    CALL apoc.create.removeLabels(n, wrongTiers) YIELD node
+                    RETURN NULL
+                ");
             }
             catch
             {
