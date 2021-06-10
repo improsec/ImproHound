@@ -14,19 +14,16 @@ namespace ImproHound.pages
 {
     public partial class OUStructurePage : Page
     {
-        private readonly DBAction dBAction;
         private Dictionary<string, ADObject> forest;
         private Hashtable idLookupTable;
         private bool ouStructureSaved = true;
 
         public OUStructurePage(DBAction dBAction)
         {
-            this.dBAction = dBAction;
-
             InitializeComponent();
             try
             {
-                Initialization();
+                Initialization(dBAction);
             }
             catch (Exception err)
             {
@@ -37,7 +34,7 @@ namespace ImproHound.pages
             }
         }
 
-        private async void Initialization()
+        private async void Initialization(DBAction dBAction)
         {
             try
             {
