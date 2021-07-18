@@ -1,5 +1,3 @@
-NB! It seems like one of the latest Windows updates breaks the application so the OU structure will not be shown. I'm working on a solution. 
-
 # ImproHound
 Identify the attack paths in BloodHound breaking your AD tiering
 
@@ -35,7 +33,8 @@ ImproHound demo video: https://www.youtube.com/watch?v=zQ01tvTr6H0
 	> Tip 2: To get even more data use [The Session Loop Collection Method](https://bloodhound.readthedocs.io/en/latest/data-collection/sharphound.html#the-session-loop-collection-method) 
 
 1. Upload your BloodHound data in the [BloodHound GUI](https://bloodhound.readthedocs.io/en/latest/#import-and-explore-the-data)
-
+	> There is a bug in BloodHound that sometimes cause the domain json file to be skipped when uploading a BloodHound data zip. Check the DB stats in BloodHound after data upload and make sure the domain objects exist.  
+ 	
 **2. Install APOC Neo4j plugin**
 (enables awesome graph operations we need) 
 1. Download the [APOC](https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases) version matching your Neo4j version (apoc-x.x.x.x-all.jar).
