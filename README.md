@@ -1,3 +1,5 @@
+NB! It seems like one of the latest Windows updates breaks the application so the OU structure will not be shown. I'm working on a solution. 
+
 # ImproHound
 Identify the attack paths in BloodHound breaking your AD tiering
 
