@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ImproHound.classes;
+using System.Windows;
 
 namespace ImproHound.pages
 {
@@ -97,6 +98,60 @@ namespace ImproHound.pages
                     CALL apoc.create.setLabels(n, lblsSort[0..2]) YIELD node
                     RETURN NULL
                 ");
+
+                // For all objects with a domain property, make sure that domain exist as a node
+                List<IRecord> records2 = await DBConnection.Query(@"
+                    MATCH (n) WHERE EXISTS(n.domain) 
+                    WITH DISTINCT n.domain AS dom
+                    CALL {
+                        MATCH (domain:Domain)
+                        RETURN COLLECT(domain.domain) AS domdom
+                    }
+                    WITH dom WHERE NOT dom IN domdom
+                    MATCH (m {domain:dom}) WHERE m.objectid STARTS WITH 'S-1-5-21-'
+                    WITH dom, COLLECT(m.objectid) AS objectids
+                    RETURN dom, objectids[0]
+                ");
+
+                if (records2.Count > 0)
+                {
+                    var domains = new Dictionary<string, string>();
+                    foreach (IRecord record in records2)
+                    {
+                        record.Values.TryGetValue("objectids[0]", out object objectid);
+                        record.Values.TryGetValue("dom", out object domain);
+
+                        string domainSID = ((string)objectid).Substring(0, ((string)objectid).LastIndexOf('-'));
+                        domains.Add(domainSID, (string)domain);
+                    }
+
+                    MessageBoxResult messageBoxResult = MessageBox.Show("These domains are missing as nodes in the database:\n" + string.Join("\n", domains.Values)
+                        + "\n\nYou should either exit and upload the domains.json file to BloodHound (again) if you have collected data from the domains, "
+                        + "or continue and let ImproHound create the domain nodes without the ACLs of the domain objects.\n"
+                        + "\nClick OK to continue or Cancel to exit"
+                        , "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+
+                    if (messageBoxResult.Equals(MessageBoxResult.Cancel))
+                    {
+                        await DeleteTieringInDB();
+                        Environment.Exit(0);
+                    }
+                    else
+                    {
+                        foreach (KeyValuePair<string, string> domain in domains)
+                        {
+                            string distinguishedname = "DC=" + domain.Value.ToLower().Replace(".", ",DC=");
+                            await DBConnection.Query(@"
+                                MERGE (n:Base:Domain {name:'" + domain.Value + @"'})
+                                SET n.distinguishedname = '" + distinguishedname + @"'
+                                SET n.objectid = '" + domain.Key + @"'
+                                SET n.domain = '" + domain.Value + @"'
+                                SET n.highvalue = true
+                                RETURN NULL
+                            ");
+                        }
+                    }
+                }
             }
             catch
             {

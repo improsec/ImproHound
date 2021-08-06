@@ -5,7 +5,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>resources\images\improsec_icon.ico</ApplicationIcon>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <Company>Improsec A/S</Company>
     <Authors>Jonas Bülow Knudsen</Authors>
     <PackageLicenseExpression>Apache-2.0 License</PackageLicenseExpression>
