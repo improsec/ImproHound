@@ -21,17 +21,7 @@ namespace ImproHound.pages
         public OUStructurePage(DBAction dBAction)
         {
             InitializeComponent();
-            try
-            {
-                Initialization(dBAction);
-            }
-            catch (Exception err)
-            {
-                // Error
-                MessageBox.Show(err.Message.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                DisableGUIWait();
-                MainWindow.BackToConnectPage();
-            }
+            Initialization(dBAction);
         }
 
         private async void Initialization(DBAction dBAction)
@@ -61,9 +51,12 @@ namespace ImproHound.pages
 
                 DisableGUIWait();
             }
-            catch
+            catch (Exception err)
             {
-                throw;
+                // Error
+                MessageBox.Show(err.Message.ToString() + "\n\n" + err.StackTrace.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                DisableGUIWait();
+                MainWindow.BackToConnectPage();
             }
         }
 
@@ -163,7 +156,7 @@ namespace ImproHound.pages
                     }
                     catch
                     {
-                        Console.Error.WriteLine("Something went wrong when adding this AD object (objectid): " + objectid);
+                        throw;
                     }
                 }
 
