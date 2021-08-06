@@ -17,6 +17,7 @@ ImproHound demo video: https://www.youtube.com/watch?v=zQ01tvTr6H0
 
 **1. Set up your BloodHound database**
 1. [Install BloodHound](https://bloodhound.readthedocs.io/en/latest/#install)
+	> NB! The latest version of the Neo4j APOC plugin (4.2.X) is not compatible with the latest Neo4j version (4.3.X). Check the latest APOC version [here](https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases). If a 4.3.X version has not beeen published yet, download the 4.2.9 version of Neo4j instead of the 4.3.X.  
 
 1. Collect BloodHound data with [SharpHound](https://bloodhound.readthedocs.io/en/latest/data-collection/sharphound.html) in your AD
  	> Note this will generate noise in your AV, SIEM, etc.
