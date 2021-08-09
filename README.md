@@ -8,6 +8,8 @@ ImproHound blogpost: https://improsec.com/tech-blog/improhound-identify-ad-tieri
 
 ImproHound demo video: https://www.youtube.com/watch?v=zQ01tvTr6H0 
 
+ImproHound DEF CON Adversary Village presentation: https://www.youtube.com/watch?v=MTsPTI7OoqM
+
 ##### Table of Contents  
 * [Install](#install)
 * [Usage](#usage)
