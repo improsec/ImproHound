@@ -23,11 +23,10 @@ ImproHound DEF CON Adversary Village presentation: https://www.youtube.com/watch
 1. Collect BloodHound data with [SharpHound](https://bloodhound.readthedocs.io/en/latest/data-collection/sharphound.html) in your AD
  	> Note this will generate noise in your AV, SIEM, etc.
  	
-	Example: Run [SharpHound.ps1](https://github.com/BloodHoundAD/BloodHound/blob/master/Collectors/SharpHound.ps1), collect all (yes, GPOLocalGroup is not included in All):
+	Example: Run [SharpHound.exe](https://github.com/BloodHoundAD/BloodHound/blob/master/Collectors/SharpHound.exe) from cmd, collect all (yes, GPOLocalGroup is not included in All):
 
 	```
-	. .\SharpHound.ps1
-	Invoke-BloodHound -CollectionMethod All, GPOLocalGroup
+	SharpHound.exe --CollectionMethods All,GPOLocalGroup
 	```
 	
 	> Tip 1: Use the ```Domain``` parameter to collect data from other domains in the forest.
