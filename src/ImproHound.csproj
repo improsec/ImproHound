@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+	<Resource Include="resources\images\ad-icons\container.png" />
     <Resource Include="resources\images\ad-icons\computer.png" />
     <Resource Include="resources\images\ad-icons\domain1.png" />
 	<Resource Include="resources\images\ad-icons\domain2.png" />

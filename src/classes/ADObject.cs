@@ -32,6 +32,9 @@ namespace ImproHound.classes
                 case ADObjectType.Domain:
                     Iconpath = "/resources/images/ad-icons/domain1.png";
                     break;
+                case ADObjectType.Container:
+                    Iconpath = "/resources/images/ad-icons/container.png";
+                    break;
                 case ADObjectType.OU:
                     Iconpath = "/resources/images/ad-icons/ou.png";
                     break;
@@ -116,19 +119,6 @@ namespace ImproHound.classes
             oUStructurePage.DisableGUIWait();
         }
 
-        public Dictionary<string, ADObject> GetOUChildren()
-        {
-            Dictionary<string, ADObject> ous = new Dictionary<string, ADObject>();
-            foreach (KeyValuePair<string, ADObject> member in Children)
-            {
-                if (member.Value.Type is ADObjectType.OU)
-                {
-                    ous.Add(member.Key, member.Value);
-                }
-            }
-            return ous;
-        }
-
         public List<ADObject> GetAllChildren()
         {
             List<ADObject> children = ChildrenList;
@@ -142,6 +132,6 @@ namespace ImproHound.classes
 
     public enum ADObjectType
     {
-        Unknown, Domain, OU, Group, User, Computer, GPO
+        Unknown, Domain, Container, OU, Group, User, Computer, GPO
     }
 }

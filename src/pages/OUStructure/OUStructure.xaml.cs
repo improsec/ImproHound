@@ -43,12 +43,6 @@ namespace ImproHound.pages
                 }
 
                 await BuildOUStructure();
-
-                if (dBAction.Equals(DBAction.StartFromScratch) || dBAction.Equals(DBAction.StartOver))
-                {
-                    await SetDefaultTiersForImprohoundCreatedOUs();
-                }
-
                 DisableGUIWait();
             }
             catch (Exception err)
@@ -57,41 +51,6 @@ namespace ImproHound.pages
                 MessageBox.Show(err.Message.ToString() + "\n\n" + err.StackTrace.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 DisableGUIWait();
                 MainWindow.BackToConnectPage();
-            }
-        }
-
-        private async Task SetDefaultTiersForImprohoundCreatedOUs()
-        {
-            try
-            {
-                // Update DB
-                List<IRecord> records = await DBConnection.Query(@"
-                    MATCH (ou:OU {" + DBCustomNodeProperty + @": true})
-                    MATCH (n) WHERE n.distinguishedname ENDS WITH ou.distinguishedname
-                    UNWIND labels(n) AS allLabels
-                    WITH DISTINCT allLabels, ou WHERE allLabels STARTS WITH 'Tier'
-                    WITH ou, allLabels ORDER BY allLabels ASC
-                    WITH ou, head(collect(allLabels)) AS rightTier
-                    CALL apoc.create.setLabels(ou, ['Base', 'OU', rightTier]) YIELD node
-                    RETURN ou.objectid, rightTier
-                ");
-
-                // Update application data
-                foreach (IRecord record in records)
-                {
-                    record.Values.TryGetValue("ou.objectid", out object objectid);
-                    record.Values.TryGetValue("rightTier", out object tier);
-
-                    if (idLookupTable.ContainsKey((string)objectid))
-                    {
-                        ADObject adObject = (ADObject)idLookupTable[(string)objectid];
-                        adObject.Tier = ((string)tier).Replace("Tier", "");
-                    }
-                }
-            }
-            catch
-            {
-                throw;
             }
         }
 
@@ -114,7 +73,7 @@ namespace ImproHound.pages
                     MATCH (o) WHERE EXISTS(o.distinguishedname)
                     UNWIND LABELS(o) AS adtype
                     WITH o.objectid AS objectid, o.name AS name, o.distinguishedname AS distinguishedname, o.tier AS tier, adtype
-                    WHERE adtype IN ['Domain', 'OU', 'Group', 'User', 'Computer', 'GPO']
+                    WHERE adtype IN ['Domain', 'Container', 'OU', 'Group', 'User', 'Computer', 'GPO']
                     RETURN objectid, name, distinguishedname, tier, adtype ORDER BY size(distinguishedname)
                 ");
 
@@ -186,38 +145,39 @@ namespace ImproHound.pages
                 {
                     string[] oupath = Regex.Split(distinguishedname.Replace("," + domain.Key, ""), @"(?<!\\),");
                     ADObject parent = domain.Value;
+
                     if (oupath.Length > 1)
                     {
+                        string currentDistinguishedname = parent.Distinguishedname;
+
+                        // Iterate from domain object down to the parent object
                         for (int i = oupath.Length - 1; i > 0; i--)
                         {
-                            bool parentFound = false;
-                            foreach (KeyValuePair<string, ADObject> container in parent.GetOUChildren())
+                            // Get the parent to the current object
+                            currentDistinguishedname = oupath[i] + "," + currentDistinguishedname;
+                            if (parent.ChildrenList.Any(obj => obj.Distinguishedname.Equals(currentDistinguishedname)))
                             {
-                                if (oupath[i].Equals(container.Key))
-                                {
-                                    parent = container.Value;
-                                    parentFound = true;
-                                    break;
-                                }
+                                parent = parent.ChildrenList.Where(obj => obj.Distinguishedname.Equals(currentDistinguishedname)).First();
                             }
 
-                            // Containers are missing in BloodHound so they have to be created manually
-                            if (!parentFound)
+                            // Objects are sometimes missing in BloodHound so they have to be created manually
+                            else
                             {
-                                string containerDistinguishedname = oupath[i] + "," + parent.Distinguishedname;
-                                string objectId = "container-" + containerDistinguishedname;
-                                string cn = oupath[i].Replace("CN=", "");
-                                string name = (cn + "@" + domain.Value.Name).ToUpper();
-                                string tier = DefaultTieringConstants.DefaultTierNumber.ToString();
+                                string missingDistinguishedname = currentDistinguishedname;
+                                string missingObjectId = currentDistinguishedname;
+                                string missingCn = oupath[i].Substring(oupath[i].IndexOf('=') + 1);
+                                string missingName = (missingCn + "@" + domain.Value.Name).ToUpper();
+                                string missingTier = DefaultTieringConstants.DefaultTierNumber.ToString();
+                                ADObjectType missingADType = oupath[i].StartsWith("OU=") ? ADObjectType.OU : ADObjectType.Container;
 
-                                // Create as OU in application data
-                                ADObject adContainer = new ADObject(objectId, ADObjectType.OU, cn, name, containerDistinguishedname, tier, this);
-                                idLookupTable.Add((string)objectId, adContainer);
-                                parent.Children.Add(oupath[i], adContainer);
-                                parent = adContainer;
+                                // Create as object in application data
+                                ADObject missingObject = new ADObject(missingObjectId, missingADType, missingCn, missingName, missingDistinguishedname, missingTier, this);
+                                idLookupTable.Add((string)missingObjectId, missingObject);
+                                parent.Children.Add(oupath[i], missingObject);
+                                parent = missingObject;
 
-                                // Create as OU in DB
-                                CreateADObjectInDB(objectId, ADObjectType.OU, name, containerDistinguishedname, domain.Value.Name, tier);
+                                // Create as object in DB
+                                CreateADObjectInDB(missingObjectId, missingADType, missingName, missingDistinguishedname, domain.Value.Name, missingTier);
                             }
                         }
                     }
@@ -230,7 +190,7 @@ namespace ImproHound.pages
                 throw;
             }
 
-            throw new Exception("Error: Could not find ADObjects OU/Domain parent");
+            throw new Exception("Error: Could not find ADObject's parent");
         }
 
         private List<ADObject> GetAllADObjects()

@@ -300,7 +300,7 @@ namespace ImproHound.pages
             try
             {
                 setChildrenButton.IsEnabled = (forestTreeView.SelectedItem != null) &&
-                    (((ADObject)forestTreeView.SelectedItem).Type.Equals(ADObjectType.Domain) || ((ADObject)forestTreeView.SelectedItem).Type.Equals(ADObjectType.OU));
+                    (((ADObject)forestTreeView.SelectedItem).Children.Count > 0);
                 setMembersButton.IsEnabled = (forestTreeView.SelectedItem != null) &&
                     ((ADObject)forestTreeView.SelectedItem).Type.Equals(ADObjectType.Group);
 

@@ -206,6 +206,18 @@ namespace ImproHound.pages
                     ");
                 }
 
+                // Set Container to be in the same tier as the lowest tier of their content
+                await DBConnection.Query(@"
+                    MATCH (con:Container) WHERE EXISTS(con.distinguishedname)
+                    MATCH (con)-[:Contains*1..]->(obj)
+                    UNWIND labels(obj) AS allLabels
+                    WITH DISTINCT allLabels, con WHERE allLabels STARTS WITH 'Tier'
+                    WITH con, allLabels ORDER BY allLabels ASC
+                    WITH con, head(collect(allLabels)) AS rightTier
+                    CALL apoc.create.setLabels(con, ['Base', 'Container', rightTier]) YIELD node
+                    RETURN NULL
+                ");
+
                 // Set OUs to be in the same tier as the lowest tier of their content
                 await DBConnection.Query(@"
                     MATCH (ou:OU) WHERE EXISTS(ou.distinguishedname)
