@@ -45,53 +45,13 @@ namespace ImproHound.pages
 
                 EnableGUIWait();
 
-                // Set GUI
+                // Update application data
                 ADObject parent = (ADObject)forestTreeView.SelectedItem;
-                parent.GetAllChildren().ForEach(child => child.Tier = parent.Tier);
+                parent.SetAllChildrenToTier();
                 forestTreeView.Focus();
 
-                if (parent.Type.Equals(ADObjectType.Domain))
-                {
-                    // Delete current tier label
-                    await DBConnection.Query(@"
-                        CALL db.labels()
-                        YIELD label WHERE label STARTS WITH 'Tier'
-                        WITH COLLECT(label) AS labels
-                        MATCH (n {domain:'" + parent.Name + @"'}) WHERE EXISTS(n.distinguishedname)
-                        WITH COLLECT(n) AS nodes, labels
-                        CALL apoc.create.removeLabels(nodes, labels) YIELD node
-                        RETURN NULL
-                    ");
-
-                    // Add new tier label
-                    await DBConnection.Query(@"
-                        MATCH (n {domain:'" + parent.Name + @"'}) WHERE EXISTS(n.distinguishedname)
-                        WITH COLLECT(n) AS nodes
-                        CALL apoc.create.addLabels(nodes, ['Tier" + parent.Tier + @"']) YIELD node
-                        RETURN NULL
-                    ");
-                }
-                else
-                {
-                    // Delete current tier label
-                    await DBConnection.Query(@"
-                        CALL db.labels()
-                        YIELD label WHERE label STARTS WITH 'Tier'
-                        WITH COLLECT(label) AS labels
-                        MATCH (n) WHERE n.distinguishedname ENDS WITH '," + parent.Distinguishedname + @"'
-                        WITH COLLECT(n) AS nodes, labels
-                        CALL apoc.create.removeLabels(nodes, labels) YIELD node
-                        RETURN NULL
-                    ");
-
-                    // Add new tier label
-                    await DBConnection.Query(@"
-                        MATCH (n) WHERE n.distinguishedname ENDS WITH '," + parent.Distinguishedname + @"'
-                        WITH COLLECT(n) AS nodes
-                        CALL apoc.create.addLabels(nodes, ['Tier" + parent.Tier + @"']) YIELD node
-                        RETURN NULL
-                    ");
-                }
+                // Update DB
+                await SetAllChildenToTier(parent);
 
                 DisableGUIWait();
             }
@@ -153,6 +113,7 @@ namespace ImproHound.pages
             {
                 EnableGUIWait();
 
+                // Update DB
                 List<IRecord> records = await DBConnection.Query(@"
                     MATCH(gpo: GPO)
                     MATCH(gpo) -[:GpLink]->(ou)
@@ -164,15 +125,25 @@ namespace ImproHound.pages
                     RETURN gpo.objectid, lowestTier
                 ");
 
-
-                // Update application data
                 foreach (IRecord record in records)
                 {
                     record.Values.TryGetValue("gpo.objectid", out object objectid);
                     record.Values.TryGetValue("lowestTier", out object lowestTier);
 
+                    // Update application data
                     ADObject gpo = (ADObject)idLookupTable[(string)objectid];
                     gpo.Tier = lowestTier.ToString().Replace("Tier", "");
+
+                    // If GPO has child objects, set those tier level
+                    if (gpo.Children.Count > 0)
+                    {
+
+                        // Update DB
+                        await SetAllChildenToTier(gpo);
+
+                        // Update application data
+                        gpo.SetAllChildrenToTier();
+                    }
                 }
 
                 forestTreeView.Focus();

@@ -307,7 +307,61 @@ namespace ImproHound.pages
                     CALL apoc.create.setLabels(o, newLabels) YIELD node
                     RETURN NULL
                 ");
-            } catch
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        internal async Task SetAllChildenToTier(ADObject parent)
+        {
+            try
+            {
+                if (parent.Type.Equals(ADObjectType.Domain))
+                {
+                    // Delete current tier label
+                    await DBConnection.Query(@"
+                        CALL db.labels()
+                        YIELD label WHERE label STARTS WITH 'Tier'
+                        WITH COLLECT(label) AS labels
+                        MATCH (n {domain:'" + parent.Name + @"'}) WHERE EXISTS(n.distinguishedname)
+                        WITH COLLECT(n) AS nodes, labels
+                        CALL apoc.create.removeLabels(nodes, labels) YIELD node
+                        RETURN NULL
+                    ");
+
+                    // Add new tier label
+                    await DBConnection.Query(@"
+                        MATCH (n {domain:'" + parent.Name + @"'}) WHERE EXISTS(n.distinguishedname)
+                        WITH COLLECT(n) AS nodes
+                        CALL apoc.create.addLabels(nodes, ['Tier" + parent.Tier + @"']) YIELD node
+                        RETURN NULL
+                    ");
+                }
+                else
+                {
+                    // Delete current tier label
+                    await DBConnection.Query(@"
+                        CALL db.labels()
+                        YIELD label WHERE label STARTS WITH 'Tier'
+                        WITH COLLECT(label) AS labels
+                        MATCH (n) WHERE n.distinguishedname ENDS WITH '," + parent.Distinguishedname + @"'
+                        WITH COLLECT(n) AS nodes, labels
+                        CALL apoc.create.removeLabels(nodes, labels) YIELD node
+                        RETURN NULL
+                    ");
+
+                    // Add new tier label
+                    await DBConnection.Query(@"
+                        MATCH (n) WHERE n.distinguishedname ENDS WITH '," + parent.Distinguishedname + @"'
+                        WITH COLLECT(n) AS nodes
+                        CALL apoc.create.addLabels(nodes, ['Tier" + parent.Tier + @"']) YIELD node
+                        RETURN NULL
+                    ");
+                }
+            }
+            catch
             {
                 throw;
             }

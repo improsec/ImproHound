@@ -128,6 +128,11 @@ namespace ImproHound.classes
             }
             return children;
         }
+
+        public void SetAllChildrenToTier()
+        {
+            GetAllChildren().ForEach(child => child.Tier = Tier);
+        }
     }
 
     public enum ADObjectType
