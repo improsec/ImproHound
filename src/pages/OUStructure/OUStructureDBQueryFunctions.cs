@@ -206,18 +206,6 @@ namespace ImproHound.pages
                     ");
                 }
 
-                // Set Container to be in the same tier as the lowest tier of their content
-                await DBConnection.Query(@"
-                    MATCH (con:Container) WHERE EXISTS(con.distinguishedname)
-                    MATCH (con)-[:Contains*1..]->(obj)
-                    UNWIND labels(obj) AS allLabels
-                    WITH DISTINCT allLabels, con WHERE allLabels STARTS WITH 'Tier'
-                    WITH con, allLabels ORDER BY allLabels ASC
-                    WITH con, head(collect(allLabels)) AS rightTier
-                    CALL apoc.create.setLabels(con, ['Base', 'Container', rightTier]) YIELD node
-                    RETURN NULL
-                ");
-
                 // Set OUs to be in the same tier as the lowest tier of their content
                 await DBConnection.Query(@"
                     MATCH (ou:OU) WHERE EXISTS(ou.distinguishedname)
@@ -256,6 +244,19 @@ namespace ImproHound.pages
                     UNWIND labels(o) AS allLabels
                     WITH o, COLLECT(allLabels) + 'Tier" + DefaultTieringConstants.DefaultTierNumber + @"' AS newLabels
                     CALL apoc.create.setLabels(o, newLabels) YIELD node
+                    RETURN NULL
+                ");
+
+                // Set all parent objects to be in the same tier as the lowest tier of their children
+                await DBConnection.Query(@"
+                    MATCH (parent) WHERE parent.distinguishedname IS NOT NULL
+                    MATCH (obj) WHERE obj.distinguishedname ENDS WITH (',' + parent.distinguishedname)
+                    UNWIND labels(obj) AS allLabels
+                    WITH DISTINCT allLabels, parent WHERE allLabels STARTS WITH 'Tier'
+                    WITH parent, allLabels ORDER BY allLabels ASC
+                    WITH parent, head(collect(allLabels)) AS rightTier
+                    WITH parent, rightTier, labels(parent) AS newLabels
+                    CALL apoc.create.setLabels(parent, newLabels + rightTier) YIELD node
                     RETURN NULL
                 ");
 
