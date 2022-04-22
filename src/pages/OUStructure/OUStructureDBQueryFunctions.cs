@@ -140,7 +140,7 @@ namespace ImproHound.pages
                     {
                         foreach (KeyValuePair<string, string> domain in domains)
                         {
-                            string distinguishedname = "DC=" + domain.Value.ToLower().Replace(".", ",DC=");
+                            string distinguishedname = "DC=" + domain.Value.ToUpper().Replace(".", ",DC=");
                             await DBConnection.Query(@"
                                 MERGE (n:Base:Domain {name:'" + domain.Value + @"'})
                                 SET n.distinguishedname = '" + distinguishedname + @"'
