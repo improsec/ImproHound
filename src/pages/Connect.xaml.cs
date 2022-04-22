@@ -81,8 +81,9 @@ namespace ImproHound.pages
                 }
                 else
                 {
-                    // Jump to OU structure page
-                    MainWindow.NavigateToPage(new OUStructurePage(DBAction.StartFromScratch));
+                    // Jump to default tiering prompt page
+                    MainWindow.NavigateToPage(new DefaultTieringPromptPage(DBAction.StartFromScratch));
+
                 }
             }
             catch (Exception err)

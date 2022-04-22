@@ -159,6 +159,25 @@ namespace ImproHound.pages
             }
         }
 
+        private async Task SetAllToTier2()
+        {
+            try
+            {
+                // Set all objects  to Tier 2
+                await DBConnection.Query(@"
+                    MATCH (o) WHERE EXISTS(o.distinguishedname)
+                    UNWIND labels(o) AS allLabels
+                    WITH o, COLLECT(allLabels) + 'Tier2' AS newLabels
+                    CALL apoc.create.setLabels(o, newLabels) YIELD node
+                    RETURN NULL
+                ");
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         private async Task SetDefaultTiers()
         {
             try

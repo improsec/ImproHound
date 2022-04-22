@@ -18,29 +18,39 @@ namespace ImproHound.pages
         private Dictionary<string, ADObject> forest;
         private Hashtable idLookupTable;
 
-        public OUStructurePage(DBAction dBAction)
+        public OUStructurePage(DBAction dBAction, NewTieringAction newTieringAction)
         {
             InitializeComponent();
-            Initialization(dBAction);
+            Initialization(dBAction, newTieringAction);
         }
 
-        private async void Initialization(DBAction dBAction)
+        private async void Initialization(DBAction dBAction, NewTieringAction newTieringAction)
         {
             try
             {
                 EnableGUIWait();
                 idLookupTable = new Hashtable();
 
-                if (dBAction.Equals(DBAction.StartFromScratch))
+                if (!dBAction.Equals(DBAction.Continue))
                 {
-                    await PrepareDB();
+                    if (dBAction.Equals(DBAction.StartFromScratch))
+                    {
+                        await PrepareDB();
+                    }
+                    else if (dBAction.Equals(DBAction.StartOver))
+                    {
+                        await DeleteTieringInDB();
+                    }
+
+                if (newTieringAction.Equals(NewTieringAction.DefaultTiering))
+                {
                     await SetDefaultTiers();
                 }
-                else if (dBAction.Equals(DBAction.StartOver))
+                else if (newTieringAction.Equals(NewTieringAction.AllInTier2))
                 {
-                    await DeleteTieringInDB();
-                    await SetDefaultTiers();
+                    await SetAllToTier2();
                 }
+            }
 
                 await BuildOUStructure();
                 DisableGUIWait();
@@ -219,6 +229,11 @@ namespace ImproHound.pages
 
     public enum DBAction
     {
-        StartFromScratch, Continue, StartOver
+        StartFromScratch, StartOver, Continue
+    }
+
+    public enum NewTieringAction
+    {
+        DefaultTiering, AllInTier2, Continue
     }
 }

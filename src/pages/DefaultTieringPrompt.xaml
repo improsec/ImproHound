@@ -1,0 +1,25 @@
+﻿<Page x:Class="ImproHound.pages.DefaultTieringPromptPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      mc:Ignorable="d" 
+      Title="DefaultTieringPrompt"
+      Height="450"
+      Width="800"
+      HorizontalAlignment="Center"
+      VerticalAlignment="Center">
+
+    <Grid Width="360" Height="140" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Label HorizontalAlignment="Center" VerticalAlignment="Top" Width="350" HorizontalContentAlignment="Center" Margin="0,10,0,0" Grid.RowSpan="1" Height="51" VerticalContentAlignment="Top" UseLayoutRounding="False">
+            <Label.Content>
+                <AccessText TextWrapping="Wrap" Text="Set 'default tiering' i.e. Domain Admins in Tier 0, Domain Users in Tier 2, etc. or set all AD objects in Tier 2?"/>
+            </Label.Content>
+        </Label>
+        <Label Content= "Default tiering may take several minutes." HorizontalAlignment="Center" VerticalAlignment="Top" Width="350" Margin="0,40,0,0" HorizontalContentAlignment="Center" Height="52"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10">
+            <Button x:Name="defaultTieringButton" Content="Default tiering" Click="DefaultTieringButton_Click" Margin="5"/>
+            <Button x:Name="allInTier2Button" Content="All in Tier 2" Click="AllInTier2Button_Click" Margin="5"/>
+        </StackPanel>
+    </Grid>
+</Page>
