@@ -2,7 +2,7 @@
 {
     public static class DefaultTieringConstants
     {
-        public const int DefaultTierNumber = 1;
+        public const int DefaultTierNumber = 2;
 
         public static WellKnownADObject[] WellKnownADObjects = {
 

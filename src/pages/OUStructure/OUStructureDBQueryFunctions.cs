@@ -314,6 +314,35 @@ namespace ImproHound.pages
             }
         }
 
+        private async Task<string> GetChildsLowestTier(string distinguishedname, string noChildrenFallback)
+        {
+            try
+            {
+                string result = noChildrenFallback;
+
+                List<IRecord> records = await DBConnection.Query(@"
+                    MATCH (obj) WHERE obj.distinguishedname ENDS WITH (',' + '" + distinguishedname + @"')
+                    UNWIND labels(obj) AS allLabels
+                    WITH DISTINCT allLabels WHERE allLabels STARTS WITH 'Tier'
+                    WITH allLabels ORDER BY allLabels ASC
+                    WITH head(collect(allLabels)) AS rightTier
+                    RETURN rightTier
+                ");
+
+                if (records.Count > 0)
+                {
+                    records[0].Values.TryGetValue("rightTier", out object rightTier);
+                    result = ((string)rightTier).Replace("Tier", "");
+                }
+
+                return result;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         internal async Task SetTier(string objectid, string newTier)
         {
             try

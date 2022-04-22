@@ -115,7 +115,7 @@ namespace ImproHound.pages
                         }
                         else
                         {
-                            ADObject parent = GetParent(distinguishednameStr);
+                            ADObject parent = await GetParent(distinguishednameStr);
                             string rdnName = distinguishednameStr.Replace("," + parent.Distinguishedname, "");
                             string cn = rdnName.Substring(distinguishednameStr.IndexOf("=") + 1);
                             ADObject adObject = new ADObject((string)objectid, adType, cn, (string)name, distinguishednameStr, tierNumber, this);
@@ -144,7 +144,7 @@ namespace ImproHound.pages
             }
         }
 
-        private ADObject GetParent(string distinguishedname)
+        private async Task<ADObject> GetParent(string distinguishedname)
         {
             try
             {
@@ -177,7 +177,7 @@ namespace ImproHound.pages
                                 string missingObjectId = currentDistinguishedname;
                                 string missingCn = oupath[i].Substring(oupath[i].IndexOf('=') + 1);
                                 string missingName = (missingCn + "@" + domain.Value.Name).ToUpper();
-                                string missingTier = DefaultTieringConstants.DefaultTierNumber.ToString();
+                                string missingTier = await GetChildsLowestTier(currentDistinguishedname, DefaultTieringConstants.DefaultTierNumber.ToString());
                                 ADObjectType missingADType = oupath[i].StartsWith("OU=") ? ADObjectType.OU : ADObjectType.Container;
 
                                 // Create as object in application data
