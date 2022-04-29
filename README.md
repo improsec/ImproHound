@@ -78,8 +78,13 @@ Enter the database credentials and establish a connection. It is the same creden
 
 ImproHound creates a ‘TierX’ label on nodes in the BloodHound database. If you have used ImproHound before with this BloodHound database, you will be asked if you want to continue with the tiering you have already created or if you want to start over.
 
+### Default tiering or all in Tier 2
+![alt text](https://github.com/improsec/ImproHound/blob/master/readme-images/03-default-or-tier2.png?raw=true)
+
+ImproHound gives you the option to set 'Default tiering' which will set Domain Admins in Tier 0, Domain Users in Tier 2, etc, or set all objects in Tier 2. 
+
 ### OU structure
-![alt text](https://github.com/improsec/ImproHound/blob/master/readme-images/03-ou-structure-v1_1.png?raw=true)
+![alt text](https://github.com/improsec/ImproHound/blob/master/readme-images/04-ou-structure.png?raw=true)
 
 This is the page where you will categorize the AD objects into tiers. The window displays the OU structure. Each AD object has a tier value which can be increased and decreased with the arrows.
 
