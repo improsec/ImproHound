@@ -10,10 +10,12 @@ ImproHound demo video: https://www.youtube.com/watch?v=zQ01tvTr6H0
 
 ImproHound DEF CON Adversary Village presentation: https://www.youtube.com/watch?v=MTsPTI7OoqM
 
+
 ##### Table of Contents  
 * [Install](#install)
 * [Usage](#usage)
 * [Guidelines for tiering AD objects](#guidelines-for-tiering-ad-objects)
+* [Latest tested version of dependencies](#latest-tested-version-of-dependencies)
 
 ## Install
 
@@ -164,3 +166,9 @@ A GPO’s tier level is determined by the tier level of the OUs it is linked to.
 Use the ‘Set tier for GPOs’ button to make sure all GPOs follow this principle.
 
 Example: A user with permission to edit a GPO linked to a Tier 1 OU would be able to control membership of Administrators on all servers under the Tier 1 OU by modifying the GPO.
+
+## Latest tested version of dependencies
+* [BloodHound 4.2.0](https://github.com/BloodHoundAD/BloodHound/releases/tag/4.2.0)
+* [Neo4j 4.4.10](https://go.neo4j.com/download-thanks.html?edition=community&release=4.4.10)
+* [APOC 4.4.0.8](https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/tag/4.4.0.8)
+* [Java/OpenJDK 11.0.16.1 LTS](https://docs.microsoft.com/en-us/java/openjdk/download#openjdk-110161-lts--see-previous-releases)
