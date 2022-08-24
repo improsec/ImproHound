@@ -115,8 +115,8 @@ namespace ImproHound.pages
 
                 // Update DB
                 List<IRecord> records = await DBConnection.Query(@"
-                    MATCH(gpo: GPO)
-                    MATCH(gpo) -[:GpLink]->(ou)
+                    MATCH(gpo:GPO)
+                    MATCH(gpo)-[:GPLink]->(ou)
                     UNWIND labels(ou) AS allLabels
                     WITH DISTINCT allLabels, gpo WHERE allLabels STARTS WITH 'Tier'
                     WITH gpo, allLabels ORDER BY allLabels ASC

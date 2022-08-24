@@ -247,7 +247,7 @@ namespace ImproHound.pages
                 // Set GPOs to be in the same tier as the lowest tier of the OUs (or domain) linked to
                 await DBConnection.Query(@"
                     MATCH (gpo:GPO) WHERE EXISTS(gpo.distinguishedname)
-                    MATCH (gpo)-[:GpLink]->(ou)
+                    MATCH (gpo)-[:GPLink]->(ou)
                     UNWIND labels(ou) AS allLabels
                     WITH DISTINCT allLabels, gpo WHERE allLabels STARTS WITH 'Tier'
                     WITH gpo, allLabels ORDER BY allLabels ASC
