@@ -172,3 +172,8 @@ Example: A user with permission to edit a GPO linked to a Tier 1 OU would be abl
 * [Neo4j 4.4.10](https://go.neo4j.com/download-thanks.html?edition=community&release=4.4.10)
 * [APOC 4.4.0.8](https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases/tag/4.4.0.8)
 * [Java/OpenJDK 11.0.16.1 LTS](https://docs.microsoft.com/en-us/java/openjdk/download#openjdk-110161-lts--see-previous-releases)
+
+## TODO
+
+- Filter out GetChanges / GetChangesAll where only one of them exist.
+- More Tier 0 by default: RODC (incl. krbtgt_xxxxxx), MSOL_, AdminSDHolder, etc.  
