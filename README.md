@@ -1,3 +1,6 @@
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/improsec/ImproHound)](https://github.com/improsec/ImproHound/releases/latest)
+![GitHub all releases](https://img.shields.io/github/downloads/improsec/ImproHound/total)
+
 # ImproHound
 Identify the attack paths in BloodHound breaking your AD tiering
 
